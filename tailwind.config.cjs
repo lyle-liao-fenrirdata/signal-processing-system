@@ -1,15 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 
-import plugin from "tailwindcss/plugin";
+const plugin = require("tailwindcss/plugin");
+const colors = require("tailwindcss/colors");
 
 module.exports = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  purge: {
+    enabled: true,
+    content: [
+      "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+      "./components/**/*.{js,ts,jsx,tsx,mdx}",
+      "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    ],
+    options: {
+      safelist: [],
+    },
+  },
   theme: {
+    colors: {
+      ...colors,
+    },
     extend: {
       minHeight: {
         "screen-75": "75vh",
@@ -69,6 +78,20 @@ module.exports = {
       },
     },
   },
+  variants: [
+    "responsive",
+    "group-hover",
+    "focus-within",
+    "first",
+    "last",
+    "odd",
+    "even",
+    "hover",
+    "focus",
+    "active",
+    "visited",
+    "disabled",
+  ],
   plugins: [
     require("@tailwindcss/forms"),
     plugin(function ({ addComponents, theme }) {

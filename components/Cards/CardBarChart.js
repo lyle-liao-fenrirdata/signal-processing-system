@@ -1,5 +1,5 @@
 import React from "react";
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 
 export default function CardBarChart() {
   React.useEffect(() => {
@@ -100,20 +100,20 @@ export default function CardBarChart() {
   }, []);
   return (
     <>
-      <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
-        <div className="rounded-t mb-0 px-4 py-3 bg-transparent">
+      <div className="relative mb-6 flex w-full min-w-0 flex-col break-words rounded bg-white shadow-lg">
+        <div className="mb-0 rounded-t bg-transparent px-4 py-3">
           <div className="flex flex-wrap items-center">
-            <div className="relative w-full max-w-full flex-grow flex-1">
-              <h6 className="uppercase text-blueGray-400 mb-1 text-xs font-semibold">
+            <div className="relative w-full max-w-full flex-1 flex-grow">
+              <h6 className="mb-1 text-xs font-semibold uppercase text-slate-400">
                 Performance
               </h6>
-              <h2 className="text-blueGray-700 text-xl font-semibold">
+              <h2 className="text-xl font-semibold text-slate-700">
                 Total orders
               </h2>
             </div>
           </div>
         </div>
-        <div className="p-4 flex-auto">
+        <div className="flex-auto p-4">
           {/* Chart */}
           <div className="relative h-350-px">
             <canvas id="bar-chart"></canvas>

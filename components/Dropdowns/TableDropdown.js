@@ -18,7 +18,7 @@ const NotificationDropdown = () => {
   return (
     <>
       <a
-        className="text-blueGray-500 py-1 px-3"
+        className="px-3 py-1 text-slate-500"
         href="#pablo"
         ref={btnDropdownRef}
         onClick={(e) => {
@@ -32,13 +32,13 @@ const NotificationDropdown = () => {
         ref={popoverDropdownRef}
         className={
           (dropdownPopoverShow ? "block " : "hidden ") +
-          "bg-white text-base z-50 float-left py-2 list-none text-left rounded shadow-lg min-w-48"
+          "z-50 float-left min-w-48 list-none rounded bg-white py-2 text-left text-base shadow-lg"
         }
       >
         <a
           href="#pablo"
           className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+            "block w-full whitespace-nowrap bg-transparent px-4 py-2 text-sm font-normal text-slate-700"
           }
           onClick={(e) => e.preventDefault()}
         >
@@ -47,7 +47,7 @@ const NotificationDropdown = () => {
         <a
           href="#pablo"
           className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+            "block w-full whitespace-nowrap bg-transparent px-4 py-2 text-sm font-normal text-slate-700"
           }
           onClick={(e) => e.preventDefault()}
         >
@@ -56,7 +56,7 @@ const NotificationDropdown = () => {
         <a
           href="#pablo"
           className={
-            "text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+            "block w-full whitespace-nowrap bg-transparent px-4 py-2 text-sm font-normal text-slate-700"
           }
           onClick={(e) => e.preventDefault()}
         >

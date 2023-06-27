@@ -3,9 +3,9 @@ import React from "react";
 export default function Footer() {
   return (
     <>
-      <footer className="relative bg-blueGray-200 pt-8 pb-6">
+      <footer className="relative bg-slate-200 pb-6 pt-8">
         <div
-          className="bottom-auto top-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden -mt-20 h-20"
+          className="pointer-events-none absolute bottom-auto left-0 right-0 top-0 -mt-20 h-20 w-full overflow-hidden"
           style={{ transform: "translateZ(0)" }}
         >
           <svg
@@ -18,55 +18,57 @@ export default function Footer() {
             y="0"
           >
             <polygon
-              className="text-blueGray-200 fill-current"
+              className="fill-current text-slate-200"
               points="2560 0 2560 100 0 100"
             ></polygon>
           </svg>
         </div>
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap text-center lg:text-left">
-            <div className="w-full lg:w-6/12 px-4">
-              <h4 className="text-3xl font-semibold">Let's keep in touch!</h4>
-              <h5 className="text-lg mt-0 mb-2 text-blueGray-600">
+            <div className="w-full px-4 lg:w-6/12">
+              <h4 className="text-3xl font-semibold">
+                Let&apos;s keep in touch!
+              </h4>
+              <h5 className="mb-2 mt-0 text-lg text-slate-600">
                 Find us on any of these platforms, we respond 1-2 business days.
               </h5>
-              <div className="mt-6 lg:mb-0 mb-6">
+              <div className="mb-6 mt-6 lg:mb-0">
                 <button
-                  className="bg-white text-lightBlue-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                  className="align-center mr-2 h-10 w-10 items-center justify-center rounded-full bg-white font-normal text-sky-400 shadow-lg outline-none focus:outline-none"
                   type="button"
                 >
                   <i className="fab fa-twitter"></i>
                 </button>
                 <button
-                  className="bg-white text-lightBlue-600 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                  className="align-center mr-2 h-10 w-10 items-center justify-center rounded-full bg-white font-normal text-sky-600 shadow-lg outline-none focus:outline-none"
                   type="button"
                 >
                   <i className="fab fa-facebook-square"></i>
                 </button>
                 <button
-                  className="bg-white text-pink-400 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                  className="align-center mr-2 h-10 w-10 items-center justify-center rounded-full bg-white font-normal text-pink-400 shadow-lg outline-none focus:outline-none"
                   type="button"
                 >
                   <i className="fab fa-dribbble"></i>
                 </button>
                 <button
-                  className="bg-white text-blueGray-800 shadow-lg font-normal h-10 w-10 items-center justify-center align-center rounded-full outline-none focus:outline-none mr-2"
+                  className="align-center mr-2 h-10 w-10 items-center justify-center rounded-full bg-white font-normal text-slate-800 shadow-lg outline-none focus:outline-none"
                   type="button"
                 >
                   <i className="fab fa-github"></i>
                 </button>
               </div>
             </div>
-            <div className="w-full lg:w-6/12 px-4">
-              <div className="flex flex-wrap items-top mb-6">
-                <div className="w-full lg:w-4/12 px-4 ml-auto">
-                  <span className="block uppercase text-blueGray-500 text-sm font-semibold mb-2">
+            <div className="w-full px-4 lg:w-6/12">
+              <div className="items-top mb-6 flex flex-wrap">
+                <div className="ml-auto w-full px-4 lg:w-4/12">
+                  <span className="mb-2 block text-sm font-semibold uppercase text-slate-500">
                     Useful Links
                   </span>
                   <ul className="list-unstyled">
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://www.creative-tim.com/presentation?ref=nnjs-footer"
                       >
                         About Us
@@ -74,7 +76,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://blog.creative-tim.com?ref=nnjs-footer"
                       >
                         Blog
@@ -82,7 +84,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://www.github.com/creativetimofficial?ref=nnjs-footer"
                       >
                         Github
@@ -90,7 +92,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://www.creative-tim.com/bootstrap-themes/free?ref=nnjs-footer"
                       >
                         Free Products
@@ -98,14 +100,14 @@ export default function Footer() {
                     </li>
                   </ul>
                 </div>
-                <div className="w-full lg:w-4/12 px-4">
-                  <span className="block uppercase text-blueGray-500 text-sm font-semibold mb-2">
+                <div className="w-full px-4 lg:w-4/12">
+                  <span className="mb-2 block text-sm font-semibold uppercase text-slate-500">
                     Other Resources
                   </span>
                   <ul className="list-unstyled">
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://github.com/creativetimofficial/notus-nextjs/blob/main/LICENSE.md?ref=nnjs-footer"
                       >
                         MIT License
@@ -113,7 +115,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://creative-tim.com/terms?ref=nnjs-footer"
                       >
                         Terms & Conditions
@@ -121,7 +123,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://creative-tim.com/privacy?ref=nnjs-footer"
                       >
                         Privacy Policy
@@ -129,7 +131,7 @@ export default function Footer() {
                     </li>
                     <li>
                       <a
-                        className="text-blueGray-600 hover:text-blueGray-800 font-semibold block pb-2 text-sm"
+                        className="block pb-2 text-sm font-semibold text-slate-600 hover:text-slate-800"
                         href="https://creative-tim.com/contact-us?ref=nnjs-footer"
                       >
                         Contact Us
@@ -140,14 +142,14 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <hr className="my-6 border-blueGray-300" />
-          <div className="flex flex-wrap items-center md:justify-between justify-center">
-            <div className="w-full md:w-4/12 px-4 mx-auto text-center">
-              <div className="text-sm text-blueGray-500 font-semibold py-1">
+          <hr className="my-6 border-slate-300" />
+          <div className="flex flex-wrap items-center justify-center md:justify-between">
+            <div className="mx-auto w-full px-4 text-center md:w-4/12">
+              <div className="py-1 text-sm font-semibold text-slate-500">
                 Copyright © {new Date().getFullYear()} Notus NextJS by{" "}
                 <a
                   href="https://www.creative-tim.com?ref=nnjs-footer"
-                  className="text-blueGray-500 hover:text-blueGray-800"
+                  className="text-slate-500 hover:text-slate-800"
                 >
                   Creative Tim
                 </a>

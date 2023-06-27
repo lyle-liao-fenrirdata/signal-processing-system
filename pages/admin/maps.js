@@ -2,7 +2,7 @@ import React from "react";
 
 // components
 
-import MapExample from "components/Maps/MapExample.js";
+// import MapExample from "components/Maps/MapExample.js";
 
 // layout for page
 
@@ -13,8 +13,8 @@ export default function Maps() {
     <>
       <div className="flex flex-wrap">
         <div className="w-full px-4">
-          <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
-            <MapExample />
+          <div className="relative mb-6 flex w-full min-w-0 flex-col break-words rounded bg-white shadow-lg">
+            {/* <MapExample /> */}
           </div>
         </div>
       </div>
