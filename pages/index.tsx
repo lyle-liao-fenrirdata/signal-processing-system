@@ -1,38 +1,27 @@
-/* eslint-disable react/jsx-no-target-blank */
-import React from "react";
-
-import IndexNavbar from "components/Navbars/IndexNavbar.js";
-import Footer from "components/Footers/Footer.js";
+/* eslint-disable @next/next/no-img-element */
+import IndexNavbar from "components/Navbars/IndexNavbar";
+import Footer from "components/Footers/Footer";
+import Link from "next/link";
 
 export default function Index() {
   return (
     <>
-      <IndexNavbar fixed />
+      <IndexNavbar />
       <section className="header relative flex h-screen max-h-860-px items-center pt-16">
         <div className="container mx-auto flex flex-wrap items-center">
           <div className="w-full px-4 md:w-8/12 lg:w-6/12 xl:w-6/12">
             <div className="pt-32 sm:pt-0">
-              <h2 className="text-4xl font-semibold text-slate-600">首頁</h2>
+              <h2 className="text-4xl font-semibold text-slate-600">歡迎</h2>
               <p className="mt-4 text-lg leading-relaxed text-slate-500">
-                It does not change any of the CSS from{" "}
-                <a
-                  href="https://tailwindcss.com/?ref=creativetim"
-                  className="text-slate-600"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Tailwind CSS
-                </a>
-                .
+                登入後使用系統，若無登入將自動導向登入頁面。
               </p>
               <div className="mt-12">
-                <a
-                  href="\admin\dashboard"
-                  target="_blank"
+                <Link
+                  href="/admin/dashboard"
                   className="get-started mb-1 mr-1 rounded bg-slate-400 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
-                  Get started
-                </a>
+                  進入系統
+                </Link>
               </div>
             </div>
           </div>

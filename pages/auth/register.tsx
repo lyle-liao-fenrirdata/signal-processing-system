@@ -1,8 +1,7 @@
+import { ReactElement } from "react";
 import Link from "next/link";
 
-// layout for page
-
-import Auth from "layouts/Auth.js";
+import AuthLayout from "layouts/Auth";
 
 export default function Register() {
   return (
@@ -96,4 +95,6 @@ export default function Register() {
   );
 }
 
-Register.layout = Auth;
+Register.getLayout = function getLayout(page: ReactElement) {
+  return <AuthLayout>{page}</AuthLayout>;
+};
