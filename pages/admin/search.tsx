@@ -4,7 +4,7 @@ import React, { ReactElement } from "react";
 
 import AdminLayout from "layouts/Admin";
 
-export default function Maps() {
+export default function Search() {
   return (
     <div className="flex flex-wrap">
       <div className="w-full px-4">
@@ -16,6 +16,6 @@ export default function Maps() {
   );
 }
 
-Maps.getLayout = function getLayout(page: ReactElement) {
+Search.getLayout = function getLayout(page: ReactElement) {
   return <AdminLayout>{page}</AdminLayout>;
 };

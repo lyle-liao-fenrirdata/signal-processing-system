@@ -1,8 +1,5 @@
 import React from "react";
 import Link from "next/link";
-// components
-
-import IndexDropdown from "components/Dropdowns/IndexDropdown.js";
 
 export default function Navbar() {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
@@ -40,11 +37,6 @@ export default function Navbar() {
                 <i className="far fa-file-alt leading-lg mr-2 text-lg text-slate-400" />{" "}
                 Docs
               </a>
-            </li>
-          </ul>
-          <ul className="flex list-none flex-col lg:ml-auto lg:flex-row">
-            <li className="flex items-center">
-              <IndexDropdown />
             </li>
           </ul>
         </div>

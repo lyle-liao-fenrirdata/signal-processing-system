@@ -1,13 +1,6 @@
-import {
-  GetStaticProps,
-  GetStaticPaths,
-  GetServerSideProps,
-  NextPage,
-  NextPageContext,
-} from "next";
-import type { AppProps, AppContext } from "next/app";
+import { NextPage } from "next";
+import type { AppProps } from "next/app";
 import React, { ReactElement, ReactNode } from "react";
-import App from "next/app";
 import Head from "next/head";
 
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -32,7 +25,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>資訊處理系統</title>
+        <title>訊號處理系統</title>
       </Head>
       {getLayout(<Component {...pageProps} />)}
     </React.Fragment>

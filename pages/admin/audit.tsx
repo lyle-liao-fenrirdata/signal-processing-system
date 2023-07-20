@@ -4,7 +4,7 @@ import CardTable from "components/Cards/CardTable.js";
 
 import AdminLayout from "layouts/Admin";
 
-export default function Tables() {
+export default function Audit() {
   return (
     <div className="mt-4 flex flex-wrap">
       <div className="mb-12 w-full px-4">
@@ -17,6 +17,6 @@ export default function Tables() {
   );
 }
 
-Tables.getLayout = function getLayout(page: ReactElement) {
+Audit.getLayout = function getLayout(page: ReactElement) {
   return <AdminLayout>{page}</AdminLayout>;
 };

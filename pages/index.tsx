@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import IndexNavbar from "components/Navbars/IndexNavbar";
 import Footer from "components/Footers/Footer";
 import Link from "next/link";
@@ -16,16 +15,18 @@ export default function Index() {
                 登入後使用系統，若無登入將自動導向登入頁面。
               </p>
               <div className="mt-12">
-                <Link
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a
                   href="/admin/dashboard"
                   className="get-started mb-1 mr-1 rounded bg-slate-400 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
                   進入系統
-                </Link>
+                </a>
               </div>
             </div>
           </div>
         </div>
+        {/* eslint-disable @next/next/no-img-element */}
         <img
           className="b-auto absolute right-0 top-0 -mt-48 max-h-860-px w-10/12 pt-16 sm:mt-0 sm:w-6/12"
           src="/img/pattern_nextjs.png"

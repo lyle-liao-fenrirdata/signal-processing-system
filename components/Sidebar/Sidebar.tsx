@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { env } from "@/utils/environment/index.mjs";
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
@@ -19,7 +20,7 @@ export default function Sidebar() {
         {/* Brand */}
         <Link
           href="/"
-          className="text-md mr-0 inline-block whitespace-nowrap p-4 px-0 text-left font-bold uppercase text-slate-600 md:block md:pb-2"
+          className="text-md mr-0 inline-block whitespace-nowrap p-4 px-0 text-left font-bold text-slate-600 md:block md:pb-2"
         >
           訊號處理系統
         </Link>
@@ -48,7 +49,7 @@ export default function Sidebar() {
               <div className="w-6/12">
                 <Link
                   href="/"
-                  className="mr-0 inline-block whitespace-nowrap p-4 px-0 text-left text-sm font-bold uppercase text-slate-600 md:block md:pb-2"
+                  className="mr-0 inline-block whitespace-nowrap p-4 px-0 text-left text-sm font-bold text-slate-600 md:block md:pb-2"
                 >
                   訊號處理系統
                 </Link>
@@ -69,10 +70,11 @@ export default function Sidebar() {
 
           <ul className="flex list-none flex-col md:min-w-full md:flex-col">
             <li className="items-center">
-              <Link
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a
                 href="/admin/dashboard"
                 className={
-                  "block py-3 text-xs font-bold uppercase " +
+                  "block py-3 text-xs font-bold " +
                   (router.pathname.indexOf("/admin/dashboard") !== -1
                     ? "text-sky-500 hover:text-sky-600"
                     : "text-slate-700 hover:text-slate-500")
@@ -87,15 +89,15 @@ export default function Sidebar() {
                   }
                 ></i>{" "}
                 儀錶板
-              </Link>
+              </a>
             </li>
 
             <li className="items-center">
               <Link
-                href="/admin/maps"
+                href="/admin/search"
                 className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/maps") !== -1
+                  "block py-3 text-xs font-bold " +
+                  (router.pathname.indexOf("/admin/search") !== -1
                     ? "text-sky-500 hover:text-sky-600"
                     : "text-slate-700 hover:text-slate-500")
                 }
@@ -103,7 +105,7 @@ export default function Sidebar() {
                 <i
                   className={
                     "fas fa-bars-staggered mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/maps") !== -1
+                    (router.pathname.indexOf("/admin/search") !== -1
                       ? "opacity-75"
                       : "text-slate-300")
                   }
@@ -114,10 +116,10 @@ export default function Sidebar() {
 
             <li className="items-center">
               <Link
-                href="/admin/tables"
+                href="/admin/audit"
                 className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
+                  "block py-3 text-xs font-bold " +
+                  (router.pathname.indexOf("/admin/audit") !== -1
                     ? "text-sky-500 hover:text-sky-600"
                     : "text-slate-700 hover:text-slate-500")
                 }
@@ -125,7 +127,7 @@ export default function Sidebar() {
                 <i
                   className={
                     "fas fa-table mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/tables") !== -1
+                    (router.pathname.indexOf("/admin/audit") !== -1
                       ? "opacity-75"
                       : "text-slate-300")
                   }
@@ -135,77 +137,49 @@ export default function Sidebar() {
             </li>
 
             <li className="items-center">
-              <Link
-                href="/admin/tables"
-                className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
+              <a
+                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                target="_blank"
+                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
               >
-                <i
-                  className={
-                    "fa-brands fa-docker mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/tables") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                容器叢集
-              </Link>
+                <i className="fa-brands fa-docker mr-2 text-sm text-slate-300"></i>{" "}
+                容器叢集{" "}
+                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+              </a>
+            </li>
+
+            {/* TODO: 需要更新 href 位置 */}
+            <li className="items-center">
+              <a
+                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                target="_blank"
+                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
+              >
+                <i className="fas fa-server mr-2 text-sm text-slate-300"></i>{" "}
+                資源管理{" "}
+                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+              </a>
+            </li>
+
+            {/* TODO: 需要更新 href 位置 */}
+            <li className="items-center">
+              <a
+                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                target="_blank"
+                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
+              >
+                <i className="fa-brands fa-ubuntu mr-2 text-sm text-slate-300"></i>{" "}
+                系統操控{" "}
+                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+              </a>
             </li>
 
             <li className="items-center">
               <Link
-                href="/admin/tables"
+                href="/admin/settings"
                 className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-server mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/tables") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                資源管理
-              </Link>
-            </li>
-
-            <li className="items-center">
-              <Link
-                href="/admin/tables"
-                className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fa-brands fa-ubuntu mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/tables") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                系統操控
-              </Link>
-            </li>
-
-            <li className="items-center">
-              <Link
-                href="/admin/tables"
-                className={
-                  "block py-3 text-xs font-bold uppercase " +
-                  (router.pathname.indexOf("/admin/tables") !== -1
+                  "block py-3 text-xs font-bold " +
+                  (router.pathname.indexOf("/admin/settings") !== -1
                     ? "text-sky-500 hover:text-sky-600"
                     : "text-slate-700 hover:text-slate-500")
                 }
@@ -213,7 +187,7 @@ export default function Sidebar() {
                 <i
                   className={
                     "fas fa-user-shield mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/tables") !== -1
+                    (router.pathname.indexOf("/admin/settings") !== -1
                       ? "opacity-75"
                       : "text-slate-300")
                   }
@@ -226,7 +200,7 @@ export default function Sidebar() {
               <Link
                 href="/admin/settings"
                 className={
-                  "block py-3 text-xs font-bold uppercase " +
+                  "block py-3 text-xs font-bold " +
                   (router.pathname.indexOf("/admin/settings") !== -1
                     ? "text-sky-500 hover:text-sky-600"
                     : "text-slate-700 hover:text-slate-500")
@@ -253,7 +227,7 @@ export default function Sidebar() {
             <li className="items-center">
               <Link
                 href="/auth/login"
-                className="block py-3 text-xs font-bold uppercase text-slate-700 hover:text-slate-500"
+                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
               >
                 <i className="fas fa-fingerprint mr-2 text-sm text-slate-400"></i>{" "}
                 登入
@@ -263,7 +237,7 @@ export default function Sidebar() {
             <li className="items-center">
               <Link
                 href="/auth/register"
-                className="block py-3 text-xs font-bold uppercase text-slate-700 hover:text-slate-500"
+                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
               >
                 <i className="fas fa-clipboard-list mr-2 text-sm text-slate-300"></i>{" "}
                 註冊
