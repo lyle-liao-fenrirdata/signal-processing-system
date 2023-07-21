@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 
 import CardTable from "components/Cards/CardTable.js";
 
-import AdminLayout from "layouts/Admin";
+import AdminLayout from "components/layouts/Admin";
 
 export default function Audit() {
   return (

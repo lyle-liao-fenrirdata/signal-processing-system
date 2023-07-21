@@ -1,4 +1,4 @@
-import { createEnv } from "@/env/nextjs";
+import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
@@ -21,6 +21,9 @@ export const env = createEnv({
     NEXT_PUBLIC_HAPROXY_PORT: z.string().min(2),
     NEXT_PUBLIC_NETDATA_PORT: z.string().min(2),
     NEXT_PUBLIC_PORTAINER_PORT: z.string().min(2),
+    NEXT_PUBLIC_KIBANA_PORT: z.string().min(2),
+    NEXT_PUBLIC_ARKIME_URL: z.string().min(12),
+    NEXT_PUBLIC_ARKIME_PORT: z.string().min(2),
   },
 
   /**
@@ -35,6 +38,9 @@ export const env = createEnv({
     NEXT_PUBLIC_HAPROXY_PORT: process.env.NEXT_PUBLIC_HAPROXY_PORT,
     NEXT_PUBLIC_NETDATA_PORT: process.env.NEXT_PUBLIC_NETDATA_PORT,
     NEXT_PUBLIC_PORTAINER_PORT: process.env.NEXT_PUBLIC_PORTAINER_PORT,
+    NEXT_PUBLIC_KIBANA_PORT: process.env.NEXT_PUBLIC_KIBANA_PORT,
+    NEXT_PUBLIC_ARKIME_URL: process.env.NEXT_PUBLIC_ARKIME_URL,
+    NEXT_PUBLIC_ARKIME_PORT: process.env.NEXT_PUBLIC_ARKIME_PORT,
   },
 
   /**

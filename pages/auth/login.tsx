@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import Link from "next/link";
 
-import AuthLayout from "layouts/Auth";
+import AuthLayout from "components/layouts/Auth";
 
 export default function Login() {
   return (

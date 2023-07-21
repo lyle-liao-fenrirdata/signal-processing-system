@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  signal-process-system-frontend-dev:
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile
+    image: signal-process-system-frontend-dev
+    ports:
+      - "3003:3000"

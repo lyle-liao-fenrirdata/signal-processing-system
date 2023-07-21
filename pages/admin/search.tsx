@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 
 // import MapExample from "components/Maps/MapExample.js";
 
-import AdminLayout from "layouts/Admin";
+import AdminLayout from "components/layouts/Admin";
 
 export default function Search() {
   return (

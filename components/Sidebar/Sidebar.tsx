@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { env } from "@/utils/environment/index.mjs";
+import { env } from "env.mjs";
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = React.useState("hidden");

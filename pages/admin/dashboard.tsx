@@ -1,9 +1,9 @@
 import React, { ReactElement } from "react";
 import Script from "next/script";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { env } from "@/env/index.mjs";
 
-import AdminLayout from "layouts/Admin";
+import AdminLayout from "components/layouts/Admin";
+import { env } from "env.mjs";
 
 interface DockerNode {
   ID: string;
