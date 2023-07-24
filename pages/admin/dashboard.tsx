@@ -2,6 +2,7 @@ import React, { ReactElement } from "react";
 import Script from "next/script";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
+import { useNavbarBreadcrumbStore } from "@/stores/navbarBreadcrumb";
 import AdminLayout from "components/layouts/Admin";
 import { env } from "env.mjs";
 
@@ -191,7 +192,7 @@ const ChartContainer = ({
   title,
   children,
 }: {
-  title: string;
+  title: JSX.Element;
   children: ReactElement;
 }) => (
   <div className="relative mb-6 h-[calc(100%-1.5rem)] w-full break-words rounded bg-white shadow-lg">
@@ -209,7 +210,7 @@ const NodeTable = ({
 }: {
   nodes: {
     key: string;
-    hostname: string;
+    hostname: JSX.Element;
     state: JSX.Element;
     availability: JSX.Element;
   }[];
@@ -238,9 +239,7 @@ const NodeTable = ({
           }}
         >
           <th className="flex items-center whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-            <span className="ml-3 font-bold text-slate-600">
-              {node.hostname}
-            </span>
+            {node.hostname}
           </th>
           <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
             {node.state}
@@ -408,11 +407,25 @@ export default function Dashboard({
   services,
   serviceError,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const setBreadcrumbs = useNavbarBreadcrumbStore(
+    (state) => state.setBreadcrumbs
+  );
+
+  React.useEffect(() => {
+    setBreadcrumbs([
+      {
+        title: "儀錶板",
+        href: "/admin/dashboard",
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <div className="flex flex-wrap">
         <div className="w-full md:w-6/12 md:pr-6">
-          <ChartContainer title="Nodes">
+          <ChartContainer title={<>Nodes</>}>
             {nodeError ? (
               <div className="flex flex-row items-center justify-center">
                 <span className="text-lg text-red-500">
@@ -423,7 +436,16 @@ export default function Dashboard({
               <NodeTable
                 nodes={nodes.map((node) => ({
                   key: node.ID,
-                  hostname: node.Description.Hostname,
+                  hostname: (
+                    <a
+                      className="ml-3 font-bold text-slate-600 hover:underline"
+                      href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                      target="_blank"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {node.Description.Hostname}
+                    </a>
+                  ),
                   state: (
                     <span
                       className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
@@ -458,7 +480,7 @@ export default function Dashboard({
           </ChartContainer>
         </div>
         <div className="w-full md:w-6/12">
-          <ChartContainer title="Services">
+          <ChartContainer title={<>Services</>}>
             {serviceError ? (
               <div className="flex flex-row items-center justify-center">
                 <span className="text-lg text-red-500">
@@ -483,7 +505,7 @@ export default function Dashboard({
           </ChartContainer>
         </div>
       </div>
-      <ChartContainer title="HA PROXY">
+      <ChartContainer title={<>HA PROXY</>}>
         <iframe
           src={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
           title="HA PROXY"
@@ -495,7 +517,16 @@ export default function Dashboard({
       {nodes.map((node) => (
         <ChartContainer
           key={node.Description.Hostname}
-          title={`${node.Description.Hostname} [${node.Status.Addr}]`}
+          title={
+            <a
+              className="font-bold hover:underline"
+              href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+              target="_blank"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {node.Description.Hostname} [{node.Status.Addr}]
+            </a>
+          }
         >
           <>
             <NetdataNodeBoard nodeUrl={node.Status.Addr} />

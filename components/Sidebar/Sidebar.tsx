@@ -161,8 +161,8 @@ export default function Sidebar() {
               </a>
             </li>
 
-            {/* TODO: 需要更新 href 位置 */}
-            <li className="items-center">
+            {/* TODO: 還需要嗎? 如要，需更新 href 位置 */}
+            {/* <li className="items-center">
               <a
                 href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
@@ -172,7 +172,7 @@ export default function Sidebar() {
                 系統操控{" "}
                 <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
               </a>
-            </li>
+            </li> */}
 
             <li className="items-center">
               <Link
@@ -242,33 +242,6 @@ export default function Sidebar() {
                 <i className="fas fa-clipboard-list mr-2 text-sm text-slate-300"></i>{" "}
                 註冊
               </Link>
-            </li>
-          </ul>
-
-          {/* Divider */}
-          <hr className="my-4 md:min-w-full" />
-          {/* Navigation */}
-          <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
-            <li className="inline-flex">
-              <a
-                href="https://tailwindcss.com/docs/customizing-colors"
-                target="_blank"
-                className="mb-4 block text-sm font-semibold text-slate-700 no-underline hover:text-slate-500"
-              >
-                <i className="fas fa-paint-brush mr-2 text-base text-slate-300"></i>
-                Colors
-              </a>
-            </li>
-
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus"
-                target="_blank"
-                className="mb-4 block text-sm font-semibold text-slate-700 no-underline hover:text-slate-500"
-              >
-                <i className="fab fa-css3-alt mr-2 text-base text-slate-300"></i>
-                Components
-              </a>
             </li>
           </ul>
         </div>
