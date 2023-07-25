@@ -2,7 +2,6 @@ import React, { ReactElement } from "react";
 import Script from "next/script";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
-import { useNavbarBreadcrumbStore } from "@/stores/navbarBreadcrumb";
 import AdminLayout from "components/layouts/Admin";
 import { env } from "env.mjs";
 
@@ -407,160 +406,149 @@ export default function Dashboard({
   services,
   serviceError,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const setBreadcrumbs = useNavbarBreadcrumbStore(
-    (state) => state.setBreadcrumbs
-  );
-
-  React.useEffect(() => {
-    setBreadcrumbs([
-      {
-        title: "儀錶板",
-        href: "/admin/dashboard",
-      },
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
-    <>
-      <div className="flex flex-wrap">
-        <div className="w-full md:w-6/12 md:pr-6">
-          <ChartContainer title={<>Nodes</>}>
-            {nodeError ? (
-              <div className="flex flex-row items-center justify-center">
-                <span className="text-lg text-red-500">
-                  {`Docker Swarm 節點異常: ${nodeError.message}`}
-                </span>
-              </div>
-            ) : (
-              <NodeTable
-                nodes={nodes.map((node) => ({
-                  key: node.ID,
-                  hostname: (
-                    <a
-                      className="ml-3 font-bold text-slate-600 hover:underline"
-                      href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
-                      target="_blank"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {node.Description.Hostname}
-                    </a>
-                  ),
-                  state: (
-                    <span
-                      className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
-                        node.Status.State === "ready"
-                          ? "bg-green-100 text-green-800"
-                          : node.Status.State === "down"
-                          ? "bg-gray-100 text-gray-800"
-                          : node.Status.State === "disconnected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-indigo-100 text-indigo-800"
-                      }`}
-                    >
-                      {node.Status.State}
-                    </span>
-                  ),
-                  availability: (
-                    <span
-                      className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
-                        node.Spec.Availability === "active"
-                          ? "bg-green-100 text-green-800"
-                          : node.Spec.Availability === "pause"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-indigo-100 text-indigo-800"
-                      }`}
-                    >
-                      {node.Spec.Availability}
-                    </span>
-                  ),
-                }))}
-              />
-            )}
-          </ChartContainer>
-        </div>
-        <div className="w-full md:w-6/12">
-          <ChartContainer title={<>Services</>}>
-            {serviceError ? (
-              <div className="flex flex-row items-center justify-center">
-                <span className="text-lg text-red-500">
-                  {`Docker Swarm 節點異常: ${serviceError.message}`}
-                </span>
-              </div>
-            ) : (
-              <ServiceTable
-                services={services.map((service) => ({
-                  key: service.ID,
-                  name: service.Spec.Name,
-                  replicated: service.Spec.Mode.Replicated.Replicas,
-                  status:
-                    service.Spec.Mode.Replicated.Replicas > 0 ? (
-                      <i className="fas fa-circle-check text-sm text-green-500"></i>
-                    ) : (
-                      <i className="fas fa-circle-xmark text-red-500"></i>
+    <AdminLayout
+      navbarProps={{
+        breadcrumbs: [{ title: "儀錶板", href: "/admin/dashboard" }],
+        user: { name: "anonymous" },
+      }}
+    >
+      <>
+        <div className="flex flex-wrap">
+          <div className="w-full md:w-6/12 md:pr-6">
+            <ChartContainer title={<>Nodes</>}>
+              {nodeError ? (
+                <div className="flex flex-row items-center justify-center">
+                  <span className="text-lg text-red-500">
+                    {`Docker Swarm 節點異常: ${nodeError.message}`}
+                  </span>
+                </div>
+              ) : (
+                <NodeTable
+                  nodes={nodes.map((node) => ({
+                    key: node.ID,
+                    hostname: (
+                      <a
+                        className="ml-3 font-bold text-slate-600 hover:underline"
+                        href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {node.Description.Hostname}
+                      </a>
                     ),
-                }))}
-              />
-            )}
-          </ChartContainer>
+                    state: (
+                      <span
+                        className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                          node.Status.State === "ready"
+                            ? "bg-green-100 text-green-800"
+                            : node.Status.State === "down"
+                            ? "bg-gray-100 text-gray-800"
+                            : node.Status.State === "disconnected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-indigo-100 text-indigo-800"
+                        }`}
+                      >
+                        {node.Status.State}
+                      </span>
+                    ),
+                    availability: (
+                      <span
+                        className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                          node.Spec.Availability === "active"
+                            ? "bg-green-100 text-green-800"
+                            : node.Spec.Availability === "pause"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-indigo-100 text-indigo-800"
+                        }`}
+                      >
+                        {node.Spec.Availability}
+                      </span>
+                    ),
+                  }))}
+                />
+              )}
+            </ChartContainer>
+          </div>
+          <div className="w-full md:w-6/12">
+            <ChartContainer title={<>Services</>}>
+              {serviceError ? (
+                <div className="flex flex-row items-center justify-center">
+                  <span className="text-lg text-red-500">
+                    {`Docker Swarm 節點異常: ${serviceError.message}`}
+                  </span>
+                </div>
+              ) : (
+                <ServiceTable
+                  services={services.map((service) => ({
+                    key: service.ID,
+                    name: service.Spec.Name,
+                    replicated: service.Spec.Mode.Replicated.Replicas,
+                    status:
+                      service.Spec.Mode.Replicated.Replicas > 0 ? (
+                        <i className="fas fa-circle-check text-sm text-green-500"></i>
+                      ) : (
+                        <i className="fas fa-circle-xmark text-red-500"></i>
+                      ),
+                  }))}
+                />
+              )}
+            </ChartContainer>
+          </div>
         </div>
-      </div>
-      <ChartContainer title={<>HA PROXY</>}>
-        <iframe
-          src={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
-          title="HA PROXY"
-          loading="lazy"
-          height={450}
-          width="100%"
-        ></iframe>
-      </ChartContainer>
-      {nodes.map((node) => (
-        <ChartContainer
-          key={node.Description.Hostname}
-          title={
-            <a
-              className="font-bold hover:underline"
-              href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
-              target="_blank"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {node.Description.Hostname} [{node.Status.Addr}]
-            </a>
-          }
-        >
-          <>
-            <NetdataNodeBoard nodeUrl={node.Status.Addr} />
-            <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
-              <span
-                id={node.ID}
-                className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
-                  node.Spec.Role === "manager"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {node.Spec.Role}
-              </span>
-            </span>
-          </>
+        <ChartContainer title={<>HA PROXY</>}>
+          <iframe
+            src={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
+            title="HA PROXY"
+            loading="lazy"
+            height={450}
+            width="100%"
+          ></iframe>
         </ChartContainer>
-      ))}
-      <Script id="disable-Bootstrap">
-        var netdataNoBootstrap = true; var netdataNoFontAwesome = true; var
-        netdataNoDygraphs = true; var netdataNoSparklines = true; var
-        netdataNoPeitys = true; var netdataNoGoogleCharts = true; var
-        netdataNoMorris = true; var netdataNoD3 = true; var netdataNoC3 = true;
-        var netdataNoD3pie = true; var netdataShowHelp = false;
-      </Script>
-      <Script
-        strategy="lazyOnload"
-        type="text/javascript"
-        src="http://192.168.15.13:19999/dashboard.js"
-      />
-    </>
+        {nodes.map((node) => (
+          <ChartContainer
+            key={node.Description.Hostname}
+            title={
+              <a
+                className="font-bold hover:underline"
+                href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {node.Description.Hostname} [{node.Status.Addr}]
+              </a>
+            }
+          >
+            <>
+              <NetdataNodeBoard nodeUrl={node.Status.Addr} />
+              <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
+                <span
+                  id={node.ID}
+                  className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                    node.Spec.Role === "manager"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {node.Spec.Role}
+                </span>
+              </span>
+            </>
+          </ChartContainer>
+        ))}
+        <Script id="disable-Bootstrap">
+          var netdataNoBootstrap = true; var netdataNoFontAwesome = true; var
+          netdataNoDygraphs = true; var netdataNoSparklines = true; var
+          netdataNoPeitys = true; var netdataNoGoogleCharts = true; var
+          netdataNoMorris = true; var netdataNoD3 = true; var netdataNoC3 =
+          true; var netdataNoD3pie = true; var netdataShowHelp = false;
+        </Script>
+        <Script
+          strategy="lazyOnload"
+          type="text/javascript"
+          src="http://192.168.15.13:19999/dashboard.js"
+        />
+      </>
+    </AdminLayout>
   );
 }
-
-Dashboard.getLayout = function getLayout(page: ReactElement) {
-  return <AdminLayout>{page}</AdminLayout>;
-};

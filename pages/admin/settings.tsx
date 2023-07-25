@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React from "react";
 
 import CardSettings from "components/Cards/CardSettings.js";
 import CardProfile from "components/Cards/CardProfile.js";
@@ -7,17 +7,20 @@ import AdminLayout from "components/layouts/Admin";
 
 export default function Settings() {
   return (
-    <div className="flex flex-wrap">
-      <div className="w-full px-4 lg:w-8/12">
-        <CardSettings />
+    <AdminLayout
+      navbarProps={{
+        breadcrumbs: [{ title: "設定", href: "/admin/settings" }],
+        user: { name: "anonymous" },
+      }}
+    >
+      <div className="flex flex-wrap">
+        <div className="w-full px-4 lg:w-8/12">
+          <CardSettings />
+        </div>
+        <div className="w-full px-4 lg:w-4/12">
+          <CardProfile />
+        </div>
       </div>
-      <div className="w-full px-4 lg:w-4/12">
-        <CardProfile />
-      </div>
-    </div>
+    </AdminLayout>
   );
 }
-
-Settings.getLayout = function getLayout(page: ReactElement) {
-  return <AdminLayout>{page}</AdminLayout>;
-};

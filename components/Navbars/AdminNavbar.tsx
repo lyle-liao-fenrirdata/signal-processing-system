@@ -1,8 +1,9 @@
-import { useNavbarBreadcrumbStore } from "@/stores/navbarBreadcrumb";
+export type NavbarProps = {
+  breadcrumbs: { title: string; href: string }[];
+  user: { name: string };
+};
 
-export default function Navbar() {
-  const breadcrumbs = useNavbarBreadcrumbStore((state) => state.breadcrumbs);
-
+export default function Navbar({ breadcrumbs, user }: NavbarProps) {
   return (
     <nav className="absolute left-0 top-0 z-10 flex w-full items-center bg-transparent py-4 md:flex-row md:flex-nowrap md:justify-start md:bg-slate-800">
       <div className="mx-autp flex w-full flex-wrap items-center justify-between px-4 md:flex-nowrap md:px-10">
@@ -26,7 +27,7 @@ export default function Navbar() {
           <a className="block text-slate-500" href="#pablo">
             <div className="flex items-center">
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-sm text-white">
-                USERNAME
+                {user.name}
               </span>
             </div>
           </a>

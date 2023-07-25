@@ -1,7 +1,6 @@
 import React, { ReactElement } from "react";
 
 import AdminLayout from "components/layouts/Admin";
-import { useNavbarBreadcrumbStore } from "@/stores/navbarBreadcrumb";
 import Image from "next/image";
 import { env } from "@/env.mjs";
 
@@ -30,10 +29,6 @@ export default function Search() {
   const [sqlTranslate, setSqlTranslate] = React.useState("");
   const [showSqlSearchModal, setSqlSearchModal] = React.useState(false);
 
-  const setBreadcrumbs = useNavbarBreadcrumbStore(
-    (state) => state.setBreadcrumbs
-  );
-
   async function postElasticSearchTranslate() {
     const res = await fetch("/api/sql_translate", {
       method: "POST",
@@ -56,165 +51,158 @@ export default function Search() {
     }
   }
 
-  React.useEffect(() => {
-    setBreadcrumbs([
-      {
-        title: "資料檢索",
-        href: "/admin/search",
-      },
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
-    <div className="flex flex-wrap">
-      <div className="w-full sm:w-6/12 sm:pr-6 md:w-7/12 lg:w-9/12">
-        {/* SQL to ES translate */}
-        <ChartContainer title={<>SQL to ES</>}>
-          <div className="mb-3 flex flex-col flex-nowrap items-start gap-2 pt-2">
-            <span>請輸入 SQL 語句</span>
-            <input
-              type="text"
-              value={sqlSearch.query}
-              placeholder="SELECT * FROM arkime_files"
-              className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
-              onChange={(e) =>
-                setSqlSearch((d) => ({
-                  ...d,
-                  query: e.target.value,
-                }))
-              }
-              onKeyUp={(e) => {
-                if (e.key === "Enter") postElasticSearchTranslate();
-              }}
-            />
-            <div className="flex w-full flex-row flex-nowrap items-center justify-start">
+    <AdminLayout
+      navbarProps={{
+        breadcrumbs: [{ title: "資料檢索", href: "/admin/search" }],
+        user: { name: "anonymous" },
+      }}
+    >
+      <div className="flex flex-wrap">
+        <div className="w-full sm:w-6/12 sm:pr-6 md:w-7/12 lg:w-9/12">
+          {/* SQL to ES translate */}
+          <ChartContainer title={<>SQL to ES</>}>
+            <div className="mb-3 flex flex-col flex-nowrap items-start gap-2 pt-2">
+              <span>請輸入 SQL 語句</span>
               <input
                 type="text"
-                value={sqlSearch.fetch_size}
+                value={sqlSearch.query}
                 placeholder="SELECT * FROM arkime_files"
-                className="relative w-1/2 rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
-                onChange={({ target }) => {
-                  const fetch_size = Number(target.value);
-                  if (fetch_size && fetch_size > 0) {
-                    setSqlSearch((d) => ({
-                      ...d,
-                      fetch_size,
-                    }));
-                  }
-                }}
+                className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
+                onChange={(e) =>
+                  setSqlSearch((d) => ({
+                    ...d,
+                    query: e.target.value,
+                  }))
+                }
                 onKeyUp={(e) => {
                   if (e.key === "Enter") postElasticSearchTranslate();
                 }}
               />
-              <button
-                className="ml-auto rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-xs font-bold text-slate-500 outline-none transition-all hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-                type="button"
-                onClick={() => {
-                  postElasticSearchTranslate();
-                }}
-              >
-                送出
-              </button>
+              <div className="flex w-full flex-row flex-nowrap items-center justify-start">
+                <input
+                  type="text"
+                  value={sqlSearch.fetch_size}
+                  placeholder="SELECT * FROM arkime_files"
+                  className="relative w-1/2 rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
+                  onChange={({ target }) => {
+                    const fetch_size = Number(target.value);
+                    if (fetch_size && fetch_size > 0) {
+                      setSqlSearch((d) => ({
+                        ...d,
+                        fetch_size,
+                      }));
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") postElasticSearchTranslate();
+                  }}
+                />
+                <button
+                  className="ml-auto rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-xs font-bold text-slate-500 outline-none transition-all hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+                  type="button"
+                  onClick={() => {
+                    postElasticSearchTranslate();
+                  }}
+                >
+                  送出
+                </button>
+              </div>
             </div>
-          </div>
-        </ChartContainer>
-      </div>
-      <div className="w-full sm:w-6/12 md:w-5/12 lg:w-3/12">
-        {/* other hyper link (Arkime and Kibana) */}
-        <ChartContainer title={<>其他檢索工具</>}>
-          <div className="flex flex-col flex-nowrap items-center gap-2 pt-2">
-            <a
-              href={`${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`}
-              target="_blank"
-            >
-              <Image
-                src="/img/Arkime_Logo.png"
-                alt="Arkime"
-                width={159}
-                height={48}
-                className="opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
-              />
-            </a>
-            <a
-              href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/kibana_overview/`}
-              target="_blank"
-              className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
-            >
-              <Image
-                src="/img/Kibana_Elasticsearch_Logo.svg"
-                alt="Kibana Elasticsearch"
-                width={40}
-                height={40}
-              />
-              <span className="text-3xl font-extrabold text-[#2F2F2F]">
-                Kibana
-              </span>
-            </a>
-          </div>
-        </ChartContainer>
-      </div>
-      <div className="w-full">
-        {/* out data search function */}
-        <ChartContainer title={<>解析資料檢索</>}>
-          <>Not implement yet</>
-        </ChartContainer>
-      </div>
+          </ChartContainer>
+        </div>
+        <div className="w-full sm:w-6/12 md:w-5/12 lg:w-3/12">
+          {/* other hyper link (Arkime and Kibana) */}
+          <ChartContainer title={<>其他檢索工具</>}>
+            <div className="flex flex-col flex-nowrap items-center gap-2 pt-2">
+              <a
+                href={`${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`}
+                target="_blank"
+              >
+                <Image
+                  src="/img/Arkime_Logo.png"
+                  alt="Arkime"
+                  width={159}
+                  height={48}
+                  className="opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
+                />
+              </a>
+              <a
+                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/kibana_overview/`}
+                target="_blank"
+                className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
+              >
+                <Image
+                  src="/img/Kibana_Elasticsearch_Logo.svg"
+                  alt="Kibana Elasticsearch"
+                  width={40}
+                  height={40}
+                />
+                <span className="text-3xl font-extrabold text-[#2F2F2F]">
+                  Kibana
+                </span>
+              </a>
+            </div>
+          </ChartContainer>
+        </div>
+        <div className="w-full">
+          {/* out data search function */}
+          <ChartContainer title={<>解析資料檢索</>}>
+            <>Not implement yet</>
+          </ChartContainer>
+        </div>
 
-      {/* modal of "SQL to ES translate" result */}
-      {showSqlSearchModal && (
-        <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden py-6 outline-none focus:outline-none">
-            <div className="relative mx-auto w-auto max-w-6xl">
-              {/*content*/}
-              <div className="relative w-[50vw] rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 px-5 py-3">
-                  <h3 className="text-lg font-semibold">
-                    SQL: {sqlSearch.query}
-                  </h3>
-                  <button
-                    className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
-                    onClick={() => setSqlSearchModal(false)}
-                  >
-                    x
-                  </button>
-                </div>
-                {/*body*/}
-                <div className="relative flex-auto overflow-y-auto px-6 py-2">
-                  <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
-                    Elastic Query:
-                    <br />
-                    {sqlTranslate}
-                  </pre>
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 px-6 py-3">
-                  <button
-                    className="mr-2 rounded border border-solid border-slate-500 bg-transparent px-6 py-3 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-                    type="button"
-                    onClick={() => copyToClipboard(sqlTranslate)}
-                  >
-                    <i className="fas fa-copy"></i> 複製 Elascti Query
-                  </button>
-                  <button
-                    className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
-                    type="button"
-                    onClick={() => setSqlSearchModal(false)}
-                  >
-                    OK
-                  </button>
+        {/* modal of "SQL to ES translate" result */}
+        {showSqlSearchModal && (
+          <>
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden py-6 outline-none focus:outline-none">
+              <div className="relative mx-auto w-auto max-w-6xl">
+                {/*content*/}
+                <div className="relative w-[50vw] rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none">
+                  {/*header*/}
+                  <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 px-5 py-3">
+                    <h3 className="text-lg font-semibold">
+                      SQL: {sqlSearch.query}
+                    </h3>
+                    <button
+                      className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
+                      onClick={() => setSqlSearchModal(false)}
+                    >
+                      x
+                    </button>
+                  </div>
+                  {/*body*/}
+                  <div className="relative flex-auto overflow-y-auto px-6 py-2">
+                    <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
+                      Elastic Query:
+                      <br />
+                      {sqlTranslate}
+                    </pre>
+                  </div>
+                  {/*footer*/}
+                  <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 px-6 py-3">
+                    <button
+                      className="mr-2 rounded border border-solid border-slate-500 bg-transparent px-6 py-3 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+                      type="button"
+                      onClick={() => copyToClipboard(sqlTranslate)}
+                    >
+                      <i className="fas fa-copy"></i> 複製 Elascti Query
+                    </button>
+                    <button
+                      className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
+                      type="button"
+                      onClick={() => setSqlSearchModal(false)}
+                    >
+                      OK
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-        </>
-      )}
-    </div>
+            <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
+          </>
+        )}
+      </div>
+    </AdminLayout>
   );
 }
-
-Search.getLayout = function getLayout(page: ReactElement) {
-  return <AdminLayout>{page}</AdminLayout>;
-};

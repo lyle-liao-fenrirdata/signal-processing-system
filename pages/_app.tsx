@@ -27,7 +27,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         />
         <title>訊號處理系統</title>
       </Head>
-      {getLayout(<Component {...pageProps} />)}
+      <Component {...pageProps} />
     </React.Fragment>
   );
 }

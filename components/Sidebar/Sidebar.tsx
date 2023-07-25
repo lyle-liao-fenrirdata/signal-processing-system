@@ -3,6 +3,44 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { env } from "env.mjs";
 
+const NavigationItem = ({
+  href,
+  target = "_self",
+  title,
+  currentPath,
+  FaIconClass,
+}: {
+  href: string;
+  target?: string;
+  title: string;
+  currentPath?: string;
+  FaIconClass: string;
+}) => (
+  /* eslint-disable-next-line @next/next/no-html-link-for-pages */
+  <a
+    href={href}
+    target={target}
+    className={
+      "block py-3 text-xs font-bold " +
+      (currentPath && currentPath.indexOf(href) !== -1
+        ? "text-sky-500 hover:text-sky-600"
+        : "text-slate-700 hover:text-slate-500")
+    }
+  >
+    <i
+      className={`${FaIconClass} mr-2 w-5 text-sm ${
+        currentPath && currentPath.indexOf(href) !== -1
+          ? "opacity-75"
+          : "text-slate-300"
+      }`}
+    ></i>
+    {title}
+    {target !== "_self" && (
+      <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+    )}
+  </a>
+);
+
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
@@ -70,95 +108,49 @@ export default function Sidebar() {
 
           <ul className="flex list-none flex-col md:min-w-full md:flex-col">
             <li className="items-center">
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-              <a
+              <NavigationItem
                 href="/admin/dashboard"
-                className={
-                  "block py-3 text-xs font-bold " +
-                  (router.pathname.indexOf("/admin/dashboard") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-tv mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/dashboard") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                儀錶板
-              </a>
+                title="儀錶機"
+                FaIconClass="fas fa-tv"
+                currentPath={router.pathname}
+              />
             </li>
 
             <li className="items-center">
-              <Link
+              <NavigationItem
                 href="/admin/search"
-                className={
-                  "block py-3 text-xs font-bold " +
-                  (router.pathname.indexOf("/admin/search") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-bars-staggered mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/search") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                資料檢索
-              </Link>
+                title="資料檢索"
+                FaIconClass="fas fa-bars-staggered"
+                currentPath={router.pathname}
+              />
             </li>
 
             <li className="items-center">
-              <Link
+              <NavigationItem
                 href="/admin/audit"
-                className={
-                  "block py-3 text-xs font-bold " +
-                  (router.pathname.indexOf("/admin/audit") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-table mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/audit") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                稽核勾稽
-              </Link>
+                title="稽核勾稽"
+                FaIconClass="fas fa-table"
+                currentPath={router.pathname}
+              />
             </li>
 
             <li className="items-center">
-              <a
+              <NavigationItem
                 href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
-                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
-              >
-                <i className="fa-brands fa-docker mr-2 text-sm text-slate-300"></i>{" "}
-                容器叢集{" "}
-                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
-              </a>
+                title="容器叢集"
+                FaIconClass="fa-brands fa-docker"
+              />
             </li>
 
             {/* TODO: 需要更新 href 位置 */}
             <li className="items-center">
-              <a
+              <NavigationItem
                 href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
-                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
-              >
-                <i className="fas fa-server mr-2 text-sm text-slate-300"></i>{" "}
-                資源管理{" "}
-                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
-              </a>
+                title="資源管理"
+                FaIconClass="fas fa-server"
+              />
             </li>
 
             {/* TODO: 還需要嗎? 如要，需更新 href 位置 */}
@@ -175,47 +167,21 @@ export default function Sidebar() {
             </li> */}
 
             <li className="items-center">
-              <Link
+              <NavigationItem
                 href="/admin/settings"
-                className={
-                  "block py-3 text-xs font-bold " +
-                  (router.pathname.indexOf("/admin/settings") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-user-shield mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/settings") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                權限管理
-              </Link>
+                title="權限管理"
+                FaIconClass="fas fa-user-shield"
+                currentPath={router.pathname}
+              />
             </li>
 
             <li className="items-center">
-              <Link
+              <NavigationItem
                 href="/admin/settings"
-                className={
-                  "block py-3 text-xs font-bold " +
-                  (router.pathname.indexOf("/admin/settings") !== -1
-                    ? "text-sky-500 hover:text-sky-600"
-                    : "text-slate-700 hover:text-slate-500")
-                }
-              >
-                <i
-                  className={
-                    "fas fa-tools mr-2 text-sm " +
-                    (router.pathname.indexOf("/admin/settings") !== -1
-                      ? "opacity-75"
-                      : "text-slate-300")
-                  }
-                ></i>{" "}
-                設定
-              </Link>
+                title="設定"
+                FaIconClass="fas fa-tools"
+                currentPath={router.pathname}
+              />
             </li>
           </ul>
 
