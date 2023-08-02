@@ -109,7 +109,7 @@ export default function Sidebar() {
           <ul className="flex list-none flex-col md:min-w-full md:flex-col">
             <li className="items-center">
               <NavigationItem
-                href="/admin/dashboard"
+                href="/app/dashboard"
                 title="儀錶機"
                 FaIconClass="fas fa-tv"
                 currentPath={router.pathname}
@@ -118,7 +118,7 @@ export default function Sidebar() {
 
             <li className="items-center">
               <NavigationItem
-                href="/admin/search"
+                href="/app/search"
                 title="資料檢索"
                 FaIconClass="fas fa-bars-staggered"
                 currentPath={router.pathname}
@@ -127,7 +127,7 @@ export default function Sidebar() {
 
             <li className="items-center">
               <NavigationItem
-                href="/admin/audit"
+                href="/app/audit"
                 title="稽核勾稽"
                 FaIconClass="fas fa-table"
                 currentPath={router.pathname}
@@ -168,7 +168,7 @@ export default function Sidebar() {
 
             <li className="items-center">
               <NavigationItem
-                href="/admin/settings"
+                href="/app/settings"
                 title="權限管理"
                 FaIconClass="fas fa-user-shield"
                 currentPath={router.pathname}
@@ -177,7 +177,7 @@ export default function Sidebar() {
 
             <li className="items-center">
               <NavigationItem
-                href="/admin/settings"
+                href="/app/settings"
                 title="設定"
                 FaIconClass="fas fa-tools"
                 currentPath={router.pathname}
@@ -186,10 +186,10 @@ export default function Sidebar() {
           </ul>
 
           {/* Divider */}
-          <hr className="my-4 md:min-w-full" />
+          {/* <hr className="my-4 md:min-w-full" /> */}
           {/* Heading */}
 
-          <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
+          {/* <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
             <li className="items-center">
               <Link
                 href="/auth/login"
@@ -209,7 +209,7 @@ export default function Sidebar() {
                 註冊
               </Link>
             </li>
-          </ul>
+          </ul> */}
         </div>
       </div>
     </nav>

@@ -3,3 +3,9 @@
 @tailwind components;
 
 @tailwind utilities;
+
+@layer components {
+  div.dangerouslySetInnerHTML pre {
+    @apply hidden;
+  }
+}

@@ -1,0 +1,52 @@
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// model Recording {
+//   id Int @id @default(autoincrement())
+// }
+
+// model RecordingLinkId {
+//   id           Int    @id @default(autoincrement())
+//   SatelliteID  String
+//   Polarization String
+//   Frequency    BigInt
+// }
+
+// const JSON_format_from_Zack_in_Line_group = {
+//     "InputPort": 1,
+//     "OutputPort": 1,
+//     "LinkID": {
+//         "SatelliteID": "AA",
+//         "Polarization": "V",
+//         "Frequency": 12500250000
+//     },
+//     "ServerIP": "192.168.016.101",
+//     "ServerPort": 1234,
+//     "ServerCh": 1,
+//     "ServerType": "HDLC/DVB/IP",
+//     "Timestamp": UnixTime(seconds),
+//     "Capture": "Enable/Disable"
+//     "FileName": "CCV1250025000_YYYYMMDDHHmmssfff"
+// }

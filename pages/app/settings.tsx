@@ -9,8 +9,7 @@ export default function Settings() {
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "設定", href: "/admin/settings" }],
-        user: { name: "anonymous" },
+        breadcrumbs: [{ title: "設定", href: "/app/settings" }],
       }}
     >
       <div className="flex flex-wrap">

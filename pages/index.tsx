@@ -1,6 +1,5 @@
 import IndexNavbar from "components/Navbars/IndexNavbar";
 import Footer from "components/Footers/Footer";
-import Link from "next/link";
 
 export default function Index() {
   return (
@@ -17,7 +16,7 @@ export default function Index() {
               <div className="mt-12">
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
-                  href="/admin/dashboard"
+                  href="/app/dashboard"
                   className="get-started mb-1 mr-1 rounded bg-slate-400 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
                   進入系統

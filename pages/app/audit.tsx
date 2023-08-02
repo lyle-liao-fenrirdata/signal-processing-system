@@ -8,8 +8,7 @@ export default function Audit() {
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "稽核勾稽", href: "/admin/audit" }],
-        user: { name: "anonymous" },
+        breadcrumbs: [{ title: "稽核勾稽", href: "/app/audit" }],
       }}
     >
       <div className="mt-4 flex flex-wrap">

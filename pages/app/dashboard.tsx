@@ -155,36 +155,47 @@ export const getServerSideProps: GetServerSideProps<{
   services: DockerService[];
   serviceError: DockerServiceError | false;
 }> = async () => {
-  const [nodesResponse, servicesResponse] = await Promise.all([
-    fetch(`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`),
-    fetch(
-      `${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/services`
-    ),
-  ]);
-  let nodes: DockerNode[] = [];
-  let nodeError: DockerNodeError | false = false;
-  let services: DockerService[] = [];
-  let serviceError: DockerServiceError | false = false;
+  try {
+    const [nodesResponse, servicesResponse] = await Promise.all([
+      fetch(`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`),
+      fetch(
+        `${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/services`
+      ),
+    ]);
 
-  if (!nodesResponse.ok) {
-    nodeError = {
-      message:
-        dockerNodeErrorCodes[
-          nodesResponse.status.toString() as unknown as keyof typeof dockerNodeErrorCodes
-        ] || "Unknown Error",
+    let nodes: DockerNode[] = [];
+    let nodeError: DockerNodeError | false = false;
+    let services: DockerService[] = [];
+    let serviceError: DockerServiceError | false = false;
+
+    if (!nodesResponse.ok) {
+      nodeError = {
+        message:
+          dockerNodeErrorCodes[
+            nodesResponse.status.toString() as unknown as keyof typeof dockerNodeErrorCodes
+          ] || "Unknown Error",
+      };
+    } else nodes = await nodesResponse.json();
+
+    if (!servicesResponse.ok) {
+      serviceError = {
+        message:
+          dockerServiceErrorCodes[
+            servicesResponse.status.toString() as unknown as keyof typeof dockerServiceErrorCodes
+          ] || "Unknown Error",
+      };
+    } else services = await servicesResponse.json();
+    return { props: { nodes, nodeError, services, serviceError } };
+  } catch (error) {
+    return {
+      props: {
+        nodes: [],
+        nodeError: { message: new String(error).toString() },
+        services: [],
+        serviceError: false,
+      },
     };
-  } else nodes = await nodesResponse.json();
-
-  if (!servicesResponse.ok) {
-    serviceError = {
-      message:
-        dockerServiceErrorCodes[
-          servicesResponse.status.toString() as unknown as keyof typeof dockerServiceErrorCodes
-        ] || "Unknown Error",
-    };
-  } else services = await servicesResponse.json();
-
-  return { props: { nodes, nodeError, services, serviceError } };
+  }
 };
 
 const ChartContainer = ({
@@ -195,7 +206,7 @@ const ChartContainer = ({
   children: ReactElement;
 }) => (
   <div className="relative mb-6 h-[calc(100%-1.5rem)] w-full break-words rounded bg-white shadow-lg">
-    <div className="w-full p-4">
+    <div className="w-full overflow-x-auto p-4">
       <span className="text-md absolute -left-2 -top-4 inline-block min-w-48 rounded bg-slate-600 px-2 py-1 font-semibold text-white drop-shadow-lg">
         {title}
       </span>
@@ -401,16 +412,15 @@ const NetdataNodeBoard = ({ nodeUrl }: { nodeUrl: string }) => {
 };
 
 export default function Dashboard({
-  nodes,
-  nodeError,
-  services,
-  serviceError,
+  nodes = [],
+  nodeError = false,
+  services = [],
+  serviceError = false,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "儀錶板", href: "/admin/dashboard" }],
-        user: { name: "anonymous" },
+        breadcrumbs: [{ title: "儀錶板", href: "/app/dashboard" }],
       }}
     >
       <>

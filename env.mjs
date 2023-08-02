@@ -8,6 +8,11 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
+    DATABASE_URL: z
+      .string()
+      .regex(
+        /^postgresql:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
+      ),
   },
 
   /**
@@ -43,6 +48,7 @@ export const env = createEnv({
     NEXT_PUBLIC_ELASTIC_PORT: process.env.NEXT_PUBLIC_ELASTIC_PORT,
     NEXT_PUBLIC_ARKIME_URL: process.env.NEXT_PUBLIC_ARKIME_URL,
     NEXT_PUBLIC_ARKIME_PORT: process.env.NEXT_PUBLIC_ARKIME_PORT,
+    DATABASE_URL: process.env.DATABASE_URL,
   },
 
   /**
