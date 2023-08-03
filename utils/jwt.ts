@@ -30,6 +30,12 @@ export async function verifyUserJWT(token: string) {
     }
 }
 
+export function getCookie(token: string) {
+    const d = new Date();
+    d.setTime(d.getTime() + (1 * 24 * 60 * 60 * 1000));
+    return `x-token=Bearer ${token}; Path=/; HttpOnly;expires=${d.toUTCString()};SameSite=Strict`
+}
+
 // export async function refreshUserJWT(oldToken: string) {
 //     const { error, verify } = await verifyUserJWT(oldToken);
 //     if (!verify) return { error };

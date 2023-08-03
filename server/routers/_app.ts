@@ -3,7 +3,7 @@
  */
 import { env } from '@/env.mjs';
 import { z } from 'zod';
-import { publicProcedure, router } from '../trpc';
+import { authProcedure, router } from '../trpc';
 import { arkimeRouter } from './arkime';
 import { recordingRouter } from './recording';
 import { authRouter } from './auth';
@@ -11,7 +11,7 @@ import { authRouter } from './auth';
 export const appRouter = router({
     auth: authRouter,
     arkime: arkimeRouter,
-    sqlTranslate: publicProcedure.input(z.object({
+    sqlTranslate: authProcedure.input(z.object({
         query: z.string(),
         fetch_size: z.number().min(1)
     })).query(async ({ input }) => {

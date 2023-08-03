@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Role } from '@prisma/client';
-import { verifyUserJWT } from './utils/jwt';
+import { getCookie, signUserJWT, verifyUserJWT } from './utils/jwt';
 
 interface AuthenticatedRequest extends NextRequest {
     user: { username: string, role: Role }
@@ -31,27 +31,19 @@ export async function middleware(request: NextRequest) {
         return response
     }
     if (isAuthPath) return NextResponse.redirect(new URL('/app/dashboard', request.url));
-    return NextResponse.next();
-    // const { username, role, exp } = verify.payload as { username: string, role: Role, iat: number, iss: string, exp: number };
-    // const isAboutToExpired = exp - 60 * 60 * 1 <= Date.now() / 1000; // less than one hour to be exprired
 
+    const { username, role, exp } = verify;
+    const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 1; // less than one hour to be exprired
 
-    // if (isAboutToExpired) {
-    //     const refresh = await refreshUserJWT(token!);
-    //     if (!refresh.token) {
-    //         const message = (refresh.error as {
-    //             "code": string,
-    //             "name": string,
-    //             "message": string
-    //         }).message
-    //         return NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ message })}`, request.url));
-    //     }
-    //     response.headers.set("Authorization", `Bearer ${refresh.token}`)
-    // }
+    const response = NextResponse.next();
 
-    // (request as AuthenticatedRequest).user = { username, role };
+    if (isAboutToExpired) {
+        const token = await signUserJWT({ username, role });
+        const cookie = getCookie(token);
+        response.cookies.set("x-token", cookie);
+    }
 
-    // return response;
+    return response;
 }
 
 export const config = {
