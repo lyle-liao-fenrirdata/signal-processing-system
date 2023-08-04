@@ -32,11 +32,11 @@ export const authRouter = router({
             const token = await signUserJWT({ username: newUser.username, role: newUser.role })
             const cookie = getCookie(token);
             ctx.res.setHeader('Set-Cookie', cookie);
-            return { token: `Bearer ${token}` };
+            return { ok: true };
         }),
     login: publicProcedure
         .input(loginUserSchema)
-        .query(async ({ input: { username, password }, ctx }) => {
+        .mutation(async ({ input: { username, password }, ctx }) => {
             const user = await prisma.user.findUnique({
                 where: { username },
                 select: {
@@ -55,10 +55,10 @@ export const authRouter = router({
             const token = await signUserJWT({ username, role: user.role })
             const cookie = getCookie(token)
             ctx.res.setHeader('Set-Cookie', cookie);
-            return { token: `Bearer ${token}` };
+            return { ok: true };
         }),
     logout: authProcedure
-        .query(async ({ ctx }) => {
+        .mutation(async ({ ctx }) => {
             ctx.res.setHeader('Set-Cookie', `x-token=; Path=/; HttpOnly;expires=${new Date().toUTCString()};SameSite=Strict`);
             return { ok: true };
         }),
@@ -72,6 +72,6 @@ export const authRouter = router({
             const token = await signUserJWT({ username, role });
             const cookie = getCookie(token);
             ctx.res.setHeader('Set-Cookie', cookie);
-            return { token: `Bearer ${token}` };
+            return { ok: true };
         }),
 });

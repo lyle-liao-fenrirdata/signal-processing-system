@@ -3,8 +3,8 @@ import type { NextRequest } from 'next/server'
 import { Role } from '@prisma/client';
 import { getCookie, signUserJWT, verifyUserJWT } from './utils/jwt';
 
-interface AuthenticatedRequest extends NextRequest {
-    user: { username: string, role: Role }
+interface AuthenticatedNextResponse extends NextResponse {
+    user?: { username: string, role: Role }
 }
 
 // This function can be marked `async` if using `await` inside
@@ -19,23 +19,26 @@ export async function middleware(request: NextRequest) {
     if (!token) return isAuthPath ? NextResponse.next() : NextResponse.redirect(new URL('/auth/login', request.url));
     if (pathname === '/app') return NextResponse.redirect(new URL('/app/dashboard', request.url))
 
-    const { error, verify } = await verifyUserJWT(token);
-    if (!verify) {
-        const message = (error as {
-            "code": string,
-            "name": string,
-            "message": string
-        }).message
-        const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ message })}`, request.url));
+    const { error, payload } = await verifyUserJWT(token);
+    if (!payload) {
+        const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: error! })}`, request.url));
         response.cookies.delete("x-token");
         return response
     }
     if (isAuthPath) return NextResponse.redirect(new URL('/app/dashboard', request.url));
 
-    const { username, role, exp } = verify;
+    const { username, role, exp } = payload;
     const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 1; // less than one hour to be exprired
 
-    const response = NextResponse.next();
+    const requestHeader = new Headers(request.headers);
+    requestHeader.set("x-username", username);
+    requestHeader.set("x-role", role);
+
+    const response: AuthenticatedNextResponse = NextResponse.next({
+        request: {
+            headers: requestHeader,
+        }
+    });
 
     if (isAboutToExpired) {
         const token = await signUserJWT({ username, role });

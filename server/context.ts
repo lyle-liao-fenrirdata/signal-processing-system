@@ -28,9 +28,9 @@ export async function createContext({ req, res }: trpcNext.CreateNextContextOpti
     async function getUserFromHeader() {
         const token = req.cookies['x-token']
         if (!token) return null;
-        const result = await verifyUserJWT(token.split(' ')[1]);
-        if (!result.verify) return null
-        return result.verify.payload as UserJWTPayload;
+        const { payload } = await verifyUserJWT(token.split(' ')[1]);
+        if (!payload) return null
+        return payload;
     }
     const user = await getUserFromHeader();
     return {

@@ -1,9 +1,73 @@
-import { ReactElement } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import AuthLayout from "components/layouts/Auth";
+import { useRouter } from "next/router";
+import {
+  RegisterUserInput,
+  registerUserSchema,
+} from "@/server/schema/auth.schema";
+import { trpc } from "@/utils/trpc";
+import { Errors } from "./login";
 
 export default function Register() {
+  const router = useRouter();
+  const [error, setError] = useState<{
+    username: string[];
+    password: string[];
+    passwordConfirm: string[];
+  }>({ username: [], password: [], passwordConfirm: [] });
+  const [registerInfo, setRegisterInfo] = useState<RegisterUserInput>({
+    username: "",
+    password: "",
+    passwordConfirm: "",
+  });
+
+  const {
+    isLoading,
+    isSuccess,
+    isError,
+    mutate,
+    data,
+    error: trpcError,
+  } = trpc.auth.register.useMutation({
+    retry: false,
+  });
+
+  function onSubmit() {
+    if (isLoading) return;
+
+    const result = registerUserSchema.safeParse(registerInfo);
+    const errors = result.success ? null : result.error.format();
+
+    if (errors) {
+      setError(() => ({
+        username: errors.username?._errors ?? [],
+        password: errors.password?._errors ?? [],
+        passwordConfirm: errors.passwordConfirm?._errors ?? [],
+      }));
+    } else {
+      mutate(registerInfo);
+    }
+  }
+
+  function onInputEnter(e: React.KeyboardEvent) {
+    if (
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.shiftKey &&
+      e.key === "Enter"
+    ) {
+      onSubmit();
+    }
+  }
+
+  useEffect(() => {
+    if (isSuccess && data.ok) router.push("/app/dashboard");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, isSuccess]);
+
   return (
     <AuthLayout>
       <div className="container mx-auto h-full px-4">
@@ -23,63 +87,107 @@ export default function Register() {
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
-                    >
-                      姓名
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="Name"
-                    />
-                  </div>
-
-                  <div className="relative mb-3 w-full">
-                    <label
-                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
+                      htmlFor="username"
                     >
                       帳號
                     </label>
                     <input
-                      type="email"
+                      onChange={({ target }) => {
+                        setRegisterInfo((d) => ({
+                          ...d,
+                          username: target.value,
+                        }));
+                        if (error.username.length > 0) {
+                          setError((d) => ({ ...d, username: [] }));
+                        }
+                      }}
+                      onKeyUp={onInputEnter}
+                      id="username"
+                      name="username"
+                      autoComplete="off"
+                      autoFocus={true}
+                      required={true}
+                      maxLength={100}
+                      minLength={1}
+                      type="text"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="Account"
+                      placeholder="Username"
                     />
+                    <Errors errors={error.username} />
                   </div>
 
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
+                      htmlFor="password"
                     >
                       密碼
                     </label>
                     <input
+                      onChange={({ target }) => {
+                        setRegisterInfo((d) => ({
+                          ...d,
+                          password: target.value,
+                        }));
+                        if (error.password.length > 0) {
+                          setError((d) => ({ ...d, password: [] }));
+                        }
+                      }}
+                      onKeyUp={onInputEnter}
+                      id="password"
+                      name="password"
+                      autoComplete="off"
+                      required={true}
+                      maxLength={32}
+                      minLength={6}
                       type="password"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
                       placeholder="Password"
                     />
+                    <Errors errors={error.password} />
                   </div>
 
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
+                      htmlFor="passwordConfirm"
                     >
                       再次輸入密碼
                     </label>
                     <input
+                      onChange={({ target }) => {
+                        setRegisterInfo((d) => ({
+                          ...d,
+                          passwordConfirm: target.value,
+                        }));
+                        if (error.passwordConfirm.length > 0) {
+                          setError((d) => ({ ...d, passwordConfirm: [] }));
+                        }
+                      }}
+                      onKeyUp={onInputEnter}
+                      id="passwordConfirm"
+                      name="passwordConfirm"
+                      autoComplete="off"
+                      required={true}
+                      maxLength={32}
+                      minLength={6}
                       type="password"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="Password"
+                      placeholder="Comfirm Password"
                     />
+                    <Errors errors={error.passwordConfirm} />
                   </div>
 
+                  {isError && <Errors errors={[trpcError.message]} />}
                   <div className="mt-6 text-center">
                     <button
-                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600"
+                      disabled={isLoading}
+                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600 disabled:opacity-30"
                       type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit();
+                      }}
                     >
                       新建帳號
                     </button>

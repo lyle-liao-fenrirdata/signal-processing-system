@@ -4,6 +4,28 @@ import AdminLayout from "components/layouts/Admin";
 import Image from "next/image";
 import { env } from "@/env.mjs";
 import { trpc } from "@/utils/trpc";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps: GetServerSideProps<{
+  username: string;
+  role: string;
+}> = async ({ req }) => {
+  const username = req.headers["x-username"];
+  const role = req.headers["x-role"];
+
+  if (typeof username !== "string" || typeof role !== "string") {
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { username, role },
+  };
+};
 
 const ChartContainer = ({
   title,
@@ -22,7 +44,10 @@ const ChartContainer = ({
   </div>
 );
 
-export default function Search() {
+export default function Search({
+  username,
+  role,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [sqlSearch, setSqlSearch] = React.useState({
     query: "",
     fetch_size: 10,
@@ -86,7 +111,9 @@ export default function Search() {
     <AdminLayout
       navbarProps={{
         breadcrumbs: [{ title: "資料檢索", href: "/app/search" }],
+        username,
       }}
+      sidebarProps={{ role }}
     >
       <div className="flex flex-wrap">
         <div className="w-full sm:w-6/12 sm:pr-6 md:w-7/12 lg:w-9/12">

@@ -1,4 +1,9 @@
-import { JWTPayload, SignJWT, jwtVerify } from 'jose';
+import { JWTPayload, JWTVerifyResult, SignJWT, jwtVerify } from 'jose';
+
+export interface UserJWTVerifyResult extends JWTVerifyResult {
+    payload: UserJWTPayload;
+    error: string | undefined;
+}
 
 export interface UserJWTPayload extends JWTPayload, UserPayload { };
 
@@ -22,12 +27,7 @@ export async function signUserJWT({ username, role }: UserPayload) {
 }
 
 export async function verifyUserJWT(token: string) {
-    try {
-        const verify = (await jwtVerify(token, secretKey)) as unknown as UserJWTPayload;
-        return { verify }
-    } catch (error) {
-        return { error }
-    }
+    return (await jwtVerify(token, secretKey)) as unknown as UserJWTVerifyResult;
 }
 
 export function getCookie(token: string) {

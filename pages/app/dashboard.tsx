@@ -154,7 +154,21 @@ export const getServerSideProps: GetServerSideProps<{
   nodeError: DockerNodeError | false;
   services: DockerService[];
   serviceError: DockerServiceError | false;
-}> = async () => {
+  username: string;
+  role: string;
+}> = async ({ req }) => {
+  const username = req.headers["x-username"];
+  const role = req.headers["x-role"];
+
+  if (typeof username !== "string" || typeof role !== "string") {
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+    };
+  }
+
   try {
     const [nodesResponse, servicesResponse] = await Promise.all([
       fetch(`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`),
@@ -185,7 +199,9 @@ export const getServerSideProps: GetServerSideProps<{
           ] || "Unknown Error",
       };
     } else services = await servicesResponse.json();
-    return { props: { nodes, nodeError, services, serviceError } };
+    return {
+      props: { nodes, nodeError, services, serviceError, username, role },
+    };
   } catch (error) {
     return {
       props: {
@@ -193,6 +209,8 @@ export const getServerSideProps: GetServerSideProps<{
         nodeError: { message: new String(error).toString() },
         services: [],
         serviceError: false,
+        username,
+        role,
       },
     };
   }
@@ -416,12 +434,16 @@ export default function Dashboard({
   nodeError = false,
   services = [],
   serviceError = false,
+  username,
+  role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <AdminLayout
       navbarProps={{
         breadcrumbs: [{ title: "儀錶板", href: "/app/dashboard" }],
+        username,
       }}
+      sidebarProps={{ role }}
     >
       <>
         <div className="flex flex-wrap">

@@ -1,44 +1,21 @@
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 export type NavbarProps = {
   breadcrumbs: { title: string; href: string }[];
+  username: string;
 };
 
-export default function Navbar({ breadcrumbs }: NavbarProps) {
+export default function Navbar({ breadcrumbs, username }: NavbarProps) {
   const router = useRouter();
-  const { data, error } = trpc.auth.verify.useQuery(undefined, {
-    refetchOnMount: false,
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    retryOnMount: false,
+
+  const { mutate: logout } = trpc.auth.logout.useMutation({
     retry: false,
-  });
-
-  useEffect(() => {
-    if (error) {
+    onSuccess: () => {
       router.replace("/auth/login");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
-  const { error: logoutError, refetch: logoutRefetch } =
-    trpc.auth.logout.useQuery(undefined, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchInterval: false,
-      refetchIntervalInBackground: false,
-      retryOnMount: false,
-      retry: false,
-      enabled: false,
-    });
-
-  function logout() {
-    logoutRefetch();
-    router.replace("/auth/login");
-  }
+    },
+    onError: (error) => console.log(error),
+  });
 
   return (
     <nav className="absolute left-0 top-0 z-10 flex w-full items-center bg-transparent py-4 md:flex-row md:flex-nowrap md:justify-start md:bg-slate-800">
@@ -61,15 +38,15 @@ export default function Navbar({ breadcrumbs }: NavbarProps) {
         {/* User */}
         <ul className="hidden list-none flex-col items-center md:flex md:flex-row">
           <div className="flex flex-row flex-nowrap items-center gap-2">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-lg text-white">
-              {data?.user ? data.user.username : "anonymous"}
+            <span className="inline-flex h-12 w-12 items-center justify-center text-lg text-white">
+              {username}
             </span>
             <button
-              className="cursor-pointer rounded border border-solid border-white bg-transparent px-3 py-1 text-sm leading-none text-white opacity-70 transition-all hover:opacity-100"
+              className="cursor-pointer bg-transparent px-3 py-1 text-xs leading-none text-white opacity-70 transition-all hover:opacity-100"
               type="button"
               onClick={() => logout()}
             >
-              <i className="fas fa-right-from-bracket mr-2 text-sm text-white"></i>{" "}
+              <i className="fas fa-right-from-bracket mr-2 text-xs text-white"></i>{" "}
               登出
             </button>
           </div>

@@ -1,13 +1,12 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import AuthLayout from "components/layouts/Auth";
 import { trpc } from "@/utils/trpc";
-import { loginUserSchema } from "@/server/schema/auth.schema";
+import { LoginUserInput, loginUserSchema } from "@/server/schema/auth.schema";
 import { useRouter } from "next/router";
-import { useUserTokenStore } from "@/stores/userToken";
 
-const Errors = ({ errors }: { errors: string[] }) => {
+export const Errors = ({ errors }: { errors: string[] }) => {
   if (!errors.length) return null;
   return (
     <>
@@ -22,54 +21,54 @@ const Errors = ({ errors }: { errors: string[] }) => {
 
 export default function Login() {
   const router = useRouter();
-  const setToken = useUserTokenStore((state) => state.setToken);
   const [error, setError] = useState<{
     username: string[];
     password: string[];
   }>({ username: [], password: [] });
-  const [userInfo, setUserInfo] = useState({
+  const [userInfo, setUserInfo] = useState<LoginUserInput>({
     username: "",
     password: "",
   });
 
   const {
-    isSuccess,
+    isLoading,
     isError,
-    refetch,
-    data,
+    mutate: login,
     error: trpcError,
-  } = trpc.auth.login.useQuery(userInfo, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    retryOnMount: false,
+  } = trpc.auth.login.useMutation({
     retry: false,
-    enabled: false,
+    onSuccess: () => {
+      router.replace("/app/dashboard");
+    },
   });
 
-  function onSubmit(e: MouseEvent) {
-    e.preventDefault();
+  function onSubmit() {
+    if (isLoading) return;
+
     const result = loginUserSchema.safeParse(userInfo);
     const errors = result.success ? null : result.error.format();
+
     if (errors) {
-      //  setError(Object.values(errors));
       setError(() => ({
         username: errors.username?._errors ?? [],
         password: errors.password?._errors ?? [],
       }));
     } else {
-      refetch();
+      login(userInfo);
     }
   }
 
-  useEffect(() => {
-    if (isSuccess) setToken(data.token);
-
-    router.push("/app/dashboard");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, isSuccess]);
+  function onInputEnter(e: React.KeyboardEvent) {
+    if (
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.shiftKey &&
+      e.key === "Enter"
+    ) {
+      onSubmit();
+    }
+  }
 
   return (
     <AuthLayout>
@@ -90,7 +89,7 @@ export default function Login() {
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
+                      htmlFor="username"
                     >
                       帳號
                     </label>
@@ -101,6 +100,7 @@ export default function Login() {
                           setError((d) => ({ ...d, username: [] }));
                         }
                       }}
+                      onKeyUp={onInputEnter}
                       id="username"
                       name="username"
                       autoComplete="off"
@@ -110,7 +110,7 @@ export default function Login() {
                       minLength={1}
                       type="text"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="USERNAME"
+                      placeholder="Username"
                     />
                     <Errors errors={error.username} />
                   </div>
@@ -118,7 +118,7 @@ export default function Login() {
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="grid-password"
+                      htmlFor="password"
                     >
                       密碼
                     </label>
@@ -129,6 +129,7 @@ export default function Login() {
                           setError((d) => ({ ...d, password: [] }));
                         }
                       }}
+                      onKeyUp={onInputEnter}
                       id="password"
                       name="password"
                       autoComplete="off"
@@ -145,9 +146,13 @@ export default function Login() {
                   {isError && <Errors errors={[trpcError.message]} />}
                   <div className="mt-6 text-center">
                     <button
-                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600"
+                      disabled={isLoading}
+                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600 disabled:opacity-30"
                       type="button"
-                      onClick={onSubmit}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit();
+                      }}
                     >
                       登入
                     </button>

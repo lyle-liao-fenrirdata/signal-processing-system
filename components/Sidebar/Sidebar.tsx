@@ -3,6 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { env } from "env.mjs";
 
+export type SidebarProps = {
+  role: string;
+};
+
 const NavigationItem = ({
   href,
   target = "_self",
@@ -41,9 +45,10 @@ const NavigationItem = ({
   </a>
 );
 
-export default function Sidebar() {
-  const [collapseShow, setCollapseShow] = React.useState("hidden");
+export default function Sidebar({ role }: SidebarProps) {
   const router = useRouter();
+  const [collapseShow, setCollapseShow] = React.useState("hidden");
+
   return (
     <nav className="relative z-10 flex flex-wrap items-center justify-between bg-white px-6 py-4 shadow-xl md:fixed md:bottom-0 md:left-0 md:top-0 md:block md:w-40 md:flex-row md:flex-nowrap md:overflow-hidden md:overflow-y-auto">
       <div className="mx-auto flex w-full flex-wrap items-center justify-between px-0 md:min-h-full md:flex-col md:flex-nowrap md:items-stretch">
@@ -166,14 +171,16 @@ export default function Sidebar() {
               </a>
             </li> */}
 
-            <li className="items-center">
-              <NavigationItem
-                href="/app/settings"
-                title="權限管理"
-                FaIconClass="fas fa-user-shield"
-                currentPath={router.pathname}
-              />
-            </li>
+            {role === "ADMIN" && (
+              <li className="items-center">
+                <NavigationItem
+                  href="/app/settings"
+                  title="權限管理"
+                  FaIconClass="fas fa-user-shield"
+                  currentPath={router.pathname}
+                />
+              </li>
+            )}
 
             <li className="items-center">
               <NavigationItem
