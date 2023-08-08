@@ -1,0 +1,53 @@
+version: "3"
+
+name: frontend
+services:
+  ui:
+    build:
+      network: host
+      context: ../
+      dockerfile: docker/Dockerfile
+    image: signal-process-system-frontend
+    restart: always
+    env_file:
+      - ../.env.production
+    ports:
+      - 80:3000
+    # networks:
+    #   - frontend-overlay
+    extra_hosts:
+      - host.docker.internal:host-gateway
+      - docker.host:192.168.16.31
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: signal_processing_system
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    # networks:
+    #   - frontend-overlay
+    volumes:
+      # - ./postgresdb/data/:/var/lib/postgresql/data/
+      - ./initdb.d/:/docker-entrypoint-initdb.d/
+
+  db-viewer:
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 5433:8080
+    # networks:
+    #   - frontend-overlay
+# networks:
+#   frontend-overlay:
+#     name: frontend-overlay
+#     ipam:
+#       driver: overlay
+#       config:
+#         - subnet: 192.168.16.0/24

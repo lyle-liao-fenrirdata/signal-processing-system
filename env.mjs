@@ -21,7 +21,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_SWARM_URL: z.string().min(12),
+    NEXT_PUBLIC_MAIN_NODE_URL: z.string().min(12),
     NEXT_PUBLIC_SWARM_PORT: z.string().min(2),
     NEXT_PUBLIC_HAPROXY_PORT: z.string().min(2),
     NEXT_PUBLIC_NETDATA_PORT: z.string().min(2),
@@ -39,7 +39,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_SWARM_URL: process.env.NEXT_PUBLIC_SWARM_URL,
+    NEXT_PUBLIC_MAIN_NODE_URL: process.env.NEXT_PUBLIC_MAIN_NODE_URL,
     NEXT_PUBLIC_SWARM_PORT: process.env.NEXT_PUBLIC_SWARM_PORT,
     NEXT_PUBLIC_HAPROXY_PORT: process.env.NEXT_PUBLIC_HAPROXY_PORT,
     NEXT_PUBLIC_NETDATA_PORT: process.env.NEXT_PUBLIC_NETDATA_PORT,

@@ -141,7 +141,7 @@ export default function Sidebar({ role }: SidebarProps) {
 
             <li className="items-center">
               <NavigationItem
-                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
                 title="容器叢集"
                 FaIconClass="fa-brands fa-docker"
@@ -151,7 +151,7 @@ export default function Sidebar({ role }: SidebarProps) {
             {/* TODO: 需要更新 href 位置 */}
             <li className="items-center">
               <NavigationItem
-                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
                 title="資源管理"
                 FaIconClass="fas fa-server"
@@ -161,7 +161,7 @@ export default function Sidebar({ role }: SidebarProps) {
             {/* TODO: 還需要嗎? 如要，需更新 href 位置 */}
             {/* <li className="items-center">
               <a
-                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                 target="_blank"
                 className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
               >

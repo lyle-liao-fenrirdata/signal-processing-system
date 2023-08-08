@@ -15,7 +15,7 @@ export const appRouter = router({
         query: z.string(),
         fetch_size: z.number().min(1)
     })).query(async ({ input }) => {
-        const res = await fetch(`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_ELASTIC_PORT}/_sql/translate`, {
+        const res = await fetch(`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ELASTIC_PORT}/_sql/translate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json; charset=UTF-8",

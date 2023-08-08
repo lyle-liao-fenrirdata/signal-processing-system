@@ -1,3 +1,4 @@
+import { env } from '@/env.mjs';
 import { router, publicProcedure, authProcedure } from '../trpc';
 // import { Prisma } from '@prisma/client';
 // import { TRPCError } from '@trpc/server';
@@ -26,7 +27,7 @@ export const arkimeRouter = router({
          *      arkime_node=arkime01-node&
          *      ip_src=192.168.15.31
          */
-        const url = new URL("/arkime_api/payload/", "http://192.168.15.13:8000/");
+        const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
         url.searchParams.append("host", host);
         url.searchParams.append("port", port);
         url.searchParams.append("query", query);
@@ -40,7 +41,7 @@ export const arkimeRouter = router({
             url.searchParams.append("arkime_node", arkime_node);
         }
         url.searchParams.append("ip_src", ip_src);
-        // console.log(url.toString())
+
         const response = await fetch(url, { method: "GET" })
         return await response.json()
     })

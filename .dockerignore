@@ -8,3 +8,5 @@ README.md
 docker
 .vscode
 .env
+.env.local
+.env.example

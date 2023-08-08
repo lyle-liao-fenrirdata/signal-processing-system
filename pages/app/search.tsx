@@ -172,7 +172,7 @@ export default function Search({
           {/* other hyper link (Arkime and Kibana) */}
           <ChartContainer title={<>其他檢索工具</>}>
             <div className="flex flex-col flex-nowrap items-center gap-2 pt-2">
-              <a
+              {/* <a
                 href={`${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`}
                 target="_blank"
               >
@@ -183,9 +183,9 @@ export default function Search({
                   height={48}
                   className="opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
                 />
-              </a>
+              </a> */}
               <a
-                href={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/kibana_overview/`}
+                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/kibana_overview/`}
                 target="_blank"
                 className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
               >

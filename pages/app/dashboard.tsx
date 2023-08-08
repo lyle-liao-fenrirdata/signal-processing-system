@@ -169,11 +169,21 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
 
+  console.log(
+    `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`
+  );
+
+  console.log(
+    `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/services`
+  );
+
   try {
     const [nodesResponse, servicesResponse] = await Promise.all([
-      fetch(`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`),
       fetch(
-        `${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/services`
+        `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/nodes`
+      ),
+      fetch(
+        `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_SWARM_PORT}/services`
       ),
     ]);
 
@@ -191,6 +201,8 @@ export const getServerSideProps: GetServerSideProps<{
       };
     } else nodes = await nodesResponse.json();
 
+    console.log({ nodes, nodeError });
+
     if (!servicesResponse.ok) {
       serviceError = {
         message:
@@ -199,10 +211,14 @@ export const getServerSideProps: GetServerSideProps<{
           ] || "Unknown Error",
       };
     } else services = await servicesResponse.json();
+
+    console.log({ services, serviceError });
+
     return {
       props: { nodes, nodeError, services, serviceError, username, role },
     };
   } catch (error) {
+    console.log("----- dashboard page error: ", error);
     return {
       props: {
         nodes: [],
@@ -530,7 +546,7 @@ export default function Dashboard({
         </div>
         <ChartContainer title={<>HA PROXY</>}>
           <iframe
-            src={`${env.NEXT_PUBLIC_SWARM_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
+            src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
             title="HA PROXY"
             loading="lazy"
             height={450}
@@ -578,7 +594,7 @@ export default function Dashboard({
         <Script
           strategy="lazyOnload"
           type="text/javascript"
-          src="http://192.168.15.13:19999/dashboard.js"
+          src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_NETDATA_PORT}/dashboard.js`}
         />
       </>
     </AdminLayout>

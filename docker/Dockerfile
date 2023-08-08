@@ -22,8 +22,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps --link /app/node_modules ./node_modules
 COPY --link  . .
+RUN npx prisma generate
 # This will do the trick, use the corresponding env file for each environment.
-COPY --link .env.production.sample .env.production
+# COPY --link .env.production.sample .env.production
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
