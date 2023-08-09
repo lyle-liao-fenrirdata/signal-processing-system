@@ -34,7 +34,7 @@ export default function Settings({
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "設定", href: "/app/settings" }],
+        breadcrumbs: [{ title: "權限設定", href: "/app/permission" }],
         username,
       }}
       sidebarProps={{ role, username }}

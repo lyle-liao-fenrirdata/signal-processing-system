@@ -9,6 +9,7 @@ export interface UserJWTPayload extends JWTPayload, UserPayload { };
 
 export interface UserPayload {
     username: string,
+    account: string,
     role: string
 }
 
@@ -17,8 +18,8 @@ const secretKey = new TextEncoder().encode(
     "Swe4g7c?UBm5Nrd96vhsVDtkyJFbqKMTm!TMw5BDRLtaCFAXNvbq?s4rGKQSZnUP"
 );
 
-export async function signUserJWT({ username, role }: UserPayload) {
-    return await new SignJWT({ username, role })
+export async function signUserJWT({ username, account, role }: UserPayload) {
+    return await new SignJWT({ username, account, role })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setIssuer("Fenrir Data Analysis")

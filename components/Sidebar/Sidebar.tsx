@@ -2,9 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { env } from "env.mjs";
+import { Role } from "@prisma/client";
 
 export type SidebarProps = {
   role: string;
+  username: string;
 };
 
 const NavigationItem = ({
@@ -45,7 +47,7 @@ const NavigationItem = ({
   </a>
 );
 
-export default function Sidebar({ role }: SidebarProps) {
+export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
@@ -73,7 +75,7 @@ export default function Sidebar({ role }: SidebarProps) {
             <a className="block text-slate-500" href="#pablo">
               <div className="flex items-center">
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-sm">
-                  USERNAME
+                  {username}
                 </span>
               </div>
             </a>
@@ -120,61 +122,56 @@ export default function Sidebar({ role }: SidebarProps) {
                 currentPath={router.pathname}
               />
             </li>
+            {(role === Role.ADMIN || role === Role.USER) && (
+              <>
+                <li className="items-center">
+                  <NavigationItem
+                    href="/app/search"
+                    title="資料檢索"
+                    FaIconClass="fas fa-bars-staggered"
+                    currentPath={router.pathname}
+                  />
+                </li>
 
-            <li className="items-center">
-              <NavigationItem
-                href="/app/search"
-                title="資料檢索"
-                FaIconClass="fas fa-bars-staggered"
-                currentPath={router.pathname}
-              />
-            </li>
+                <li className="items-center">
+                  <NavigationItem
+                    href="/app/audit"
+                    title="稽核勾稽"
+                    FaIconClass="fas fa-table"
+                    currentPath={router.pathname}
+                  />
+                </li>
 
-            <li className="items-center">
-              <NavigationItem
-                href="/app/audit"
-                title="稽核勾稽"
-                FaIconClass="fas fa-table"
-                currentPath={router.pathname}
-              />
-            </li>
+                <li className="items-center">
+                  <NavigationItem
+                    href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                    target="_blank"
+                    title="容器叢集"
+                    FaIconClass="fa-brands fa-docker"
+                  />
+                </li>
 
-            <li className="items-center">
-              <NavigationItem
-                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
-                target="_blank"
-                title="容器叢集"
-                FaIconClass="fa-brands fa-docker"
-              />
-            </li>
+                {/* TODO: 需要更新 href 位置 */}
+                <li className="items-center">
+                  <NavigationItem
+                    href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                    target="_blank"
+                    title="資源管理"
+                    FaIconClass="fas fa-server"
+                  />
+                </li>
+              </>
+            )}
+          </ul>
 
-            {/* TODO: 需要更新 href 位置 */}
-            <li className="items-center">
-              <NavigationItem
-                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
-                target="_blank"
-                title="資源管理"
-                FaIconClass="fas fa-server"
-              />
-            </li>
+          {/* Divider */}
+          <hr className="my-4 md:min-w-full" />
 
-            {/* TODO: 還需要嗎? 如要，需更新 href 位置 */}
-            {/* <li className="items-center">
-              <a
-                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
-                target="_blank"
-                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
-              >
-                <i className="fa-brands fa-ubuntu mr-2 text-sm text-slate-300"></i>{" "}
-                系統操控{" "}
-                <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
-              </a>
-            </li> */}
-
-            {role === "ADMIN" && (
+          <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
+            {role === Role.ADMIN && (
               <li className="items-center">
                 <NavigationItem
-                  href="/app/settings"
+                  href="/app/permission"
                   title="權限管理"
                   FaIconClass="fas fa-user-shield"
                   currentPath={router.pathname}
@@ -191,32 +188,6 @@ export default function Sidebar({ role }: SidebarProps) {
               />
             </li>
           </ul>
-
-          {/* Divider */}
-          {/* <hr className="my-4 md:min-w-full" /> */}
-          {/* Heading */}
-
-          {/* <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
-            <li className="items-center">
-              <Link
-                href="/auth/login"
-                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
-              >
-                <i className="fas fa-fingerprint mr-2 text-sm text-slate-400"></i>{" "}
-                登入
-              </Link>
-            </li>
-
-            <li className="items-center">
-              <Link
-                href="/auth/register"
-                className="block py-3 text-xs font-bold text-slate-700 hover:text-slate-500"
-              >
-                <i className="fas fa-clipboard-list mr-2 text-sm text-slate-300"></i>{" "}
-                註冊
-              </Link>
-            </li>
-          </ul> */}
         </div>
       </div>
     </nav>

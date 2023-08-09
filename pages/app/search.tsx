@@ -23,7 +23,7 @@ export const getServerSideProps: GetServerSideProps<{
   }
 
   return {
-    props: { username, role },
+    props: { username: decodeURIComponent(username), role },
   };
 };
 
@@ -113,7 +113,7 @@ export default function Search({
         breadcrumbs: [{ title: "資料檢索", href: "/app/search" }],
         username,
       }}
-      sidebarProps={{ role }}
+      sidebarProps={{ role, username }}
     >
       <div className="flex flex-wrap">
         <div className="w-full sm:w-6/12 sm:pr-6 md:w-7/12 lg:w-9/12">

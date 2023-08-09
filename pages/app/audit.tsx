@@ -22,7 +22,7 @@ export const getServerSideProps: GetServerSideProps<{
   }
 
   return {
-    props: { username, role },
+    props: { username: decodeURIComponent(username), role },
   };
 };
 
@@ -36,7 +36,7 @@ export default function Audit({
         breadcrumbs: [{ title: "稽核勾稽", href: "/app/audit" }],
         username,
       }}
-      sidebarProps={{ role }}
+      sidebarProps={{ role, username }}
     >
       <div className="mt-4 flex flex-wrap">
         <div className="mb-12 w-full px-4">

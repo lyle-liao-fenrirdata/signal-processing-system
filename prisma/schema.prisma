@@ -10,17 +10,66 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
+  id        Int        @id @default(autoincrement())
+  account   String     @unique
+  username  String     @unique
   password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role       @default(GUEST)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  audits    Audit[]
+  auditLogs AuditLog[]
 }
 
 enum Role {
   USER
   ADMIN
+  GUEST
+}
+
+model Audit {
+  id          Int         @id @default(autoincrement())
+  isActive    Boolean     @default(false)
+  createdById Int
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime
+  auditItem   AuditItem[]
+}
+
+model AuditItem {
+  id        Int         @id @default(autoincrement())
+  name      String
+  order     Int         @default(autoincrement())
+  color     Color       @default(Default)
+  auditId   Int?
+  audit     Audit?      @relation(fields: [auditId], references: [id])
+  parent    AuditItem[] @relation("AuditGroup")
+  children  AuditItem[] @relation("AuditGroup")
+  auditLogs AuditLog[]
+}
+
+model AuditLog {
+  id          Int       @id @default(autoincrement())
+  isLocked    Boolean   @default(false)
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  auditItemId Int
+  auditItem   AuditItem @relation(fields: [auditItemId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum Color {
+  Default
+  Gray
+  Orange
+  Yellow
+  Green
+  Blue
+  Purple
+  Pink
+  Red
 }
 
 // model Recording {

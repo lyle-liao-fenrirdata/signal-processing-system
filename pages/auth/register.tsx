@@ -13,12 +13,14 @@ import { Errors } from "./login";
 export default function Register() {
   const router = useRouter();
   const [error, setError] = useState<{
+    account: string[];
     username: string[];
     password: string[];
     passwordConfirm: string[];
-  }>({ username: [], password: [], passwordConfirm: [] });
+  }>({ account: [], username: [], password: [], passwordConfirm: [] });
   const [registerInfo, setRegisterInfo] = useState<RegisterUserInput>({
     username: "",
+    account: "",
     password: "",
     passwordConfirm: "",
   });
@@ -43,6 +45,7 @@ export default function Register() {
     if (errors) {
       setError(() => ({
         username: errors.username?._errors ?? [],
+        account: errors.account?._errors ?? [],
         password: errors.password?._errors ?? [],
         passwordConfirm: errors.passwordConfirm?._errors ?? [],
       }));
@@ -89,7 +92,7 @@ export default function Register() {
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
                       htmlFor="username"
                     >
-                      帳號
+                      使用者姓名
                     </label>
                     <input
                       onChange={({ target }) => {
@@ -111,9 +114,41 @@ export default function Register() {
                       minLength={1}
                       type="text"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="Username"
+                      placeholder="王大天"
                     />
                     <Errors errors={error.username} />
+                  </div>
+
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="account"
+                    >
+                      帳號
+                    </label>
+                    <input
+                      onChange={({ target }) => {
+                        setRegisterInfo((d) => ({
+                          ...d,
+                          account: target.value,
+                        }));
+                        if (error.account.length > 0) {
+                          setError((d) => ({ ...d, account: [] }));
+                        }
+                      }}
+                      onKeyUp={onInputEnter}
+                      id="account"
+                      name="account"
+                      autoComplete="off"
+                      autoFocus={false}
+                      required={true}
+                      maxLength={100}
+                      minLength={1}
+                      type="text"
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      placeholder="account"
+                    />
+                    <Errors errors={error.account} />
                   </div>
 
                   <div className="relative mb-3 w-full">

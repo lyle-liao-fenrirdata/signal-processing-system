@@ -225,7 +225,7 @@ export const getServerSideProps: GetServerSideProps<{
         nodeError: { message: new String(error).toString() },
         services: [],
         serviceError: false,
-        username,
+        username: decodeURIComponent(username),
         role,
       },
     };
@@ -459,7 +459,7 @@ export default function Dashboard({
         breadcrumbs: [{ title: "儀錶板", href: "/app/dashboard" }],
         username,
       }}
-      sidebarProps={{ role }}
+      sidebarProps={{ role, username }}
     >
       <>
         <div className="flex flex-wrap">

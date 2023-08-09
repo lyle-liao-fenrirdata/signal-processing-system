@@ -11,6 +11,7 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import { transformer } from '@/utils/transformer';
 import { Context } from './context';
+import { Role } from '@prisma/client';
 
 const t = initTRPC.context<Context>().create({
     /**
@@ -50,7 +51,7 @@ export const mergeRouters = t.mergeRouters;
 const isAdmin = middleware(async (opts) => {
     const { ctx } = opts;
     if (!ctx.user?.role) throw new TRPCError({ code: 'UNAUTHORIZED', message: '請先登入' });
-    if (ctx.user.role !== 'ADMIN') throw new TRPCError({ code: "FORBIDDEN", message: '權限不足' });
+    if (ctx.user.role !== Role.ADMIN) throw new TRPCError({ code: "FORBIDDEN", message: '權限不足' });
     return opts.next({
         ctx: {
             user: ctx.user,
@@ -63,6 +64,7 @@ export const adminProcedure = publicProcedure.use(isAdmin);
 const isAuth = middleware(async (opts) => {
     const { ctx } = opts;
     if (!ctx.user?.role) throw new TRPCError({ code: 'UNAUTHORIZED', message: '請先登入' });
+    if (ctx.user.role !== Role.ADMIN && ctx.user.role !== Role.USER) throw new TRPCError({ code: "FORBIDDEN", message: '權限不足' });
     return opts.next({
         ctx: {
             user: ctx.user,

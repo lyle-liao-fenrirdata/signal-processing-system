@@ -22,11 +22,11 @@ export const Errors = ({ errors }: { errors: string[] }) => {
 export default function Login() {
   const router = useRouter();
   const [error, setError] = useState<{
-    username: string[];
+    account: string[];
     password: string[];
-  }>({ username: [], password: [] });
+  }>({ account: [], password: [] });
   const [userInfo, setUserInfo] = useState<LoginUserInput>({
-    username: "",
+    account: "",
     password: "",
   });
 
@@ -50,7 +50,7 @@ export default function Login() {
 
     if (errors) {
       setError(() => ({
-        username: errors.username?._errors ?? [],
+        account: errors.account?._errors ?? [],
         password: errors.password?._errors ?? [],
       }));
     } else {
@@ -89,20 +89,20 @@ export default function Login() {
                   <div className="relative mb-3 w-full">
                     <label
                       className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                      htmlFor="username"
+                      htmlFor="account"
                     >
                       帳號
                     </label>
                     <input
                       onChange={({ target }) => {
-                        setUserInfo((d) => ({ ...d, username: target.value }));
-                        if (error.username.length > 0) {
-                          setError((d) => ({ ...d, username: [] }));
+                        setUserInfo((d) => ({ ...d, account: target.value }));
+                        if (error.account.length > 0) {
+                          setError((d) => ({ ...d, account: [] }));
                         }
                       }}
                       onKeyUp={onInputEnter}
-                      id="username"
-                      name="username"
+                      id="account"
+                      name="account"
                       autoComplete="off"
                       autoFocus={true}
                       required={true}
@@ -110,9 +110,9 @@ export default function Login() {
                       minLength={1}
                       type="text"
                       className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                      placeholder="Username"
+                      placeholder="account"
                     />
-                    <Errors errors={error.username} />
+                    <Errors errors={error.account} />
                   </div>
 
                   <div className="relative mb-3 w-full">

@@ -38,7 +38,7 @@ export default function Navbar({ breadcrumbs, username }: NavbarProps) {
         {/* User */}
         <ul className="hidden list-none flex-col items-center md:flex md:flex-row">
           <div className="flex flex-row flex-nowrap items-center gap-2">
-            <span className="inline-flex h-12 w-12 items-center justify-center text-lg text-white">
+            <span className="inline-flex h-12 min-w-fit items-center justify-center text-lg text-white">
               {username}
             </span>
             <button
