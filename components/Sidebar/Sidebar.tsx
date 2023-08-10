@@ -27,22 +27,26 @@ const NavigationItem = ({
     href={href}
     target={target}
     className={
-      "block py-3 text-xs font-bold " +
+      "flex flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold " +
       (currentPath && currentPath.indexOf(href) !== -1
         ? "text-sky-500 hover:text-sky-600"
         : "text-slate-700 hover:text-slate-500")
     }
   >
-    <i
-      className={`${FaIconClass} mr-2 w-5 text-sm ${
-        currentPath && currentPath.indexOf(href) !== -1
-          ? "opacity-75"
-          : "text-slate-300"
-      }`}
-    ></i>
-    {title}
+    <span>
+      <i
+        className={`${FaIconClass} w-5 text-sm ${
+          currentPath && currentPath.indexOf(href) !== -1
+            ? "opacity-75"
+            : "text-slate-300"
+        }`}
+      ></i>
+    </span>
+    <span>{title}</span>
     {target !== "_self" && (
-      <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+      <span className="ml-auto w-4">
+        <i className="fas fa-arrow-up-right-from-square ml-1 text-xs opacity-75"></i>
+      </span>
     )}
   </a>
 );
@@ -117,7 +121,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
             <li className="items-center">
               <NavigationItem
                 href="/app/dashboard"
-                title="儀錶機"
+                title="儀表板"
                 FaIconClass="fas fa-tv"
                 currentPath={router.pathname}
               />
@@ -154,9 +158,19 @@ export default function Sidebar({ role, username }: SidebarProps) {
                 {/* TODO: 需要更新 href 位置 */}
                 <li className="items-center">
                   <NavigationItem
-                    href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
+                    href={env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK}
                     target="_blank"
-                    title="資源管理"
+                    title="RF設備及資源控制系統"
+                    FaIconClass="fas fa-satellite-dish"
+                  />
+                </li>
+
+                {/* TODO: 需要更新 href 位置 */}
+                <li className="items-center">
+                  <NavigationItem
+                    href={env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK}
+                    target="_blank"
+                    title="前端管理系統(5網)"
                     FaIconClass="fas fa-server"
                   />
                 </li>

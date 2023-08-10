@@ -30,6 +30,8 @@ export const env = createEnv({
     NEXT_PUBLIC_ELASTIC_PORT: z.string().min(2),
     NEXT_PUBLIC_ARKIME_URL: z.string().min(12),
     NEXT_PUBLIC_ARKIME_PORT: z.string().min(2),
+    NEXT_PUBLIC_FACILITY_RESOURCE_LINK: z.string().min(2),
+    NEXT_PUBLIC_FRONTEND_MANAGE_LINK: z.string().min(2),
   },
 
   /**
@@ -49,6 +51,10 @@ export const env = createEnv({
     NEXT_PUBLIC_ARKIME_URL: process.env.NEXT_PUBLIC_ARKIME_URL,
     NEXT_PUBLIC_ARKIME_PORT: process.env.NEXT_PUBLIC_ARKIME_PORT,
     DATABASE_URL: process.env.DATABASE_URL,
+    NEXT_PUBLIC_FACILITY_RESOURCE_LINK:
+      process.env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK,
+    NEXT_PUBLIC_FRONTEND_MANAGE_LINK:
+      process.env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK,
   },
 
   /**
