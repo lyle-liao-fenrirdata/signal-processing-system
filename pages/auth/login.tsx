@@ -5,19 +5,7 @@ import AuthLayout from "components/layouts/Auth";
 import { trpc } from "@/utils/trpc";
 import { LoginUserInput, loginUserSchema } from "@/server/schema/auth.schema";
 import { useRouter } from "next/router";
-
-export const Errors = ({ errors }: { errors: string[] }) => {
-  if (!errors.length) return null;
-  return (
-    <>
-      {errors.map((err) => (
-        <p key={err} className="pl-1 pt-2 text-sm text-red-500">
-          {err}
-        </p>
-      ))}
-    </>
-  );
-};
+import { Errors } from "@/components/commons/Errors";
 
 export default function Login() {
   const router = useRouter();

@@ -8,7 +8,7 @@ import {
   registerUserSchema,
 } from "@/server/schema/auth.schema";
 import { trpc } from "@/utils/trpc";
-import { Errors } from "./login";
+import { Errors } from "@/components/commons/Errors";
 
 export default function Register() {
   const router = useRouter();
