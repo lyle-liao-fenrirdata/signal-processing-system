@@ -44,7 +44,8 @@ export const authRouter = router({
                     username: true,
                     account: true,
                     password: true,
-                    role: true
+                    role: true,
+                    deletedAt: true,
                 }
             })
 
@@ -52,6 +53,13 @@ export const authRouter = router({
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message: "使用者名稱或密碼不正確",
+                });
+            }
+
+            if (user.deletedAt) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "帳號已被設定為靜止障戶",
                 });
             }
 

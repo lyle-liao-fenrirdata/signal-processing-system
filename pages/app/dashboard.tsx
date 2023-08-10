@@ -112,7 +112,7 @@ export default function Dashboard({
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "儀錶板", href: "/app/dashboard" }],
+        breadcrumbs: [{ title: "儀表板", href: "/app/dashboard" }],
         username,
       }}
       sidebarProps={{ role, username }}

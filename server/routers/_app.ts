@@ -7,6 +7,7 @@ import { authProcedure, router } from '../trpc';
 import { arkimeRouter } from './arkime';
 import { recordingRouter } from './recording';
 import { authRouter } from './auth';
+import { permissionRouter } from './permission';
 
 export const appRouter = router({
     auth: authRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
         return await res.json()
     }),
     recording: recordingRouter,
+    permission: permissionRouter
 });
 
 export type AppRouter = typeof appRouter;

@@ -41,5 +41,5 @@ export const recordingRouter = router({
 //     "ServerType": "HDLC/DVB/IP",
 //     "Timestamp": UnixTime(seconds),
 //     "Capture": "Enable/Disable"
-//     "FileName": "CCV1250025000_YYYYMMDDHHmmssfff"
+//     "RecordId": "CCV1250025000_YYYYMMDDHHmmssfff"
 // }
