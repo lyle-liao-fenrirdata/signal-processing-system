@@ -6,6 +6,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { ChartContainer } from "@/components/commons/ChartContainer";
 import { Flex2ColExt } from "@/components/search/Flex2ColExt";
 import { useState } from "react";
+import Modal from "@/components/commons/Modal";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -357,104 +358,63 @@ export default function Search({
 
       {/* modal of "SQL to ES translate" result */}
       {showSqlSearchModal && (
-        <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden py-6 outline-none focus:outline-none">
-            <div className="relative mx-auto w-auto max-w-6xl">
-              {/*content*/}
-              <div className="relative w-[50vw] rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 px-5 py-3">
-                  <h3 className="text-lg font-semibold">
-                    SQL: {sqlSearch.query}
-                  </h3>
-                  <button
-                    className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
-                    onClick={() => setSqlSearchModal(false)}
-                  >
-                    x
-                  </button>
-                </div>
-                {/*body*/}
-                <div className="relative flex-auto overflow-y-auto px-6 py-2">
-                  <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
-                    Elastic Query:
-                    <br />
-                    {JSON.stringify(elasticSearchTranslate.data, undefined, 4)}
-                  </pre>
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 px-6 py-3">
-                  <button
-                    className="mr-2 rounded border border-solid border-slate-500 bg-transparent px-6 py-3 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-                    type="button"
-                    onClick={() =>
-                      copyToClipboard(
-                        JSON.stringify(
-                          elasticSearchTranslate.data,
-                          undefined,
-                          4
-                        )
-                      )
-                    }
-                  >
-                    <i className="fas fa-copy"></i> 複製 Elascti Query
-                  </button>
-                  <button
-                    className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
-                    type="button"
-                    onClick={() => setSqlSearchModal(false)}
-                  >
-                    OK
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-        </>
+        <Modal
+          header={`SQL: ${sqlSearch.query}`}
+          actions={[
+            <button
+              key={`SQL: ${sqlSearch.query}`}
+              className="mr-2 rounded border border-solid border-slate-500 bg-transparent px-6 py-3 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+              type="button"
+              onClick={() =>
+                copyToClipboard(
+                  JSON.stringify(elasticSearchTranslate.data, undefined, 4)
+                )
+              }
+            >
+              <i className="fas fa-copy"></i> 複製 Elascti Query
+            </button>,
+            <button
+              key="closeModal-sql"
+              className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
+              type="button"
+              onClick={() => setSqlSearchModal(false)}
+            >
+              OK
+            </button>,
+          ]}
+          onCloseModel={() => setSqlSearchModal(false)}
+        >
+          <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
+            Elastic Query:
+            <br />
+            {JSON.stringify(elasticSearchTranslate.data, undefined, 4)}
+          </pre>
+        </Modal>
       )}
       {/* modal of "Arkime Search Payload" result */}
       {showArkimeSearchPayloadModal !== "" && arkimeSearchPayload.isSuccess && (
-        <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden py-6 outline-none focus:outline-none">
-            <div className="relative mx-auto w-auto max-w-6xl">
-              {/*content*/}
-              <div className="relative w-[50vw] rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 px-5 py-3">
-                  <h3 className="text-lg font-semibold">Payload</h3>
-                  <button
-                    className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
-                    onClick={() => setArkimeSearchPayloadModal("")}
-                  >
-                    x
-                  </button>
-                </div>
-                {/*body*/}
-                <div className="relative flex-auto overflow-y-auto px-6 py-2">
-                  <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: showArkimeSearchPayloadModal,
-                      }}
-                    ></div>
-                  </pre>
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 px-6 py-3">
-                  <button
-                    className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
-                    type="button"
-                    onClick={() => setArkimeSearchPayloadModal("")}
-                  >
-                    OK
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-        </>
+        <Modal
+          header="Payload"
+          actions={[
+            <button
+              key="closeModal-payload"
+              className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
+              type="button"
+              onClick={() => setArkimeSearchPayloadModal("")}
+            >
+              OK
+            </button>,
+          ]}
+          onCloseModel={() => setArkimeSearchPayloadModal("")}
+        >
+          <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: showArkimeSearchPayloadModal,
+              }}
+            ></div>
+          </pre>
+        </Modal>
       )}
     </AdminLayout>
   );

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { loginUserSchema } from './auth.schema';
+import { loginUserSchema, passwordSchema } from './auth.schema';
 import { Role } from '@prisma/client';
 
 export const updateUserBaseSchema = loginUserSchema.pick({ account: true })
@@ -11,6 +11,14 @@ export const updateUserRoleSchema = updateUserBaseSchema.extend({
     deletedAt: z.nullable(z.date())
 })
 
+export const resetUserPasswordSchema = updateUserBaseSchema.merge(passwordSchema).extend({
+    passwordConfirm: passwordSchema.shape.password
+}).refine((data) => data.password === data.passwordConfirm, {
+    path: ["passwordConfirm"],
+    message: "兩次密碼輸入不同",
+});
+
 
 export type UpdateUserBaseInput = z.infer<typeof updateUserBaseSchema>;
-export type UpdateUserRoleSchema = z.infer<typeof updateUserRoleSchema>;
+export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>;
+export type ResetUserPasswordInput = z.infer<typeof resetUserPasswordSchema>;

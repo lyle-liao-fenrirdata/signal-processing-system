@@ -7,6 +7,12 @@ import { trpc } from "@/utils/trpc";
 import { PermissionTable } from "@/components/permission/Tables";
 import { Role } from "@prisma/client";
 import { Errors } from "@/components/commons/Errors";
+import ModalExt from "@/components/permission/ModalExt";
+import Modal from "@/components/commons/Modal";
+import {
+  ResetUserPasswordInput,
+  resetUserPasswordSchema,
+} from "@/server/schema/permission.schema";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -44,7 +50,7 @@ export const formatDate = new Intl.DateTimeFormat("zh-TW", {
   timeStyle: "medium",
 });
 
-export default function Settings({
+export default function Permission({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -59,13 +65,40 @@ export default function Settings({
   });
 
   const {
-    mutate,
-    isError,
-    error: trpcError,
+    mutate: updateUser,
+    isError: isUpdateError,
+    error: updateError,
   } = trpc.permission.updateUserRole.useMutation({
     retry: false,
     onSuccess: () => {
-      setUerInfo(null);
+      closeUpdateModel();
+      refetch();
+    },
+  });
+
+  const {
+    mutate: removeUser,
+    // isError: isRemoveError,
+    // error: removeError,
+  } = trpc.permission.removeUser.useMutation({
+    retry: false,
+    onSuccess: () => {
+      setIsRemoveComfirmModelOpen(false);
+      closeUpdateModel();
+      refetch();
+    },
+  });
+
+  const {
+    mutate: resetUser,
+    isLoading,
+    isError,
+    error: trpcError,
+  } = trpc.permission.resetPassword.useMutation({
+    retry: false,
+    onSuccess: () => {
+      setIsResetPasswordModelOpen(false);
+      closeUpdateModel();
       refetch();
     },
   });
@@ -75,14 +108,39 @@ export default function Settings({
     UserInfo,
     "createdAt" | "updatedAt" | "username"
   > | null>(null);
+  const [isRemoveComfirmModelOpen, setIsRemoveComfirmModelOpen] =
+    React.useState(false);
+  const [isResetPasswordModelOpen, setIsResetPasswordModelOpen] =
+    React.useState(false);
+  const [error, setError] = React.useState<{
+    account: string[];
+    password: string[];
+    passwordConfirm: string[];
+  }>({ account: [], password: [], passwordConfirm: [] });
+  const [registerInfo, setRegisterInfo] =
+    React.useState<ResetUserPasswordInput>({
+      account: "",
+      password: "",
+      passwordConfirm: "",
+    });
 
-  function openUserModel(user: UserInfo) {
+  function openUpdateModel(user: UserInfo) {
     setUerInfo(user);
     setUserUpdate(() => ({
       account: user.account,
       role: user.role,
       deletedAt: user.deletedAt,
     }));
+  }
+
+  function closeUpdateModel() {
+    setUerInfo(null);
+    setUserUpdate(() => null);
+  }
+
+  function openResetModel(user: UserInfo) {
+    setRegisterInfo((prev) => ({ ...prev, account: user.account }));
+    setIsResetPasswordModelOpen(true);
   }
 
   function onSelected(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -105,6 +163,35 @@ export default function Settings({
           deletedAt: e.target.value === "inactive" ? new Date() : null,
         };
       });
+    }
+  }
+
+  function onSubmit() {
+    if (isLoading) return;
+
+    const result = resetUserPasswordSchema.safeParse(registerInfo);
+    const errors = result.success ? null : result.error.format();
+
+    if (errors) {
+      setError(() => ({
+        account: errors.account?._errors ?? [],
+        password: errors.password?._errors ?? [],
+        passwordConfirm: errors.passwordConfirm?._errors ?? [],
+      }));
+    } else {
+      resetUser(registerInfo);
+    }
+  }
+
+  function onInputEnter(e: React.KeyboardEvent) {
+    if (
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.shiftKey &&
+      e.key === "Enter"
+    ) {
+      onSubmit();
     }
   }
 
@@ -131,7 +218,7 @@ export default function Settings({
           </span>
           <PermissionTable
             users={data?.guest || []}
-            openModel={openUserModel}
+            openModel={openUpdateModel}
           />
         </>
       </ChartContainer>
@@ -140,7 +227,10 @@ export default function Settings({
           <span className="block py-2 text-sm">
             USER - 除權限管理外，所有功能
           </span>
-          <PermissionTable users={data?.user || []} openModel={openUserModel} />
+          <PermissionTable
+            users={data?.user || []}
+            openModel={openUpdateModel}
+          />
         </>
       </ChartContainer>
       <ChartContainer title={<>管理者 (Admin)</>}>
@@ -151,7 +241,7 @@ export default function Settings({
           </span>
           <PermissionTable
             users={data?.admin || []}
-            openModel={openUserModel}
+            openModel={openUpdateModel}
           />
         </>
       </ChartContainer>
@@ -162,147 +252,275 @@ export default function Settings({
           </span>
           <PermissionTable
             users={data?.deleted || []}
-            openModel={openUserModel}
+            openModel={openUpdateModel}
           />
         </>
       </ChartContainer>
 
       {/* user information model */}
       {userInfo && (
-        <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden py-6 outline-none focus:outline-none">
-            <div className="relative mx-auto w-auto">
-              {/*content*/}
-              <div className="relative rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 px-5 py-3">
-                  <h3 className="text-lg font-semibold">使用者資訊</h3>
-                  <button
-                    className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
-                    onClick={() => setUerInfo(null)}
-                  >
-                    x
-                  </button>
-                </div>
-                {/*body*/}
-                <div className="relative flex-auto overflow-y-auto px-6 py-2">
-                  <table className="w-full border-collapse items-center bg-transparent">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 px-6 py-3 text-left align-middle text-xs font-semibold text-slate-500">
-                          目前設定
-                        </th>
-                        <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 px-6 py-3 text-left align-middle text-xs font-semibold text-slate-500">
-                          變更設定
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          姓名
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {userInfo.username}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          帳號
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {userInfo.account}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          狀態
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {Boolean(userInfo.deletedAt) ? "停用" : "啟用"}
-                        </td>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          <select
-                            name="deletedAt"
-                            id="deletedAt"
-                            className="rounded border-none py-0 text-xs focus:outline-none"
-                            defaultValue={
-                              Boolean(userInfo.deletedAt)
-                                ? "inactive"
-                                : "active"
-                            }
-                            onChange={onSelected}
-                          >
-                            <option value="active">啟用</option>
-                            <option value="inactive">停用</option>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          註冊時間
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {formatDate.format(userInfo.createdAt)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          最後變更時間
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {formatDate.format(userInfo.updatedAt)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
-                          權限
-                        </th>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          {userInfo.role}
-                        </td>
-                        <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                          <select
-                            name="role"
-                            id="role"
-                            className="rounded border-none py-0 text-xs focus:outline-none"
-                            defaultValue={userInfo.role}
-                            onChange={onSelected}
-                          >
-                            <option value="GUEST">{Role.GUEST}</option>
-                            <option value="USER">{Role.USER}</option>
-                            <option value="ADMIN">{Role.ADMIN}</option>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500"></pre>
-                  {isError && <Errors errors={[trpcError.message]} />}
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 px-6 py-3">
-                  <button
-                    className="mr-2 rounded bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
-                    type="button"
-                    onClick={() => userUpdate && mutate(userUpdate)}
-                  >
-                    儲存變更
-                  </button>
-                  <button
-                    className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-                    type="button"
-                    onClick={() => setUerInfo(null)}
-                  >
-                    關閉
-                  </button>
-                </div>
-              </div>
+        <ModalExt
+          header="使用者資訊"
+          ths={["", "目前設定", "變更設定"]}
+          caption={
+            isUpdateError ? <Errors errors={[updateError.message]} /> : <></>
+          }
+          actions={[
+            Boolean(userInfo.deletedAt) ? (
+              <button
+                key={`delete ${userInfo.account}`}
+                className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
+                type="button"
+                onClick={() => userUpdate && setIsRemoveComfirmModelOpen(true)}
+              >
+                刪除
+              </button>
+            ) : (
+              <button
+                key={`reset ${userInfo.account}`}
+                className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
+                type="button"
+                onClick={() => userUpdate && openResetModel(userInfo)}
+              >
+                重設密碼
+              </button>
+            ),
+            <button
+              key={`save ${userInfo.account}`}
+              className="mr-2 rounded bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
+              type="button"
+              onClick={() => userUpdate && updateUser(userUpdate)}
+            >
+              儲存變更
+            </button>,
+            <button
+              key="closeModel"
+              className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+              type="button"
+              onClick={closeUpdateModel}
+            >
+              關閉
+            </button>,
+          ]}
+          onCloseModel={closeUpdateModel}
+        >
+          <>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                姓名
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {userInfo.username}
+              </td>
+            </tr>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                帳號
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {userInfo.account}
+              </td>
+            </tr>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                狀態
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {Boolean(userInfo.deletedAt) ? "停用" : "啟用"}
+              </td>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                <select
+                  name="deletedAt"
+                  id="deletedAt"
+                  className="rounded border-none py-0 text-xs focus:outline-none"
+                  defaultValue={
+                    Boolean(userInfo.deletedAt) ? "inactive" : "active"
+                  }
+                  onChange={onSelected}
+                >
+                  <option value="active">啟用</option>
+                  <option value="inactive">停用</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                註冊時間
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {formatDate.format(userInfo.createdAt)}
+              </td>
+            </tr>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                最後變更時間
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {formatDate.format(userInfo.updatedAt)}
+              </td>
+            </tr>
+            <tr>
+              <th className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">
+                權限
+              </th>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                {userInfo.role}
+              </td>
+              <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
+                <select
+                  name="role"
+                  id="role"
+                  className="rounded border-none py-0 text-xs focus:outline-none"
+                  defaultValue={userInfo.role}
+                  onChange={onSelected}
+                >
+                  <option value="GUEST">{Role.GUEST}</option>
+                  <option value="USER">{Role.USER}</option>
+                  <option value="ADMIN">{Role.ADMIN}</option>
+                </select>
+              </td>
+            </tr>
+          </>
+        </ModalExt>
+      )}
+      {isRemoveComfirmModelOpen && userUpdate && (
+        <Modal
+          header={`刪除帳號: ${userUpdate.account}`}
+          actions={[
+            <button
+              key={`delete ${userUpdate.account}`}
+              className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
+              type="button"
+              onClick={() => removeUser({ account: userUpdate.account })}
+            >
+              刪除帳號
+            </button>,
+            <button
+              key="closeModel-confirm"
+              className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+              type="button"
+              onClick={() => setIsRemoveComfirmModelOpen(false)}
+            >
+              關閉
+            </button>,
+          ]}
+          onCloseModel={() => setIsRemoveComfirmModelOpen(false)}
+        >
+          <pre className="max-h-[60vh] text-lg leading-relaxed text-red-500">
+            <b>確定要刪除此帳號?</b>
+            <br />
+            此動作無法復原，會一併刪除任何稽核紀錄。
+            <br />
+            <br />
+            請按「確認刪除」刪除此帳號。
+          </pre>
+        </Modal>
+      )}
+      {isResetPasswordModelOpen && userUpdate && (
+        <Modal
+          header="重設密碼"
+          actions={[
+            <button
+              key={`reset ${userUpdate.account}`}
+              className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onSubmit();
+              }}
+            >
+              確定變更
+            </button>,
+            <button
+              key="closeModel-confirm"
+              className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+              type="button"
+              onClick={() => setIsResetPasswordModelOpen(false)}
+            >
+              關閉
+            </button>,
+          ]}
+          onCloseModel={() => setIsResetPasswordModelOpen(false)}
+        >
+          <form>
+            <div className="relative mb-3 w-full">
+              <label
+                className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                htmlFor="account"
+              >
+                帳號
+              </label>
+              <span className="inline-block w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600">
+                {registerInfo.account}
+              </span>
+              <Errors errors={error.account} />
             </div>
-          </div>
-          <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-        </>
+
+            <div className="relative mb-3 w-full">
+              <label
+                className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                htmlFor="password"
+              >
+                密碼
+              </label>
+              <input
+                onChange={({ target }) => {
+                  setRegisterInfo((d) => ({
+                    ...d,
+                    password: target.value,
+                  }));
+                  if (error.password.length > 0) {
+                    setError((d) => ({ ...d, password: [] }));
+                  }
+                }}
+                onKeyUp={onInputEnter}
+                id="password"
+                name="password"
+                autoComplete="off"
+                required={true}
+                maxLength={32}
+                minLength={6}
+                type="password"
+                className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                placeholder="Password"
+              />
+              <Errors errors={error.password} />
+            </div>
+
+            <div className="relative mb-3 w-full">
+              <label
+                className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                htmlFor="passwordConfirm"
+              >
+                再次輸入密碼
+              </label>
+              <input
+                onChange={({ target }) => {
+                  setRegisterInfo((d) => ({
+                    ...d,
+                    passwordConfirm: target.value,
+                  }));
+                  if (error.passwordConfirm.length > 0) {
+                    setError((d) => ({ ...d, passwordConfirm: [] }));
+                  }
+                }}
+                onKeyUp={onInputEnter}
+                id="passwordConfirm"
+                name="passwordConfirm"
+                autoComplete="off"
+                required={true}
+                maxLength={32}
+                minLength={6}
+                type="password"
+                className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                placeholder="Comfirm Password"
+              />
+              <Errors errors={error.passwordConfirm} />
+            </div>
+
+            {isError && <Errors errors={[trpcError.message]} />}
+          </form>
+        </Modal>
       )}
     </AdminLayout>
   );

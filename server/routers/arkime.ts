@@ -1,5 +1,5 @@
 import { env } from '@/env.mjs';
-import { router, publicProcedure, authProcedure } from '../trpc';
+import { router, publicProcedure, userProcedure } from '../trpc';
 // import { Prisma } from '@prisma/client';
 // import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
@@ -9,7 +9,7 @@ import { z } from 'zod';
 export type ArkimeRouter = typeof arkimeRouter;
 
 export const arkimeRouter = router({
-    searchPayload: authProcedure.input(z.object({
+    searchPayload: userProcedure.input(z.object({
         host: z.string(),
         port: z.string(),
         query: z.string(),

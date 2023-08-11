@@ -61,7 +61,7 @@ const isAdmin = middleware(async (opts) => {
 
 export const adminProcedure = publicProcedure.use(isAdmin);
 
-const isAuth = middleware(async (opts) => {
+const isUser = middleware(async (opts) => {
     const { ctx } = opts;
     if (!ctx.user?.role) throw new TRPCError({ code: 'UNAUTHORIZED', message: '請先登入' });
     if (ctx.user.role !== Role.ADMIN && ctx.user.role !== Role.USER) throw new TRPCError({ code: "FORBIDDEN", message: '權限不足' });
@@ -72,4 +72,16 @@ const isAuth = middleware(async (opts) => {
     });
 });
 
-export const authProcedure = publicProcedure.use(isAuth);
+export const userProcedure = publicProcedure.use(isUser);
+
+const isLogin = middleware(async (opts) => {
+    const { ctx } = opts;
+    if (!ctx.user?.role) throw new TRPCError({ code: 'UNAUTHORIZED', message: '請先登入' });
+    return opts.next({
+        ctx: {
+            user: ctx.user,
+        },
+    });
+});
+
+export const loginProcedure = publicProcedure.use(isLogin);

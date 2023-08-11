@@ -1,9 +1,9 @@
-import { router, publicProcedure, authProcedure } from '../trpc';
+import { router, publicProcedure, userProcedure, loginProcedure } from '../trpc';
 // import { Prisma } from '@prisma/client';
 import * as argon2 from "argon2";
 import { prisma } from '@/server/prisma';
 import { TRPCError } from '@trpc/server';
-import { loginUserSchema, registerUserSchema, tokenSchema } from '../schema/auth.schema';
+import { loginUserSchema, registerUserSchema, updateUserSchema } from '../schema/auth.schema';
 import { getCookie, signUserJWT } from '@/utils/jwt';
 
 // Export type router type signature,
@@ -21,6 +21,7 @@ export const authRouter = router({
                     message: "使用者已存在",
                 })
             }
+
             const hashedPassword = await argon2.hash(password)
             const newUser = await prisma.user.create({
                 data: {
@@ -73,6 +74,69 @@ export const authRouter = router({
             ctx.res.setHeader('Set-Cookie', `x-token=; Path=/; HttpOnly;expires=${new Date().toUTCString()};SameSite=Strict`);
             return { ok: true };
         }),
+    getSelfInfo: loginProcedure
+        .query(async ({ ctx: { user: { account } } }) => {
+            const user = await prisma.user.findUnique({
+                where: { account }, select: {
+                    account: true,
+                    username: true,
+                    role: true,
+                    createdAt: true,
+                    updatedAt: true,
+                }
+            })
+
+            if (!user) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "無此使用者",
+                })
+            }
+
+            return user;
+        }),
+    updateSelfInfo: loginProcedure
+        .input(updateUserSchema)
+        .mutation(async ({ ctx: { user: { account } }, input: { username } }) => {
+            const user = await prisma.user.findUnique({
+                where: { account }, select: {
+                    username: true,
+                }
+            });
+
+            if (!user) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "無此使用者",
+                })
+            }
+
+            if (user.username === username) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "沒有內容變更，無須更新",
+                })
+            }
+
+            await prisma.user.update({
+                where: { account },
+                data: { username }
+            })
+
+            return { ok: true };
+        })
+    // getUserInfoByPayload: loginProcedure
+    //     .query(async ({ ctx: { user } }) => {
+    //         const { username, account, role } = user
+    //         const trueUser = await prisma.user.findUnique({ where: { account }, select: { username: true, role: true, deletedAt: true } })
+    //         if (!trueUser || Boolean(trueUser.deletedAt)) {
+    //             throw new TRPCError({
+    //                 code: "FORBIDDEN",
+    //                 message: "無此使用者，或已為靜止戶",
+    //             })
+    //         }
+    //         return { username, account, role }
+    //     })
     // verify: authProcedure
     //     .query(async ({ ctx }) => {
     //         return { user: ctx.user };

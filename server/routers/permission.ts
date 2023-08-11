@@ -1,8 +1,9 @@
-import { router, publicProcedure, authProcedure, adminProcedure } from '../trpc';
+import { router, publicProcedure, userProcedure, adminProcedure } from '../trpc';
+import * as argon2 from "argon2";
 import { prisma } from '@/server/prisma';
 import { TRPCError } from '@trpc/server';
 import { Role } from '.prisma/client';
-import { updateUserRoleSchema } from '../schema/permission.schema';
+import { resetUserPasswordSchema, updateUserBaseSchema, updateUserRoleSchema } from '../schema/permission.schema';
 
 export type PermissionRouter = typeof permissionRouter;
 
@@ -43,7 +44,7 @@ export const permissionRouter = router({
             const oldUser = await prisma.user.findUnique({ where: { account }, select: { role: true, deletedAt: true } })
             if (!oldUser) {
                 throw new TRPCError({
-                    code: "FORBIDDEN",
+                    code: "NOT_FOUND",
                     message: "沒有此帳號",
                 })
             }
@@ -73,27 +74,73 @@ export const permissionRouter = router({
             })
 
             return { ok: true }
-        })
-    // .mutation(async ({ input: { username, account, password }, ctx }) => {
-    //     const user = await prisma.user.findUnique({ where: { username }, select: { id: true } })
-    //     if (user) {
-    //         throw new TRPCError({
-    //             code: "CONFLICT",
-    //             message: "使用者已存在",
-    //         })
-    //     }
-    //     const hashedPassword = await argon2.hash(password)
-    //     const newUser = await prisma.user.create({
-    //         data: {
-    //             username,
-    //             account,
-    //             password: hashedPassword,
-    //         },
-    //     });
+        }),
 
-    //     const token = await signUserJWT({ username: newUser.username, account: newUser.account, role: newUser.role })
-    //     const cookie = getCookie(token);
-    //     ctx.res.setHeader('Set-Cookie', cookie);
-    //     return { ok: true };
-    // }),
+    removeUser: adminProcedure
+        .input(updateUserBaseSchema)
+        .mutation(async ({ input: { account }, ctx: { user: { account: inputerAccount } } }) => {
+            if (inputerAccount === account) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "不可移除自己的帳號",
+                })
+            }
+            const oldUser = await prisma.user.findUnique({ where: { account }, select: { role: true, deletedAt: true } })
+            if (!oldUser) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "沒有此帳號",
+                })
+            }
+
+            if (!oldUser.deletedAt) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "請先將使者設定為靜止帳戶",
+                })
+            }
+
+            const res = await prisma.user.delete({
+                where: { account },
+            })
+            console.log(res)
+
+            return { ok: true }
+        }),
+
+    resetPassword: adminProcedure
+        .input(resetUserPasswordSchema)
+        .mutation(async ({ input: { account, password }, ctx: { user: { account: inputerAccount } } }) => {
+            if (inputerAccount === account) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "不可變更自己的密碼，請到「設定」變更",
+                })
+            }
+
+            const oldUser = await prisma.user.findUnique({ where: { account }, select: { role: true, deletedAt: true } })
+            if (!oldUser) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "沒有此帳號",
+                })
+            }
+
+            if (oldUser.deletedAt) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "不可變更靜止帳戶密碼",
+                })
+            }
+
+            const hashedPassword = await argon2.hash(password)
+            await prisma.user.update({
+                where: { account },
+                data: {
+                    password: hashedPassword,
+                }
+            })
+
+            return { ok: true }
+        }),
 });

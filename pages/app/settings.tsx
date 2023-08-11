@@ -1,10 +1,12 @@
 import React from "react";
 
-import CardSettings from "components/Cards/CardSettings.js";
-import CardProfile from "components/Cards/CardProfile.js";
-
 import AdminLayout from "components/layouts/Admin";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { trpc } from "@/utils/trpc";
+import { Errors } from "@/components/commons/Errors";
+import { formatDate } from "./permission";
+import { UpdateUserInput, updateUserSchema } from "@/server/schema/auth.schema";
+import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -31,6 +33,53 @@ export default function Settings({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
+  const {
+    data,
+    isError,
+    error: queryError,
+  } = trpc.auth.getSelfInfo.useQuery(undefined, {
+    refetchOnMount: false,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    retryOnMount: false,
+    retry: false,
+  });
+  const {
+    mutate: updateUserInfo,
+    isError: isUpdateError,
+    error: updateError,
+    isLoading,
+  } = trpc.auth.updateSelfInfo.useMutation({
+    retry: false,
+    onSuccess: () => {
+      router.reload();
+    },
+  });
+
+  const [updateInfo, setUpdateInfo] = React.useState<UpdateUserInput>({
+    username: "",
+  });
+
+  const [error, setError] = React.useState<{
+    username: string[];
+  }>({ username: [] });
+
+  function onSubmit() {
+    if (isLoading) return;
+
+    const result = updateUserSchema.safeParse(updateInfo);
+    const errors = result.success ? null : result.error.format();
+
+    if (errors) {
+      setError(() => ({
+        username: errors.username?._errors ?? [],
+      }));
+    } else {
+      updateUserInfo(updateInfo);
+    }
+  }
+
   return (
     <AdminLayout
       navbarProps={{
@@ -39,14 +88,141 @@ export default function Settings({
       }}
       sidebarProps={{ role, username }}
     >
-      <div className="flex flex-wrap">
-        <div className="w-full px-4 lg:w-8/12">
-          <CardSettings />
+      {isError || !data ? (
+        <Errors
+          errors={isError ? [queryError.message] : ["無法找到你的資訊"]}
+        />
+      ) : (
+        <div className="relative mb-6 flex w-full min-w-0 flex-col break-words rounded-lg border-0 bg-slate-100 shadow-lg">
+          <div className="mb-0 rounded-t bg-white px-6 py-6">
+            <div className="flex justify-between text-center">
+              <h6 className="text-xl font-bold text-slate-700">
+                {data.account}
+              </h6>
+              <button
+                className="rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
+                type="button"
+              >
+                變更密碼
+              </button>
+            </div>
+          </div>
+          <div className="flex-auto px-4 py-10 pt-0 lg:px-10">
+            <form>
+              <h6 className="mb-6 mt-3 text-sm font-bold uppercase text-slate-400">
+                個人資訊
+              </h6>
+              <div className="flex flex-wrap">
+                <div className="w-full px-4 lg:w-6/12">
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="grid-password"
+                    >
+                      使用者名稱
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      defaultValue={data.username}
+                    />
+                  </div>
+                </div>
+                <div className="w-full px-4 lg:w-6/12">
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="grid-password"
+                    >
+                      使用者權限
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      defaultValue={data.role}
+                    />
+                  </div>
+                </div>
+                <div className="w-full px-4 lg:w-6/12">
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="grid-password"
+                    >
+                      帳號註冊時間
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      defaultValue={formatDate.format(data.createdAt)}
+                    />
+                  </div>
+                </div>
+                <div className="w-full px-4 lg:w-6/12">
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="grid-password"
+                    >
+                      最後變更時間
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      defaultValue={formatDate.format(data.updatedAt)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-b-1 mt-6 border-slate-300" />
+
+              <h6 className="mb-6 mt-3 text-sm font-bold uppercase text-slate-400">
+                變更設定
+              </h6>
+              <div className="flex flex-wrap gap-4">
+                <div className="lg:w-12/12 w-full px-4">
+                  <div className="relative mb-3 w-full">
+                    <label
+                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      htmlFor="grid-password"
+                    >
+                      使用者名稱
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
+                      value={updateInfo.username}
+                      onChange={({ target }) => {
+                        setUpdateInfo((d) => ({
+                          ...d,
+                          username: target.value,
+                        }));
+                        if (error.username.length > 0) {
+                          setError((d) => ({ ...d, username: [] }));
+                        }
+                      }}
+                    />
+                  </div>
+                  <Errors errors={error.username} />
+                </div>
+                {isUpdateError && <Errors errors={[updateError.message]} />}
+                <button
+                  className="ml-auto mr-4 rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
+                  type="button"
+                  onClick={onSubmit}
+                >
+                  變更設定
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="w-full px-4 lg:w-4/12">
-          <CardProfile />
-        </div>
-      </div>
+      )}
     </AdminLayout>
   );
 }
