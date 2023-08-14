@@ -9,7 +9,7 @@ export async function GET(request: Request) {
         if (!token) return NextResponse.json({ ok: false }, { status: 400 })
 
         const { payload, error } = await verifyUserJWT(token)
-        if (payload) return NextResponse.json({ ok: false }, { status: 401 })
+        if (error) return NextResponse.json({ ok: false }, { status: 401 })
 
         return NextResponse.json({ ok: true, user: payload });
     } catch (error) {

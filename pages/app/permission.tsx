@@ -9,10 +9,7 @@ import { Role } from "@prisma/client";
 import { Errors } from "@/components/commons/Errors";
 import ModalExt from "@/components/permission/ModalExt";
 import Modal from "@/components/commons/Modal";
-import {
-  ResetUserPasswordInput,
-  resetUserPasswordSchema,
-} from "@/server/schema/permission.schema";
+import ModalExtResetPassword from "@/components/permission/ModalExtResetPassword";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -71,7 +68,7 @@ export default function Permission({
   } = trpc.permission.updateUserRole.useMutation({
     retry: false,
     onSuccess: () => {
-      closeUpdateModel();
+      closeUpdateModal();
       refetch();
     },
   });
@@ -83,22 +80,8 @@ export default function Permission({
   } = trpc.permission.removeUser.useMutation({
     retry: false,
     onSuccess: () => {
-      setIsRemoveComfirmModelOpen(false);
-      closeUpdateModel();
-      refetch();
-    },
-  });
-
-  const {
-    mutate: resetUser,
-    isLoading,
-    isError,
-    error: trpcError,
-  } = trpc.permission.resetPassword.useMutation({
-    retry: false,
-    onSuccess: () => {
-      setIsResetPasswordModelOpen(false);
-      closeUpdateModel();
+      setIsRemoveComfirmModalOpen(false);
+      closeUpdateModal();
       refetch();
     },
   });
@@ -108,23 +91,12 @@ export default function Permission({
     UserInfo,
     "createdAt" | "updatedAt" | "username"
   > | null>(null);
-  const [isRemoveComfirmModelOpen, setIsRemoveComfirmModelOpen] =
+  const [isRemoveComfirmModalOpen, setIsRemoveComfirmModalOpen] =
     React.useState(false);
-  const [isResetPasswordModelOpen, setIsResetPasswordModelOpen] =
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
     React.useState(false);
-  const [error, setError] = React.useState<{
-    account: string[];
-    password: string[];
-    passwordConfirm: string[];
-  }>({ account: [], password: [], passwordConfirm: [] });
-  const [registerInfo, setRegisterInfo] =
-    React.useState<ResetUserPasswordInput>({
-      account: "",
-      password: "",
-      passwordConfirm: "",
-    });
 
-  function openUpdateModel(user: UserInfo) {
+  function openUpdateModal(user: UserInfo) {
     setUerInfo(user);
     setUserUpdate(() => ({
       account: user.account,
@@ -133,14 +105,13 @@ export default function Permission({
     }));
   }
 
-  function closeUpdateModel() {
+  function closeUpdateModal() {
     setUerInfo(null);
     setUserUpdate(() => null);
   }
 
-  function openResetModel(user: UserInfo) {
-    setRegisterInfo((prev) => ({ ...prev, account: user.account }));
-    setIsResetPasswordModelOpen(true);
+  function openResetModal() {
+    setIsResetPasswordModalOpen(true);
   }
 
   function onSelected(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -163,35 +134,6 @@ export default function Permission({
           deletedAt: e.target.value === "inactive" ? new Date() : null,
         };
       });
-    }
-  }
-
-  function onSubmit() {
-    if (isLoading) return;
-
-    const result = resetUserPasswordSchema.safeParse(registerInfo);
-    const errors = result.success ? null : result.error.format();
-
-    if (errors) {
-      setError(() => ({
-        account: errors.account?._errors ?? [],
-        password: errors.password?._errors ?? [],
-        passwordConfirm: errors.passwordConfirm?._errors ?? [],
-      }));
-    } else {
-      resetUser(registerInfo);
-    }
-  }
-
-  function onInputEnter(e: React.KeyboardEvent) {
-    if (
-      !e.altKey &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.shiftKey &&
-      e.key === "Enter"
-    ) {
-      onSubmit();
     }
   }
 
@@ -218,7 +160,7 @@ export default function Permission({
           </span>
           <PermissionTable
             users={data?.guest || []}
-            openModel={openUpdateModel}
+            openModal={openUpdateModal}
           />
         </>
       </ChartContainer>
@@ -229,7 +171,7 @@ export default function Permission({
           </span>
           <PermissionTable
             users={data?.user || []}
-            openModel={openUpdateModel}
+            openModal={openUpdateModal}
           />
         </>
       </ChartContainer>
@@ -241,7 +183,7 @@ export default function Permission({
           </span>
           <PermissionTable
             users={data?.admin || []}
-            openModel={openUpdateModel}
+            openModal={openUpdateModal}
           />
         </>
       </ChartContainer>
@@ -252,7 +194,7 @@ export default function Permission({
           </span>
           <PermissionTable
             users={data?.deleted || []}
-            openModel={openUpdateModel}
+            openModal={openUpdateModal}
           />
         </>
       </ChartContainer>
@@ -271,7 +213,7 @@ export default function Permission({
                 key={`delete ${userInfo.account}`}
                 className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
                 type="button"
-                onClick={() => userUpdate && setIsRemoveComfirmModelOpen(true)}
+                onClick={() => userUpdate && setIsRemoveComfirmModalOpen(true)}
               >
                 刪除
               </button>
@@ -280,7 +222,7 @@ export default function Permission({
                 key={`reset ${userInfo.account}`}
                 className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
                 type="button"
-                onClick={() => userUpdate && openResetModel(userInfo)}
+                onClick={() => userUpdate && openResetModal()}
               >
                 重設密碼
               </button>
@@ -294,15 +236,15 @@ export default function Permission({
               儲存變更
             </button>,
             <button
-              key="closeModel"
+              key="closeModal"
               className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
               type="button"
-              onClick={closeUpdateModel}
+              onClick={closeUpdateModal}
             >
               關閉
             </button>,
           ]}
-          onCloseModel={closeUpdateModel}
+          onCloseModal={closeUpdateModal}
         >
           <>
             <tr>
@@ -383,7 +325,7 @@ export default function Permission({
           </>
         </ModalExt>
       )}
-      {isRemoveComfirmModelOpen && userUpdate && (
+      {isRemoveComfirmModalOpen && userUpdate && (
         <Modal
           header={`刪除帳號: ${userUpdate.account}`}
           actions={[
@@ -396,15 +338,15 @@ export default function Permission({
               刪除帳號
             </button>,
             <button
-              key="closeModel-confirm"
+              key="closeModal-confirm"
               className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
               type="button"
-              onClick={() => setIsRemoveComfirmModelOpen(false)}
+              onClick={() => setIsRemoveComfirmModalOpen(false)}
             >
               關閉
             </button>,
           ]}
-          onCloseModel={() => setIsRemoveComfirmModelOpen(false)}
+          onCloseModal={() => setIsRemoveComfirmModalOpen(false)}
         >
           <pre className="max-h-[60vh] text-lg leading-relaxed text-red-500">
             <b>確定要刪除此帳號?</b>
@@ -416,111 +358,11 @@ export default function Permission({
           </pre>
         </Modal>
       )}
-      {isResetPasswordModelOpen && userUpdate && (
-        <Modal
-          header="重設密碼"
-          actions={[
-            <button
-              key={`reset ${userUpdate.account}`}
-              className="mr-2 rounded bg-red-600 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-700"
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                onSubmit();
-              }}
-            >
-              確定變更
-            </button>,
-            <button
-              key="closeModel-confirm"
-              className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-              type="button"
-              onClick={() => setIsResetPasswordModelOpen(false)}
-            >
-              關閉
-            </button>,
-          ]}
-          onCloseModel={() => setIsResetPasswordModelOpen(false)}
-        >
-          <form>
-            <div className="relative mb-3 w-full">
-              <label
-                className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                htmlFor="account"
-              >
-                帳號
-              </label>
-              <span className="inline-block w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600">
-                {registerInfo.account}
-              </span>
-              <Errors errors={error.account} />
-            </div>
-
-            <div className="relative mb-3 w-full">
-              <label
-                className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                htmlFor="password"
-              >
-                密碼
-              </label>
-              <input
-                onChange={({ target }) => {
-                  setRegisterInfo((d) => ({
-                    ...d,
-                    password: target.value,
-                  }));
-                  if (error.password.length > 0) {
-                    setError((d) => ({ ...d, password: [] }));
-                  }
-                }}
-                onKeyUp={onInputEnter}
-                id="password"
-                name="password"
-                autoComplete="off"
-                required={true}
-                maxLength={32}
-                minLength={6}
-                type="password"
-                className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                placeholder="Password"
-              />
-              <Errors errors={error.password} />
-            </div>
-
-            <div className="relative mb-3 w-full">
-              <label
-                className="mb-2 block text-xs font-bold uppercase text-slate-600"
-                htmlFor="passwordConfirm"
-              >
-                再次輸入密碼
-              </label>
-              <input
-                onChange={({ target }) => {
-                  setRegisterInfo((d) => ({
-                    ...d,
-                    passwordConfirm: target.value,
-                  }));
-                  if (error.passwordConfirm.length > 0) {
-                    setError((d) => ({ ...d, passwordConfirm: [] }));
-                  }
-                }}
-                onKeyUp={onInputEnter}
-                id="passwordConfirm"
-                name="passwordConfirm"
-                autoComplete="off"
-                required={true}
-                maxLength={32}
-                minLength={6}
-                type="password"
-                className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                placeholder="Comfirm Password"
-              />
-              <Errors errors={error.passwordConfirm} />
-            </div>
-
-            {isError && <Errors errors={[trpcError.message]} />}
-          </form>
-        </Modal>
+      {isResetPasswordModalOpen && userUpdate && (
+        <ModalExtResetPassword
+          userAccount={userUpdate}
+          onCloseModal={() => setIsResetPasswordModalOpen(false)}
+        />
       )}
     </AdminLayout>
   );

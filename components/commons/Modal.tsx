@@ -4,12 +4,12 @@ export default function Modal({
   children,
   header,
   actions,
-  onCloseModel,
+  onCloseModal,
 }: {
   children: React.ReactNode;
   header: string;
   actions: JSX.Element[];
-  onCloseModel: React.MouseEventHandler<HTMLButtonElement>;
+  onCloseModal: React.MouseEventHandler<HTMLButtonElement>;
 }) {
   return (
     <>
@@ -22,7 +22,7 @@ export default function Modal({
               <h3 className="text-lg font-semibold">{header}</h3>
               <button
                 className="float-right ml-auto border-0 bg-transparent p-1 text-xl font-semibold leading-none text-black opacity-50 outline-none focus:outline-none"
-                onClick={onCloseModel}
+                onClick={onCloseModal}
               >
                 x
               </button>

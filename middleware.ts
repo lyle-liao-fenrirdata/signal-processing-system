@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Role } from '@prisma/client';
 import { getCookie, signUserJWT, verifyUserJWT } from './utils/jwt';
-import { prisma } from './server/prisma';
 
 interface AuthenticatedNextResponse extends NextResponse {
     user?: { username: string, role: Role }
@@ -21,7 +20,7 @@ export async function middleware(request: NextRequest) {
     const isUserPath = ["/app/search", "/app/audit"].some((path) => pathname === path);
     const isAdminPath = ["/app/permission"].some((path) => pathname === path);
 
-    if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.substring(7, bearerCookie.indexOf(';'));
+    if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.split(';')[0].split(" ")[1];
     console.log("middleware 2")
     console.log({ bearerCookie, isAdminPath, isAuthPath, isUserPath, token })
 

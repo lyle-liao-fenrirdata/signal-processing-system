@@ -2,10 +2,10 @@ import { UserInfo, formatDate } from "@/pages/app/permission";
 
 export const PermissionTable = ({
   users,
-  openModel,
+  openModal,
 }: {
   users: UserInfo[];
-  openModel: (user: UserInfo) => void;
+  openModal: (user: UserInfo) => void;
 }) => (
   <table className="w-full border-collapse items-center bg-transparent">
     <thead>
@@ -43,7 +43,7 @@ export const PermissionTable = ({
             key={user.account}
             className="cursor-pointer hover:bg-slate-100"
             onClick={() => {
-              openModel(user);
+              openModal(user);
             }}
           >
             <th className="flex items-center whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 text-left align-middle text-xs">

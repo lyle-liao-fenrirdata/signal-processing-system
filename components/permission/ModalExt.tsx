@@ -7,17 +7,17 @@ export default function ModalExt({
   ths,
   caption,
   actions,
-  onCloseModel,
+  onCloseModal,
 }: {
   children: React.ReactNode;
   header: string;
   ths: string[];
   caption: JSX.Element;
   actions: JSX.Element[];
-  onCloseModel: React.MouseEventHandler<HTMLButtonElement>;
+  onCloseModal: React.MouseEventHandler<HTMLButtonElement>;
 }) {
   return (
-    <Modal header={header} actions={actions} onCloseModel={onCloseModel}>
+    <Modal header={header} actions={actions} onCloseModal={onCloseModal}>
       <>
         <table className="w-full border-collapse items-center bg-transparent">
           <thead>

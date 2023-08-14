@@ -5,6 +5,7 @@ import { prisma } from '@/server/prisma';
 import { TRPCError } from '@trpc/server';
 import { loginUserSchema, registerUserSchema, updateUserSchema } from '../schema/auth.schema';
 import { getCookie, signUserJWT } from '@/utils/jwt';
+import { resetUserPasswordSchema } from '../schema/permission.schema';
 
 // Export type router type signature,
 // NOT the router itself.
@@ -124,6 +125,41 @@ export const authRouter = router({
             })
 
             return { ok: true };
+        }),
+    updateSelfPassword: loginProcedure
+        .input(resetUserPasswordSchema)
+        .mutation(async ({ ctx: { user: { account: inputerAccount } }, input: { account, password } }) => {
+            if (inputerAccount !== account) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "不可變更他人密碼",
+                })
+            }
+
+            const oldUser = await prisma.user.findUnique({ where: { account }, select: { deletedAt: true } })
+            if (!oldUser) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "沒有此帳號",
+                })
+            }
+
+            if (oldUser.deletedAt) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "不可變更靜止帳戶密碼",
+                })
+            }
+
+            const hashedPassword = await argon2.hash(password)
+            await prisma.user.update({
+                where: { account },
+                data: {
+                    password: hashedPassword,
+                }
+            })
+
+            return { ok: true }
         })
     // getUserInfoByPayload: loginProcedure
     //     .query(async ({ ctx: { user } }) => {

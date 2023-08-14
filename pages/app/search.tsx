@@ -382,7 +382,7 @@ export default function Search({
               OK
             </button>,
           ]}
-          onCloseModel={() => setSqlSearchModal(false)}
+          onCloseModal={() => setSqlSearchModal(false)}
         >
           <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
             Elastic Query:
@@ -405,7 +405,7 @@ export default function Search({
               OK
             </button>,
           ]}
-          onCloseModel={() => setArkimeSearchPayloadModal("")}
+          onCloseModal={() => setArkimeSearchPayloadModal("")}
         >
           <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
             <div
