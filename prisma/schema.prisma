@@ -29,25 +29,32 @@ enum Role {
 }
 
 model Audit {
-  id          Int         @id @default(autoincrement())
-  isActive    Boolean     @default(false)
+  id          Int          @id @default(autoincrement())
+  isActive    Boolean      @default(false)
   createdById Int
-  createdBy   User        @relation(fields: [createdById], references: [id])
-  createdAt   DateTime    @default(now())
-  deletedAt   DateTime
-  auditItem   AuditItem[]
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdAt   DateTime     @default(now())
+  deletedAt   DateTime?
+  auditGroup  AuditGroup[]
 }
 
-model AuditItem {
+model AuditGroup {
   id        Int         @id @default(autoincrement())
   name      String
   order     Int         @default(autoincrement())
   color     Color       @default(Default)
-  auditId   Int?
-  audit     Audit?      @relation(fields: [auditId], references: [id])
-  parent    AuditItem[] @relation("AuditGroup")
-  children  AuditItem[] @relation("AuditGroup")
-  auditLogs AuditLog[]
+  auditId   Int
+  audit     Audit       @relation(fields: [auditId], references: [id])
+  auditItem AuditItem[]
+}
+
+model AuditItem {
+  id           Int        @id @default(autoincrement())
+  name         String
+  order        Int        @default(autoincrement())
+  auditGroupId Int
+  auditGroup   AuditGroup @relation(fields: [auditGroupId], references: [id])
+  auditLogs    AuditLog[]
 }
 
 model AuditLog {
