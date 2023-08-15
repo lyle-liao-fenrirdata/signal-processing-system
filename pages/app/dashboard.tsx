@@ -187,9 +187,16 @@ export default function Dashboard({
                   services={services.map((service) => ({
                     key: service.ID,
                     name: service.Spec.Name,
-                    replicated: service.Spec.Mode.Replicated.Replicas,
+                    replicated: Object.keys(service.Spec?.Mode ?? {}).includes(
+                      "Global"
+                    )
+                      ? 1
+                      : service.Spec?.Mode?.Replicated?.Replicas ?? 0,
                     status:
-                      service.Spec.Mode.Replicated.Replicas > 0 ? (
+                      Object.keys(service.Spec?.Mode ?? {}).includes(
+                        "Global"
+                      ) ||
+                      (service.Spec?.Mode?.Replicated?.Replicas ?? 0) > 0 ? (
                         <i className="fas fa-circle-check text-sm text-green-500"></i>
                       ) : (
                         <i className="fas fa-circle-xmark text-red-500"></i>

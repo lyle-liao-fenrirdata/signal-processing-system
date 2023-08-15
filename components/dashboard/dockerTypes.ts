@@ -83,7 +83,7 @@ interface DockerServiceSpec {
     };
     TaskTemplate: any;
     Mode: {
-        Replicated: {
+        Replicated?: {
             Replicas: number;
         };
         Global?: any;
