@@ -1,10 +1,10 @@
 import React from "react";
 
-import AdminNavbar, { NavbarProps } from "components/Navbars/AdminNavbar";
+import AppNavbar, { NavbarProps } from "@/components/Navbars/AppNavbar";
 import Sidebar, { SidebarProps } from "components/Sidebar/Sidebar";
 import FooterAdmin from "components/Footers/FooterAdmin";
 
-export default function Admin({
+export default function App({
   children,
   navbarProps,
   sidebarProps,
@@ -17,7 +17,7 @@ export default function Admin({
     <>
       <Sidebar {...sidebarProps} />
       <div className="relative bg-slate-100 md:ml-40">
-        <AdminNavbar {...navbarProps} />
+        <AppNavbar {...navbarProps} />
         <div className="mx-auto min-h-screen w-full px-4 pt-8 md:px-10 md:pt-28">
           {children}
           <FooterAdmin />

@@ -1,6 +1,6 @@
 import React from "react";
 
-import AdminLayout from "components/layouts/Admin";
+import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { ChartContainer } from "@/components/commons/ChartContainer";
 import { trpc } from "@/utils/trpc";

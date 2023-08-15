@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Navbar() {
+export default function AuthNavbar() {
   return (
     <nav className="navbar-expand-lg absolute top-0 z-50 flex w-full flex-wrap items-center justify-between px-2 py-3">
       <div className="container mx-auto flex flex-wrap items-center justify-between px-4">

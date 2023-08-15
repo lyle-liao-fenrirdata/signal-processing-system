@@ -1,6 +1,6 @@
 import React from "react";
 
-import AdminLayout from "components/layouts/Admin";
+import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { Container } from "@/components/commons/Container";
 import CardTable from "@/components/commons/TableContainer";

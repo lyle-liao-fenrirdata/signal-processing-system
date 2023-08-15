@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { env } from "env.mjs";
 import { Role } from "@prisma/client";
+import { trpc } from "@/utils/trpc";
 
 export type SidebarProps = {
   role: string;
@@ -27,18 +28,18 @@ const NavigationItem = ({
     href={href}
     target={target}
     className={
-      "flex flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold " +
+      "group flex flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold " +
       (currentPath && currentPath.indexOf(href) !== -1
-        ? "text-sky-500 hover:text-sky-600"
-        : "text-slate-700 hover:text-slate-500")
+        ? "text-sky-600"
+        : "text-slate-700 hover:text-sky-500")
     }
   >
     <span>
       <i
         className={`${FaIconClass} w-5 text-sm ${
           currentPath && currentPath.indexOf(href) !== -1
-            ? "opacity-75"
-            : "text-slate-300"
+            ? "text-sky-600"
+            : "opacity-25 group-hover:text-sky-500 group-hover:opacity-100"
         }`}
       ></i>
     </span>
@@ -54,6 +55,14 @@ const NavigationItem = ({
 export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
   const [collapseShow, setCollapseShow] = React.useState("hidden");
+
+  const { mutate: logout } = trpc.auth.logout.useMutation({
+    retry: false,
+    onSuccess: () => {
+      router.replace("/auth/login");
+    },
+    onError: (error) => console.log(error),
+  });
 
   return (
     <nav className="relative z-10 flex flex-wrap items-center justify-between bg-white px-6 py-4 shadow-xl md:fixed md:bottom-0 md:left-0 md:top-0 md:block md:w-40 md:flex-row md:flex-nowrap md:overflow-hidden md:overflow-y-auto">
@@ -74,16 +83,12 @@ export default function Sidebar({ role, username }: SidebarProps) {
           訊號處理系統
         </Link>
         {/* User */}
-        <ul className="flex list-none flex-wrap items-center md:hidden">
-          <li className="relative inline-block">
-            <a className="block text-slate-500" href="#pablo">
-              <div className="flex items-center">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full text-sm">
-                  {username}
-                </span>
-              </div>
-            </a>
-          </li>
+        <ul className="flex list-none flex-row items-center md:hidden">
+          <div className="flex flex-row flex-nowrap items-center gap-2">
+            <span className="inline-flex h-12 min-w-fit items-center justify-center text-sm text-slate-500">
+              {username}
+            </span>
+          </div>
         </ul>
         {/* Collapse */}
         <div
@@ -178,7 +183,6 @@ export default function Sidebar({ role, username }: SidebarProps) {
             )}
           </ul>
 
-          {/* Divider */}
           <hr className="my-4 md:min-w-full" />
 
           <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
@@ -200,6 +204,23 @@ export default function Sidebar({ role, username }: SidebarProps) {
                 FaIconClass="fas fa-tools"
                 currentPath={router.pathname}
               />
+            </li>
+          </ul>
+
+          <hr className="my-4 md:min-w-full" />
+
+          <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
+            <li className="items-center">
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="group flex w-full flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold text-slate-700 hover:text-sky-500 hover:opacity-100"
+              >
+                <span>
+                  <i className="fas fa-right-from-bracket mr-2 text-xs text-slate-700 opacity-25 group-hover:text-sky-500 group-hover:opacity-100"></i>{" "}
+                </span>
+                <span>登出</span>
+              </button>
             </li>
           </ul>
         </div>

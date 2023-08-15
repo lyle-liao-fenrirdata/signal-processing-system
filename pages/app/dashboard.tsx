@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 import Script from "next/script";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
-import AdminLayout from "components/layouts/Admin";
+import AdminLayout from "@/components/layouts/App";
 import { env } from "env.mjs";
 import { ChartContainer } from "@/components/commons/ChartContainer";
 import { NodeTable, ServiceTable } from "@/components/dashboard/Tables";

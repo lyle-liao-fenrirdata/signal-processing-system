@@ -1,6 +1,6 @@
 import React from "react";
 
-import AdminLayout from "components/layouts/Admin";
+import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { trpc } from "@/utils/trpc";
 import { Errors } from "@/components/commons/Errors";
