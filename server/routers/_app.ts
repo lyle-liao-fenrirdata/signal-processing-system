@@ -8,6 +8,7 @@ import { arkimeRouter } from './arkime';
 import { recordingRouter } from './recording';
 import { authRouter } from './auth';
 import { permissionRouter } from './permission';
+import { swarmRouter } from './swarm';
 
 export const appRouter = router({
     auth: authRouter,
@@ -26,7 +27,8 @@ export const appRouter = router({
         return await res.json()
     }),
     recording: recordingRouter,
-    permission: permissionRouter
+    permission: permissionRouter,
+    swarm: swarmRouter,
 });
 
 export type AppRouter = typeof appRouter;

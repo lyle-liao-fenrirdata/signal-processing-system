@@ -1,6 +1,9 @@
 import { connect } from "mqtt";
 import { useEffect, useState } from "react";
-import { Container } from "../commons/Container";
+import ToastList from "../commons/toast/ToastList";
+import { iconMap } from "../commons/toast/Toast";
+import useMqttStore, { MqttMessage } from "@/stores/mqtt";
+import { SideList } from "../commons/toast/SideList";
 
 export type NavbarProps = {
   breadcrumbs: { title: string; href: string }[];
@@ -8,34 +11,62 @@ export type NavbarProps = {
 };
 
 export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
-  const [isWsConnected, setIsWsConnected] = useState(false);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [isSideListOpen, setIsSideListOpen] = useState(false);
+
+  const toast = useMqttStore((state) => state.toast);
+  const setMessage = useMqttStore((state) => state.setMessage);
+  const removeMessage = useMqttStore((state) => state.removeMessage);
 
   useEffect(() => {
     const client = connect("ws://192.168.16.31:9001", {
-      clientId: `mqtt_${Math.random().toString(16).slice(3)}`,
+      clientId: `mqtt_${Math.random().toString(16).slice(2)}`,
       clean: true,
       connectTimeout: 4000,
       reconnectPeriod: 1000,
     });
     client.on("connect", () => {
-      setIsWsConnected(true);
+      console.log("mqtt connected");
+    });
+    client.on("offline", () => {
+      console.log("mqtt offline");
+      setMessageQueue({ message: "network offline", type: "warning" });
+    });
+    client.on("error", (error) => {
+      console.log("mqtt error", error);
+      setMessageQueue({ message: error.message, type: "failure" });
     });
     client.subscribe(["example/ui-test"]);
     client.on("message", (topic, message) => {
-      // setMessages(messages.concat(message.toString()));
-      console.log({ topic, message: message.toString() });
-      setMessages((prev) => [message.toString(), ...prev]);
+      // TODO: remove this randomness
+      const type = Object.keys(iconMap).at(
+        Math.floor(Math.random() * 3)
+      ) as keyof typeof iconMap;
+
+      setMessageQueue({
+        type,
+        message: message.toString(),
+      });
     });
 
     return () => {
       if (client) {
         client.unsubscribe(["example/ui-test"]);
         client.end(true);
-        setIsWsConnected(false);
       }
     };
   }, []);
+
+  function setMessageQueue(message: MqttMessage) {
+    const id = Math.random().toString(16).slice(3);
+    setMessage({
+      id,
+      ...message,
+    });
+
+    setTimeout(() => {
+      removeMessage(id);
+    }, 5000);
+  }
 
   return (
     <>
@@ -65,7 +96,7 @@ export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
               <button
                 className="cursor-pointer bg-transparent px-3 py-1 text-xs leading-none text-white opacity-70 transition-all hover:opacity-100"
                 type="button"
-                // onClick={() => logout()}
+                onClick={() => setIsSideListOpen((prev) => !prev)}
               >
                 <i className="fas fa-bell text-xs text-white"></i>
               </button>
@@ -73,15 +104,19 @@ export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
           </ul>
         </div>
       </nav>
+
+      {/* toast */}
       <div className="absolute -left-40 bottom-0 z-10">
-        {messages.length && (
-          <div className="bg-transparent pb-8 pl-6">
-            <div className="relative flex w-full min-w-48 flex-col break-words rounded border-0 bg-emerald-500 px-8 py-6 text-lg text-white shadow-lg">
-              {messages.at(0)}
-            </div>
-          </div>
-        )}
+        <ToastList
+          data={toast}
+          x="left"
+          y="bottom"
+          removeToast={removeMessage}
+        />
       </div>
+
+      {/* message board */}
+      {isSideListOpen && <SideList />}
     </>
   );
 }

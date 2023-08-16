@@ -4,8 +4,54 @@
 
 @tailwind utilities;
 
+@layer base {
+  *::-webkit-scrollbar {
+    width: 0.35em;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply rounded bg-slate-50;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply rounded bg-slate-400;
+  }
+
+  *::-webkit-scrollbar-thumb:window-inactive {
+    @apply bg-slate-300;
+  }
+}
+
 @layer components {
   div.dangerouslySetInnerHTML pre {
     @apply hidden;
+  }
+
+  .toast-list--top-left .toast,
+  .toast-list--bottom-left .toast {
+    animation: toast-in-left 500ms;
+  }
+
+  .toast-list--top-right .toast,
+  .toast-list--bottom-right .toast {
+    animation: toast-in-right 500ms;
+  }
+
+  @keyframes toast-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes toast-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
   }
 }

@@ -62,10 +62,6 @@ export interface DockerNode {
     };
 }
 
-export interface DockerNodeError {
-    message: string;
-}
-
 interface DockerEndpointSpec {
     Mode: "vip" | "dnsrr";
     Ports?: {
@@ -125,10 +121,6 @@ export interface DockerService {
         CompletedAt: string;
         Message: string;
     };
-}
-
-export interface DockerServiceError {
-    message: string;
 }
 
 export const dockerNodeErrorCodes = {
