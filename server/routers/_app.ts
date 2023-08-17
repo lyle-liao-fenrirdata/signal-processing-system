@@ -9,6 +9,7 @@ import { recordingRouter } from './recording';
 import { authRouter } from './auth';
 import { permissionRouter } from './permission';
 import { swarmRouter } from './swarm';
+import { auditRouter } from './audit';
 
 export const appRouter = router({
     auth: authRouter,
@@ -29,6 +30,7 @@ export const appRouter = router({
     recording: recordingRouter,
     permission: permissionRouter,
     swarm: swarmRouter,
+    audit: auditRouter,
 });
 
 export type AppRouter = typeof appRouter;

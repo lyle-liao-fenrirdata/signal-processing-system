@@ -12,14 +12,17 @@ export type MqttQueue = MqttMessage & {
 }
 
 export type MqttList = MqttQueue & {
-    receivedAt: Date;
+    receivedAt: number;
 }
 
 interface MqttState {
     messages: MqttList[];
     toast: MqttQueue[];
     setMessage: (message: MqttQueue) => void;
+    removeToast: (id: string) => void;
     removeMessage: (id: string) => void;
+    clearToast: () => void;
+    clearAll: () => void;
 }
 
 const useMqttStore = create<MqttState>()(
@@ -29,12 +32,17 @@ const useMqttStore = create<MqttState>()(
                 messages: [],
                 toast: [],
                 setMessage: (message) => set((state) => ({
-                    messages: [{ ...message, receivedAt: new Date() }, ...state.messages],
+                    messages: [{ ...message, receivedAt: Date.now() }, ...state.messages],
                     toast: [...state.toast, message]
                 })),
-                removeMessage: (id) => set((state) => ({
+                removeToast: (id) => set((state) => ({
                     toast: state.toast.filter(t => t.id !== id),
                 })),
+                removeMessage: (id) => set((state) => ({
+                    messages: state.messages.filter(t => t.id !== id),
+                })),
+                clearToast: () => set(() => ({ toast: [] })),
+                clearAll: () => set(() => ({ messages: [], toast: [] }))
             }),
             {
                 name: 'mqtt-storage', // unique name

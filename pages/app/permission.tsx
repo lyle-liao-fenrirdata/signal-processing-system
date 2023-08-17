@@ -10,6 +10,7 @@ import { Errors } from "@/components/commons/Errors";
 import ModalExt from "@/components/permission/ModalExt";
 import Modal from "@/components/commons/Modal";
 import ModalExtResetPassword from "@/components/permission/ModalExtResetPassword";
+import { formatDate } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -40,12 +41,6 @@ export type UserInfo = {
   updatedAt: Date;
   deletedAt: Date | null;
 };
-
-export const formatDate = new Intl.DateTimeFormat("zh-TW", {
-  hour12: false,
-  dateStyle: "long",
-  timeStyle: "medium",
-});
 
 export default function Permission({
   username,

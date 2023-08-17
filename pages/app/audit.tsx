@@ -5,6 +5,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { Container } from "@/components/commons/Container";
 import CardTable from "@/components/commons/TableContainer";
 import Modal from "@/components/commons/Modal";
+import { trpc } from "@/utils/trpc";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -44,8 +45,14 @@ export default function Audit({
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [isAuditChangeModalOpen, setIsAuditChangeModalOpen] =
-    React.useState(true);
+    React.useState(false);
 
+  const t = trpc.audit.getLiveAudit.useQuery(undefined, {
+    retry: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retryOnMount: false,
+  });
   function closeAuditChangeModal() {
     setIsAuditChangeModalOpen(false);
   }

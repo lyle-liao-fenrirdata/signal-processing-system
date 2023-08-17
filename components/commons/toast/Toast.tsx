@@ -1,5 +1,11 @@
 import React from "react";
-import { CloseIcon, FailureIcon, SuccessIcon, WarningIcon } from "./Icon";
+import {
+  CloseIcon,
+  FailureIcon,
+  QuestionIcon,
+  SuccessIcon,
+  WarningIcon,
+} from "./Icon";
 import { MqttQueue } from "@/stores/mqtt";
 
 export const iconMap = {
@@ -10,10 +16,11 @@ export const iconMap = {
 
 type ToastProps = Omit<MqttQueue, "id"> & {
   onClose: () => void;
+  children?: React.ReactNode;
 };
 
-const Toast = ({ message, type, onClose }: ToastProps) => {
-  const toastIcon = iconMap[type || "success"];
+const Toast = ({ message, type, onClose, children }: ToastProps) => {
+  const toastIcon = iconMap[type];
 
   return (
     <div
@@ -21,7 +28,7 @@ const Toast = ({ message, type, onClose }: ToastProps) => {
       role="alert"
     >
       <div className="flex gap-4">
-        {toastIcon && (
+        {toastIcon ? (
           <div
             className={`h-6 w-6 shrink-0 ${
               type === "success"
@@ -33,9 +40,14 @@ const Toast = ({ message, type, onClose }: ToastProps) => {
           >
             {toastIcon}
           </div>
+        ) : (
+          <div className="h-6 w-6 shrink-0 text-amber-500">
+            <QuestionIcon />
+          </div>
         )}
-        <p>{message}</p>
+        <pre>{message}</pre>
       </div>
+      {children}
       <button
         className="absolute right-2 top-2 h-6 w-6 cursor-pointer bg-transparent p-1 leading-none text-inherit opacity-75 hover:opacity-100"
         onClick={onClose}

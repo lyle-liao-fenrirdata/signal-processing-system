@@ -2,10 +2,13 @@
 
 import React, { useEffect, useRef } from "react";
 import useMqttStore from "@/stores/mqtt";
-import { iconMap } from "@/components/commons/toast/Toast";
+import Toast, { iconMap } from "@/components/commons/toast/Toast";
+import { formatDate } from "@/utils/formats";
 
-export const SideList = () => {
+export default function NotifyBoard() {
   const messages = useMqttStore((state) => state.messages);
+  const removeMessage = useMqttStore((state) => state.removeMessage);
+  const clearAll = useMqttStore((state) => state.clearAll);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,27 +27,26 @@ export const SideList = () => {
       className="fixed right-2 top-20 z-10 max-h-[calc(100vh-80px)] w-full max-w-md overflow-y-auto overflow-x-hidden p-4"
       ref={listRef}
     >
-      {messages.map((message) => (
-        <div
-          key={`${message.id}`}
-          className="toast relative mb-2 rounded-lg bg-white p-6 text-slate-700 shadow-md transition-all duration-500 hover:shadow-xl"
-          role="alert"
+      <div className="flex">
+        <button
+          onClick={clearAll}
+          className=" ml-auto p-1 opacity-75 transition-all hover:opacity-100"
         >
-          <div className="flex gap-4">
-            <div
-              className={`h-6 w-6 shrink-0 ${
-                message.type === "success"
-                  ? "text-emerald-500"
-                  : message.type === "failure"
-                  ? "text-red-500"
-                  : "text-sky-500"
-              }`}
-            >
-              {iconMap[message.type]}
-            </div>
-            <p>{message.message}</p>
-          </div>
-        </div>
+          清除全部
+        </button>
+      </div>
+
+      {messages.map((message) => (
+        <Toast
+          key={message.id}
+          message={message.message}
+          type={message.type}
+          onClose={() => removeMessage(message.id)}
+        >
+          <span className="absolute bottom-1 right-2 bg-transparent p-1 leading-none text-inherit opacity-75">
+            通知時間: {formatDate.format(message.receivedAt)}
+          </span>
+        </Toast>
       ))}
     </div>
   ) : (
@@ -60,6 +62,4 @@ export const SideList = () => {
       </div>
     </div>
   );
-};
-
-export default SideList;
+}

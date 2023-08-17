@@ -4,11 +4,11 @@ import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { trpc } from "@/utils/trpc";
 import { Errors } from "@/components/commons/Errors";
-import { formatDate } from "./permission";
 import { UpdateUserInput, updateUserSchema } from "@/server/schema/auth.schema";
 import { useRouter } from "next/router";
 import ModalExtChangetPassword from "@/components/settings/ModalExtChangePassword";
 import { Container } from "@/components/commons/Container";
+import { formatDate } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;

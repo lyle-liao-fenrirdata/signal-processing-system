@@ -1,4 +1,4 @@
-import { router, publicProcedure, userProcedure, adminProcedure } from '../trpc';
+import { router, adminProcedure } from '../trpc';
 import * as argon2 from "argon2";
 import { prisma } from '@/server/prisma';
 import { TRPCError } from '@trpc/server';

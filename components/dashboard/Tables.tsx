@@ -4,8 +4,9 @@ export const ServiceTable = ({
   services: {
     key: string;
     name: string;
-    replicated: number;
+    replicated: number | string;
     status: JSX.Element;
+    updatedAt: string;
   }[];
 }) => (
   <table className="w-full border-collapse items-center bg-transparent">
@@ -17,8 +18,11 @@ export const ServiceTable = ({
         <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 px-6 py-3 text-left align-middle text-xs font-semibold text-slate-500">
           Scheduling Mode
         </th>
-        <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 px-6 py-3 text-left align-middle text-xs font-semibold text-slate-500">
+        <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 text-left align-middle text-xs font-semibold text-slate-500">
           Status
+        </th>
+        <th className="whitespace-nowrap border border-l-0 border-r-0 border-solid border-slate-100 bg-slate-50 px-6 py-3 text-left align-middle text-xs font-semibold text-slate-500">
+          Updated At
         </th>
       </tr>
     </thead>
@@ -31,10 +35,15 @@ export const ServiceTable = ({
             </span>
           </th>
           <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-            {`replicated ${service.replicated}`}
+            {typeof service.replicated === "string"
+              ? service.replicated
+              : `replicated ${service.replicated}`}
+          </td>
+          <td className="flex justify-center whitespace-nowrap border-l-0 border-r-0 border-t-0 align-middle text-xs">
+            {service.status}
           </td>
           <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-            {service.status}
+            {service.updatedAt}
           </td>
         </tr>
       ))}

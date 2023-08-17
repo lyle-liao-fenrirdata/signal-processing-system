@@ -1,9 +1,11 @@
-import { connect } from "mqtt";
-import { useEffect, useState } from "react";
-import ToastList from "../commons/toast/ToastList";
-import { iconMap } from "../commons/toast/Toast";
-import useMqttStore, { MqttMessage } from "@/stores/mqtt";
-import { SideList } from "../commons/toast/SideList";
+import { useState } from "react";
+import dynamic from "next/dynamic";
+const NotifyBoard = dynamic(() => import("../commons/NotifyBoard"), {
+  ssr: false,
+});
+const Toasts = dynamic(() => import("../commons/Toasts"), {
+  ssr: false,
+});
 
 export type NavbarProps = {
   breadcrumbs: { title: string; href: string }[];
@@ -12,61 +14,6 @@ export type NavbarProps = {
 
 export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
   const [isSideListOpen, setIsSideListOpen] = useState(false);
-
-  const toast = useMqttStore((state) => state.toast);
-  const setMessage = useMqttStore((state) => state.setMessage);
-  const removeMessage = useMqttStore((state) => state.removeMessage);
-
-  useEffect(() => {
-    const client = connect("ws://192.168.16.31:9001", {
-      clientId: `mqtt_${Math.random().toString(16).slice(2)}`,
-      clean: true,
-      connectTimeout: 4000,
-      reconnectPeriod: 1000,
-    });
-    client.on("connect", () => {
-      console.log("mqtt connected");
-    });
-    client.on("offline", () => {
-      console.log("mqtt offline");
-      setMessageQueue({ message: "network offline", type: "warning" });
-    });
-    client.on("error", (error) => {
-      console.log("mqtt error", error);
-      setMessageQueue({ message: error.message, type: "failure" });
-    });
-    client.subscribe(["example/ui-test"]);
-    client.on("message", (topic, message) => {
-      // TODO: remove this randomness
-      const type = Object.keys(iconMap).at(
-        Math.floor(Math.random() * 3)
-      ) as keyof typeof iconMap;
-
-      setMessageQueue({
-        type,
-        message: message.toString(),
-      });
-    });
-
-    return () => {
-      if (client) {
-        client.unsubscribe(["example/ui-test"]);
-        client.end(true);
-      }
-    };
-  }, []);
-
-  function setMessageQueue(message: MqttMessage) {
-    const id = Math.random().toString(16).slice(3);
-    setMessage({
-      id,
-      ...message,
-    });
-
-    setTimeout(() => {
-      removeMessage(id);
-    }, 5000);
-  }
 
   return (
     <>
@@ -106,17 +53,10 @@ export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
       </nav>
 
       {/* toast */}
-      <div className="absolute -left-40 bottom-0 z-10">
-        <ToastList
-          data={toast}
-          x="left"
-          y="bottom"
-          removeToast={removeMessage}
-        />
-      </div>
+      <Toasts />
 
       {/* message board */}
-      {isSideListOpen && <SideList />}
+      {isSideListOpen && <NotifyBoard />}
     </>
   );
 }

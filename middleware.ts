@@ -27,64 +27,70 @@ export async function middleware(request: NextRequest) {
     if (!token) return isAuthPath ? NextResponse.next() : NextResponse.redirect(new URL('/auth/login', request.url));
     if (pathname === '/app') return NextResponse.redirect(new URL('/app/dashboard', request.url))
 
-    const { error, payload } = await verifyUserJWT(token);
-    console.log("middleware 3")
-    console.log({ error, payload })
+    try {
 
-    if (!payload) {
-        const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: error! })}`, request.url));
-        response.cookies.delete("x-token");
-        return response
-    }
-    if (isAuthPath) return NextResponse.redirect(new URL('/app/dashboard', request.url));
+        const { error, payload } = await verifyUserJWT(token);
+        console.log("middleware 3")
+        console.log({ error, payload })
 
-    const { username, account, role, exp } = payload;
-    const userCheckResult = await fetch('http://localhost:3000/api/auth', {
-        method: "PUT",
-        body: JSON.stringify({ username, account, role }),
-    })
-    const { ok, username: trueUsername, role: trueRole } = (await userCheckResult.json()) as {
-        ok: boolean;
-        username: string;
-        role: Role;
-    };
-
-    console.log("middleware 4")
-    console.log({ ok, trueUsername, trueRole })
-
-    if (!ok) {
-        const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: "User does not exist." })}`, request.url));
-        response.cookies.delete("x-token");
-        return response
-    }
-
-    if (isUserPath && trueRole !== Role.USER && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
-    if (isAdminPath && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
-
-    const isRoleOrNameChange = trueUsername !== username || trueRole !== role
-    const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 1; // less than one hour to be exprired
-
-    const requestHeader = new Headers(request.headers);
-    requestHeader.set("x-username", encodeURIComponent(trueUsername));
-    // requestHeader.set("x-account", account);
-    requestHeader.set("x-role", trueRole);
-
-    const response: AuthenticatedNextResponse = NextResponse.next({
-        request: {
-            headers: requestHeader,
+        if (!payload) {
+            const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: error! })}`, request.url));
+            response.cookies.delete("x-token");
+            return response
         }
-    });
+        if (isAuthPath) return NextResponse.redirect(new URL('/app/dashboard', request.url));
 
-    console.log("middleware 5")
-    console.log({ isRoleOrNameChange, isAboutToExpired, trueUsername })
+        const { username, account, role, exp } = payload;
+        const userCheckResult = await fetch('http://localhost:3000/api/auth', {
+            method: "PUT",
+            body: JSON.stringify({ username, account, role }),
+        })
+        const { ok, username: trueUsername, role: trueRole } = (await userCheckResult.json()) as {
+            ok: boolean;
+            username: string;
+            role: Role;
+        };
 
-    if (isAboutToExpired || isRoleOrNameChange) {
-        const token = await signUserJWT({ username: trueUsername, account, role: trueRole });
-        const cookie = getCookie(token);
-        response.cookies.set("x-token", cookie.substring(8));
+        console.log("middleware 4")
+        console.log({ ok, trueUsername, trueRole })
+
+        if (!ok) {
+            const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: "User does not exist." })}`, request.url));
+            response.cookies.delete("x-token");
+            return response
+        }
+
+        if (isUserPath && trueRole !== Role.USER && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
+        if (isAdminPath && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
+
+        const isRoleOrNameChange = trueUsername !== username || trueRole !== role
+        const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 1; // less than one hour to be exprired
+
+        const requestHeader = new Headers(request.headers);
+        requestHeader.set("x-username", encodeURIComponent(trueUsername));
+        // requestHeader.set("x-account", account);
+        requestHeader.set("x-role", trueRole);
+
+        const response: AuthenticatedNextResponse = NextResponse.next({
+            request: {
+                headers: requestHeader,
+            }
+        });
+
+        console.log("middleware 5")
+        console.log({ isRoleOrNameChange, isAboutToExpired, trueUsername })
+
+        if (isAboutToExpired || isRoleOrNameChange) {
+            const token = await signUserJWT({ username: trueUsername, account, role: trueRole });
+            const cookie = getCookie(token);
+            response.cookies.set("x-token", cookie.substring(8));
+        }
+
+        return response;
+    } catch (error) {
+        console.error("middleware error", error);
+        return NextResponse.redirect(new URL(`/?${new URLSearchParams({ error: String(error) })}`, request.url));
     }
-
-    return response;
 }
 
 export const config = {

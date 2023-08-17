@@ -1,4 +1,5 @@
-import { UserInfo, formatDate } from "@/pages/app/permission";
+import { UserInfo } from "@/pages/app/permission";
+import { formatDate } from "@/utils/formats";
 
 export const PermissionTable = ({
   users,

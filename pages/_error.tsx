@@ -1,4 +1,6 @@
-function Error({ statusCode }: { statusCode: number | null | undefined }) {
+import { NextPageContext } from "next";
+
+function Error({ statusCode }: { statusCode: number | undefined }) {
   return (
     <p>
       {statusCode
@@ -8,7 +10,7 @@ function Error({ statusCode }: { statusCode: number | null | undefined }) {
   );
 }
 
-Error.getInitialProps = ({ res, err }: any) => {
+Error.getInitialProps = ({ res, err }: NextPageContext) => {
   const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
   return { statusCode };
 };

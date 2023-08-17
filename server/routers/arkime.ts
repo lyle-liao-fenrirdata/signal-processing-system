@@ -1,7 +1,5 @@
 import { env } from '@/env.mjs';
-import { router, publicProcedure, userProcedure } from '../trpc';
-// import { Prisma } from '@prisma/client';
-// import { TRPCError } from '@trpc/server';
+import { router, userProcedure, loginProcedure } from '../trpc';
 import { z } from 'zod';
 import { arkimeSearchSessionSchema } from '../schema/arkime.schema';
 
@@ -49,16 +47,47 @@ export const arkimeRouter = router({
          *      ip_src=127.0.0.1&
          *      expression=file = *out*
          */
-        const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
-        url.searchParams.append("host", host);
-        if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
-        url.searchParams.append("expression", expression);
+        try {
+            // TODO: fix this shit
+            // let url = `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}/arkime_api/sessions/`
+            const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
+            // url.searchParams.append("host", `http://${host}`);
+            url.searchParams.append("host", `http://192.168.16.32`);
+            // if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
+            url.searchParams.append("expression", expression);
+            // url += `?host=http://${host}`
+            // url += `?host=http://192.168.16.32`
+            // if (arkime_node) url += `&arkime_node=${arkime_node}`
+            // url += `&expression=${expression}`
 
-        const response = await fetch(url, { method: "GET" })
-        return (await response.json()) as ArkimeSessionData
+            const response = await fetch(url, { method: "GET" })
+            return (await response.json()) as ArkimeSessionData
+            // return { error: JSON.stringify(response.headers), data: undefined }
+        } catch (error) {
+            return { error: String(error), data: undefined }
+        }
+    }),
+    getArkimeHosts: loginProcedure
+        .query(async () => {
+            try {
+                const arkimeUser = new FormData();
+                arkimeUser.append("username", "apiuser");
+                arkimeUser.append("password", "1qaz@WSX3edc");
+                const tokenUrl = new URL("/api/token/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
+                const tokenResponse = await fetch(tokenUrl, { method: "POST", body: arkimeUser })
+                const token = await tokenResponse.json() as ArkimeTokenData
 
-        // return fakeSessionData
-    })
+                const tokenHeader = new Headers();
+                tokenHeader.append("Authorization", `Bearer ${token.access}`);
+                const hostsUrl = new URL("/arkime_api/api/arkime-hosts/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
+                const hostsResponse = await fetch(hostsUrl, { method: "GET", headers: tokenHeader })
+                const hosts = await hostsResponse.json()
+
+                return hosts as ArkimeHostData
+            } catch (error) {
+                return { error: String(error), arkime_hosts: [] }
+            }
+        }),
 });
 
 // import { prisma } from '@/server/prisma';
@@ -521,4 +550,22 @@ const fakeSessionData = {
     "recordsFiltered": 10
 }
 
-export type ArkimeSessionData = typeof fakeSessionData;
+export type ArkimeSessionData = typeof fakeSessionData | { error: string, data: undefined };
+
+type ArkimeTokenData = {
+    refresh: string;
+    access: string;
+};
+
+const fakeArkimeHostData = {
+    "arkime_hosts": [
+        {
+            "hostname": "dac02",
+            "ip": "192.168.16.31"
+        }
+    ],
+}
+
+export type ArkimeHostData = typeof fakeArkimeHostData & {
+    comment?: string
+} | { error: string, arkime_hosts: typeof fakeArkimeHostData["arkime_hosts"] };;

@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React from "react";
 import Script from "next/script";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
@@ -10,6 +10,7 @@ import { NetdataNodeBoard } from "@/components/dashboard/NetdataNodeBoard";
 import { Errors } from "@/components/commons/Errors";
 import { Flex2Col } from "@/components/commons/Flex2Col";
 import { trpc } from "@/utils/trpc";
+import { formatDate } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -46,7 +47,7 @@ export default function Dashboard({
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
-    refetchInterval: 5000,
+    refetchInterval: 10000,
     refetchIntervalInBackground: false,
     retryOnMount: true,
     retry: true,
@@ -65,7 +66,7 @@ export default function Dashboard({
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: true,
-    refetchInterval: 5000,
+    refetchInterval: 10000,
     refetchIntervalInBackground: false,
     retryOnMount: true,
     retry: true,
@@ -84,7 +85,16 @@ export default function Dashboard({
       <>
         <Flex2Col
           left={
-            <ChartContainer title={<>Nodes</>}>
+            <ChartContainer
+              title={
+                <>
+                  Nodes{" "}
+                  <span className="font-normal">
+                    [資料更新時間: {formatDate.format(nodesDataUpdatedAt)}]
+                  </span>
+                </>
+              }
+            >
               {isNodesError ? (
                 <Errors errors={[nodesError.message]} />
               ) : isNodesSuccess ? (
@@ -143,7 +153,16 @@ export default function Dashboard({
             </ChartContainer>
           }
           right={
-            <ChartContainer title={<>Services</>}>
+            <ChartContainer
+              title={
+                <>
+                  Services{" "}
+                  <span className="font-normal">
+                    [資料更新時間: {formatDate.format(servicesDataUpdatedAt)}]
+                  </span>
+                </>
+              }
+            >
               {isServicesError ? (
                 <Errors errors={[servicesError.message]} />
               ) : isServicesSuccess ? (
@@ -161,7 +180,7 @@ export default function Dashboard({
                       replicated: Object.keys(
                         service.Spec?.Mode ?? {}
                       ).includes("Global")
-                        ? 1
+                        ? "global"
                         : service.Spec?.Mode?.Replicated?.Replicas ?? 0,
                       status:
                         Object.keys(service.Spec?.Mode ?? {}).includes(
@@ -172,6 +191,9 @@ export default function Dashboard({
                         ) : (
                           <i className="fas fa-circle-xmark text-red-500"></i>
                         ),
+                      updatedAt: formatDate.format(
+                        Date.parse(service.UpdatedAt)
+                      ),
                     }))}
                   />
                 )
@@ -181,6 +203,45 @@ export default function Dashboard({
             </ChartContainer>
           }
         />
+        {isNodesSuccess &&
+          nodes.ok &&
+          nodes.data.map((node) => (
+            <React.Fragment key={node.Description.Hostname}>
+              <ChartContainer
+                title={
+                  <a
+                    className="font-bold hover:underline"
+                    href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {node.Description.Hostname} [{node.Status.Addr}]
+                  </a>
+                }
+              >
+                <>
+                  <NetdataNodeBoard nodeUrl={node.Status.Addr} />
+                  <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
+                    <span
+                      id={node.ID}
+                      className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                        node.Spec.Role === "manager"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {node.Spec.Role}
+                    </span>
+                  </span>
+                </>
+              </ChartContainer>
+              <Script
+                strategy="lazyOnload"
+                type="text/javascript"
+                src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_NETDATA_PORT}/dashboard.js`}
+              />
+            </React.Fragment>
+          ))}
         <ChartContainer title={<>HA PROXY</>}>
           <iframe
             src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
@@ -190,39 +251,6 @@ export default function Dashboard({
             width="100%"
           ></iframe>
         </ChartContainer>
-        {isNodesSuccess &&
-          nodes.ok &&
-          nodes.data.map((node) => (
-            <ChartContainer
-              key={node.Description.Hostname}
-              title={
-                <a
-                  className="font-bold hover:underline"
-                  href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {node.Description.Hostname} [{node.Status.Addr}]
-                </a>
-              }
-            >
-              <>
-                <NetdataNodeBoard nodeUrl={node.Status.Addr} />
-                <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
-                  <span
-                    id={node.ID}
-                    className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
-                      node.Spec.Role === "manager"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {node.Spec.Role}
-                  </span>
-                </span>
-              </>
-            </ChartContainer>
-          ))}
         <Script id="disable-Bootstrap">
           var netdataNoBootstrap = true; var netdataNoFontAwesome = true; var
           netdataNoDygraphs = true; var netdataNoSparklines = true; var
@@ -230,11 +258,6 @@ export default function Dashboard({
           netdataNoMorris = true; var netdataNoD3 = true; var netdataNoC3 =
           true; var netdataNoD3pie = true; var netdataShowHelp = false;
         </Script>
-        <Script
-          strategy="lazyOnload"
-          type="text/javascript"
-          src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_NETDATA_PORT}/dashboard.js`}
-        />
       </>
     </AdminLayout>
   );
