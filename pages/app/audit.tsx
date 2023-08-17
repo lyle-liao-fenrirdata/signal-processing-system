@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -6,6 +6,8 @@ import { Container } from "@/components/commons/Container";
 import CardTable from "@/components/commons/TableContainer";
 import Modal from "@/components/commons/Modal";
 import { trpc } from "@/utils/trpc";
+import { formatDate } from "@/utils/formats";
+import { Color } from "@prisma/client";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -47,12 +49,20 @@ export default function Audit({
   const [isAuditChangeModalOpen, setIsAuditChangeModalOpen] =
     React.useState(false);
 
-  const t = trpc.audit.getLiveAudit.useQuery(undefined, {
-    retry: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    retryOnMount: false,
-  });
+  const { isError, isSuccess, data, isLoading, error } =
+    trpc.audit.getLiveAudit.useQuery(undefined, {
+      retry: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      retryOnMount: false,
+    });
+
+  // useEffect(() => {
+  //   if (!isError && !isLoading && isSuccess) {
+  //     console.log(JSON.stringify(data, undefined, 4));
+  //   }
+  // }, [data, isError, isLoading, isSuccess]);
+
   function closeAuditChangeModal() {
     setIsAuditChangeModalOpen(false);
   }
@@ -65,10 +75,10 @@ export default function Audit({
       }}
       sidebarProps={{ role, username }}
     >
-      <Container title={<>勾稽表單</>}>
+      {/* <Container title={<>勾稽表單</>}>
         <>勾稽表單</>
-      </Container>
-      <CardTable
+      </Container> */}
+      {/* <CardTable
         color="light"
         title={<>勾稽紀錄</>}
         ths={["Project", "Budget", "Status", "Completion", "Action"]}
@@ -98,192 +108,73 @@ export default function Audit({
               </>,
             ],
           },
-          {
-            th: "Angular Now UI Kit PRO",
-            tds: [
-              <>$1,800 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-emerald-500"></i>{" "}
-                completed
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">100%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-emerald-200 text-xs">
-                      <div
-                        style={{ width: "100%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-emerald-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-          {
-            th: "Black Dashboard Sketch",
-            tds: [
-              <>$3,150 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-red-500"></i> delayed
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">73%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-red-200 text-xs">
-                      <div
-                        style={{ width: "73%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-red-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-          {
-            th: "React Material Dashboard",
-            tds: [
-              <>$4,400 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-teal-500"></i> on schedule
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">90%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-teal-200 text-xs">
-                      <div
-                        style={{ width: "90%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-teal-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
         ]}
-      />
-      <CardTable
-        color="dark"
-        title={<>表單紀錄</>}
-        ths={["Project", "Budget", "Status", "Completion", "Action"]}
-        tbodyTrs={[
-          {
-            th: "Argon Design System",
-            tds: [
-              <>$2,500 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-orange-500"></i> pending
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">60%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-red-200 text-xs">
-                      <div
-                        style={{ width: "60%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-red-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-          {
-            th: "Angular Now UI Kit PRO",
-            tds: [
-              <>$1,800 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-emerald-500"></i>{" "}
-                completed
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">100%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-emerald-200 text-xs">
-                      <div
-                        style={{ width: "100%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-emerald-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-          {
-            th: "Black Dashboard Sketch",
-            tds: [
-              <>$3,150 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-red-500"></i> delayed
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">73%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-red-200 text-xs">
-                      <div
-                        style={{ width: "73%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-red-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-          {
-            th: "React Material Dashboard",
-            tds: [
-              <>$4,400 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-teal-500"></i> on schedule
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">90%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-teal-200 text-xs">
-                      <div
-                        style={{ width: "90%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-teal-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-        ]}
-      />
+      /> */}
+      {isLoading ? (
+        <CardTable
+          color="light"
+          title={<>表單紀錄</>}
+          ths={[""]}
+          tbodyTrs={[
+            {
+              th: "Loading...",
+              tds: [],
+            },
+          ]}
+        />
+      ) : isError ? (
+        <CardTable
+          color="light"
+          title={<>表單紀錄</>}
+          ths={["", ""]}
+          tbodyTrs={[
+            {
+              th: "Error",
+              tds: [<>錯誤</>, <>{error?.message}</>],
+            },
+          ]}
+        />
+      ) : (
+        data.map((audit) => (
+          <pre key={`audit-${audit.id}`}>
+            表單新增者: {audit.createdBy.username}
+            <br />
+            表單新增時間: {formatDate.format(audit.createdAt)}
+            {audit.auditGroup.map((auditGroup) => (
+              <pre
+                key={`auditGroup-${auditGroup.id}`}
+                className={`ml-8 ${
+                  auditGroup.color === Color.Blue
+                    ? "bg-sky-100"
+                    : auditGroup.color === Color.Gray
+                    ? "bg-neutral-100"
+                    : auditGroup.color === Color.Green
+                    ? "bg-green-100"
+                    : auditGroup.color === Color.Orange
+                    ? "bg-orange-100"
+                    : auditGroup.color === Color.Pink
+                    ? "bg-pink-100"
+                    : auditGroup.color === Color.Purple
+                    ? "bg-purple-100"
+                    : auditGroup.color === Color.Red
+                    ? "bg-red-100"
+                    : auditGroup.color === Color.Yellow
+                    ? "bg-yellow-100"
+                    : "bg-slate-100"
+                }`}
+              >
+                {" "}
+                群組名稱: {auditGroup.name}
+                {auditGroup.auditItem.map((auditItem) => (
+                  <pre key={`auditItem-${auditItem.id}`} className="ml-8">
+                    稽核事項: {auditGroup.name}
+                  </pre>
+                ))}
+              </pre>
+            ))}
+          </pre>
+        ))
+      )}
       {isAuditChangeModalOpen && (
         <Modal
           header="新增(變更)表單"

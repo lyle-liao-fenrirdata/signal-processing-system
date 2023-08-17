@@ -16,7 +16,12 @@ export const auditRouter = router({
                 include: {
                     auditGroup: {
                         include: {
-                            auditItem: true
+                            auditItem: true,
+                        }
+                    },
+                    createdBy: {
+                        select: {
+                            username: true,
                         }
                     }
                 }
