@@ -15,8 +15,8 @@ export const arkimeRouter = router({
         stopTime: z.string().nullable(),
         startTime: z.string().nullable(),
         arkime_node: z.string().nullable(),
-        ip_src: z.string(),
-    })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node, ip_src } }) => {
+        // ip_src: z.string(),
+    })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node } }) => {
         // const client = new DigestClient('admin', '1qaz2wsx', { algorithm: 'MD5' })
         /**
          * http://192.168.15.13:8000/arkime_api/payload/?
@@ -33,7 +33,7 @@ export const arkimeRouter = router({
         if (stopTime) url.searchParams.append("stopTime", stopTime);
         if (startTime) url.searchParams.append("startTime", startTime);
         if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
-        url.searchParams.append("ip_src", ip_src);
+        // url.searchParams.append("ip_src", ip_src);
 
         const response = await fetch(url, { method: "GET" })
         return await response.json()
