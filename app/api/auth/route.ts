@@ -6,31 +6,31 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
         const token = searchParams.get('token')
-        if (!token) return NextResponse.json({ ok: false }, { status: 400 })
+        if (!token) return NextResponse.json({ ok: false, error: "Expect 'token' query parameter." }, { status: 400 })
 
         const { payload, error } = await verifyUserJWT(token)
-        if (error) return NextResponse.json({ ok: false }, { status: 401 })
+        if (error) return NextResponse.json({ ok: false, error: "Invalid token." }, { status: 401 })
 
         return NextResponse.json({ ok: true, user: payload });
     } catch (error) {
-        return NextResponse.json({ ok: false }, { status: 400, statusText: String(error) })
+        return NextResponse.json({ ok: false, error: String(error) }, { status: 400 })
     }
 }
 
 export async function POST(request: Request) {
     try {
         const { token } = await request.json()
-        if (!token) return NextResponse.json({ ok: false }, { status: 400, statusText: "Expect 'token' porperty in body JSON format." })
+        if (!token) return NextResponse.json({ ok: false, error: "Expect 'token' property in body JSON format." }, { status: 400 })
 
         const { payload, error } = await verifyUserJWT(token)
-        if (error) return NextResponse.json({ ok: false }, { status: 401, statusText: "Invalid token." })
+        if (error) return NextResponse.json({ ok: false, error: "Invalid token." }, { status: 401 })
 
         const { username, role, account } = payload
         const newToken = await signUserJWT({ username, account, role })
 
         return NextResponse.json({ ok: true, token: newToken });
     } catch (error) {
-        return NextResponse.json({ ok: false }, { status: 400, statusText: String(error) })
+        return NextResponse.json({ ok: false, error: String(error) }, { status: 400 })
     }
 }
 

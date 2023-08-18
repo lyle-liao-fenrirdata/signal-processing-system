@@ -1,34 +1,86 @@
-# Fork From Notus NextJS
+## Get Started
 
-### Get Started
+_Orignal project cloned from Notus NextJS_
 
 - Install NodeJS **LTS** version from <a href="https://nodejs.org/en/">NodeJs Official Page</a>
-- Download the product on this page
-- Unzip the downloaded file to a folder in your computer
 - Open Terminal
 - Go to your file project (where you’ve unzipped the product)
-- (If you are on a linux based terminal) Simply run `npm run install:clean`
-- (If not) Run in terminal `npm install`
-- (If not) Run in terminal `npm run build:tailwind` (each time you add a new class, a class that does not exist in `src/assets/styles/tailwind.css`, you will need to run this command)
-- (If not) Run in terminal `npm run dev`
-- Navigate to https://localhost:3000
+- Run in terminal `npm install`
+- Navigate to http://localhost:3000
 - Check more about [Tailwind CSS](https://tailwindcss.com/)
 
-### CSS Components
+## CSS Components
 
 Notus NextJS comes with 120 Fully Coded CSS elements, such as [Alerts](https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=nnjs-github-readme), [Buttons](https://www.creative-tim.com/learning-lab/tailwind/nextjs/buttons/notus?ref=nnjs-github-readme), [Inputs](https://www.creative-tim.com/learning-lab/tailwind/nextjs/inputs/notus?ref=nnjs-github-readme) and many more.
 
 Please [check all of them here](https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=nnjs-github-readme).
 
-### NextJS Components
+## /api/auth for External Site
 
-We also feature the following 18 dynamic components:
+**use THE_IP_OR_URL:THE_PORT/api/auth GET & POST methods only**
 
-- [Alerts](https://www.creative-tim.com/learning-lab/tailwind/nextjs/alerts/notus?ref=nnjs-github-readme)
-- [Popper for Menus](https://www.creative-tim.com/learning-lab/tailwind/nextjs/dropdowns/notus?ref=nnjs-github-readme)
-- [Menus](https://www.creative-tim.com/learning-lab/tailwind/nextjs/menus/notus?ref=nnjs-github-readme)
-- [Modals](https://www.creative-tim.com/learning-lab/tailwind/nextjs/modals/notus?ref=nnjs-github-readme)
-- [Navbars](https://www.creative-tim.com/learning-lab/tailwind/nextjs/navbar/notus?ref=nnjs-github-readme)
-- [Popper for popover content](https://www.creative-tim.com/learning-lab/tailwind/nextjs/popovers/notus?ref=nnjs-github-readme)
-- [Tabs](https://www.creative-tim.com/learning-lab/tailwind/nextjs/tabs/notus?ref=nnjs-github-readme)
-- [Popper for tooltips content](https://www.creative-tim.com/learning-lab/tailwind/nextjs/tooltips/notus?ref=nnjs-github-readme)
+- GET (to get user's username, account, and role)
+
+  - query parameter: token
+    - example /api/auth??token=THE_JWT_TOKEN
+  - body: none
+  - returns:
+    - 200 OK
+      ```json
+      {
+        "ok": true,
+        "user": {
+          "username": "測試-管理者",
+          "account": "admin",
+          "role": "ADMIN", // three possible value ADMIN, USER, and GUEST
+          "iat": 1692275895,
+          "iss": "Fenrir Data Analysis", // always return this
+          "exp": 1692362295
+        }
+      }
+      ```
+    - 400 Bad Request
+      ```json
+      {
+        "ok": false,
+        "error": "Expect 'token' query parameter." // or any server side or token parse error message
+      }
+      ```
+    - 401 Unauthorized
+      ```json
+      {
+        "ok": false,
+        "error": "JWSInvalid: JWS Protected Header is invalid"
+      }
+      ```
+
+- POST (to validate the token, confirm the token is signed by system)
+  - query parameter: none
+  - body: JSON format as follow
+    ```json
+    {
+      "token": "THE_TOKEN"
+    }
+    ```
+  - returns:
+    - 200 OK
+      ```json
+      {
+        "ok": true,
+        "token": "THE_TOKEN" // this token will different from previous(POST body) because of different iat and exp.
+      }
+      ```
+    - 400 Bad Request
+      ```json
+      {
+        "ok": false,
+        "error": "Expect 'token' property in body JSON format." // or any server side or token parse error message
+      }
+      ```
+    - 401 Unauthorized
+      ```json
+      {
+        "ok": false,
+        "error": "Invalid token."
+      }
+      ```
