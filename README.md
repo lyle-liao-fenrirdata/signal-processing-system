@@ -17,16 +17,16 @@ Please [check all of them here](https://www.creative-tim.com/learning-lab/tailwi
 
 ## /api/auth for External Site
 
-**use THE_IP_OR_URL:THE_PORT/api/auth GET & POST methods only**
+#### Use THE_IP_OR_URL:THE_PORT/api/auth GET & POST methods only
 
 - GET (to get user's username, account, and role)
 
   - query parameter: token
-    - example /api/auth??token=THE_JWT_TOKEN
+    - example /api/auth?token=THE_JWT_TOKEN
   - body: none
   - returns:
     - 200 OK
-      ```json
+      ```jsonc
       {
         "ok": true,
         "user": {
@@ -40,14 +40,14 @@ Please [check all of them here](https://www.creative-tim.com/learning-lab/tailwi
       }
       ```
     - 400 Bad Request
-      ```json
+      ```jsonc
       {
         "ok": false,
         "error": "Expect 'token' query parameter." // or any server side or token parse error message
       }
       ```
     - 401 Unauthorized
-      ```json
+      ```jsonc
       {
         "ok": false,
         "error": "JWSInvalid: JWS Protected Header is invalid"
@@ -57,28 +57,28 @@ Please [check all of them here](https://www.creative-tim.com/learning-lab/tailwi
 - POST (to validate the token, confirm the token is signed by system)
   - query parameter: none
   - body: JSON format as follow
-    ```json
+    ```jsonc
     {
       "token": "THE_TOKEN"
     }
     ```
   - returns:
     - 200 OK
-      ```json
+      ```jsonc
       {
         "ok": true,
         "token": "THE_TOKEN" // this token will different from previous(POST body) because of different iat and exp.
       }
       ```
     - 400 Bad Request
-      ```json
+      ```jsonc
       {
         "ok": false,
         "error": "Expect 'token' property in body JSON format." // or any server side or token parse error message
       }
       ```
     - 401 Unauthorized
-      ```json
+      ```jsonc
       {
         "ok": false,
         "error": "Invalid token."
