@@ -31,37 +31,59 @@ enum Role {
 model Audit {
   id          Int          @id @default(autoincrement())
   isActive    Boolean      @default(false)
+  comment     String?
   createdById Int
   createdBy   User         @relation(fields: [createdById], references: [id])
   createdAt   DateTime     @default(now())
   deletedAt   DateTime?
-  auditGroup  AuditGroup[]
-}
-
-model AuditGroup {
-  id        Int         @id @default(autoincrement())
-  name      String
-  order     Int         @default(autoincrement())
-  color     Color       @default(Default)
-  auditId   Int
-  audit     Audit       @relation(fields: [auditId], references: [id])
-  auditItem AuditItem[]
-}
-
-model AuditItem {
-  id           Int        @id @default(autoincrement())
-  name         String
-  order        Int        @default(autoincrement())
-  auditGroupId Int
-  auditGroup   AuditGroup @relation(fields: [auditGroupId], references: [id])
-  auditLogs    AuditLog[]
+  auditGroups AuditGroup[]
+  AuditLogs   AuditLog[]
 }
 
 model AuditLog {
-  id          Int       @id @default(autoincrement())
-  isLocked    Boolean   @default(false)
+  id          Int      @id @default(autoincrement())
+  isLocked    Boolean  @default(false)
+  description String?
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  auditId     Int
+  audit       Audit    @relation(fields: [auditId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditGroup {
+  id             Int             @id @default(autoincrement())
+  name           String
+  order          Int             @default(autoincrement())
+  color          Color           @default(Default)
+  auditId        Int
+  audit          Audit           @relation(fields: [auditId], references: [id])
+  auditItems     AuditItem[]
+  auditGroupLogs AuditGroupLog[]
+}
+
+model AuditGroupLog {
+  id           Int        @id @default(autoincrement())
+  description  String?
+  auditGroupId Int
+  auditGroup   AuditGroup @relation(fields: [auditGroupId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model AuditItem {
+  id           Int            @id @default(autoincrement())
+  name         String
+  order        Int            @default(autoincrement())
+  auditGroupId Int
+  auditGroups  AuditGroup     @relation(fields: [auditGroupId], references: [id])
+  auditLogs    AuditItemLog[]
+}
+
+model AuditItemLog {
+  id          Int       @id @default(autoincrement())
+  isChecked   Boolean   @default(false)
   auditItemId Int
   auditItem   AuditItem @relation(fields: [auditItemId], references: [id])
   createdAt   DateTime  @default(now())

@@ -14,9 +14,9 @@ export const auditRouter = router({
                     deletedAt: null
                 },
                 include: {
-                    auditGroup: {
+                    auditGroups: {
                         include: {
-                            auditItem: true,
+                            auditItems: true,
                         }
                     },
                     createdBy: {

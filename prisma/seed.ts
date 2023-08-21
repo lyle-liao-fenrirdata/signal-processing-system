@@ -48,9 +48,9 @@ async function main() {
 
     await prisma.audit.createMany({
         data: [
-            { createdById: admin.id, createdAt: new Date(new Date().setDate(new Date().getDate() - 2)) },
-            { createdById: admin.id, createdAt: new Date(new Date().setDate(new Date().getDate() - 1)) },
-            { createdById: admin.id, isActive: true },
+            { createdById: admin.id, createdAt: new Date(new Date().setDate(new Date().getDate() - 2)), comment: "text comment" },
+            { createdById: admin.id, createdAt: new Date(new Date().setDate(new Date().getDate() - 1)), comment: "try it first" },
+            { createdById: admin.id, isActive: true, comment: "測試留言功    能!!!" },
         ]
     })
 
@@ -80,7 +80,7 @@ async function main() {
     })
     await Promise.all(auditGroups.map(async ({ id, name, color }, index) => {
         await prisma.auditItem.createMany({
-            data: Array.from({ length: index + 2 }, (_, i) => ({
+            data: Array.from({ length: (index % 3) + 2 }, (_, i) => ({
                 name: `Item ${i + 1} of ${name} in ${color}`,
                 auditGroupId: id
             }))
