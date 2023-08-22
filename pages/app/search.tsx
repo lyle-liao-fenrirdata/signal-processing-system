@@ -30,23 +30,23 @@ export default function Search({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [isSqlTabActive, setIsSqlTabActive] = useState(true);
-  const [isPayloadTabActive, setIsPayloadTabActive] = useState(false);
-  const [isSessionTabActive, setIsSessionTabActive] = useState(false);
+  const [isSqlTabActive, setIsSqlTabActive] = useState(false);
+  // const [isPayloadTabActive, setIsPayloadTabActive] = useState(false);
+  const [isSessionTabActive, setIsSessionTabActive] = useState(true);
 
   function onTabClick(e: React.MouseEvent<HTMLButtonElement>) {
     const id = e.currentTarget.id;
     if (id === "sql2es-tab") {
       setIsSqlTabActive(true);
-      setIsPayloadTabActive(false);
+      // setIsPayloadTabActive(false);
       setIsSessionTabActive(false);
     } else if (id === "payload-tab") {
       setIsSqlTabActive(false);
-      setIsPayloadTabActive(true);
+      // setIsPayloadTabActive(true);
       setIsSessionTabActive(false);
     } else if (id === "session-tab") {
       setIsSqlTabActive(false);
-      setIsPayloadTabActive(false);
+      // setIsPayloadTabActive(false);
       setIsSessionTabActive(true);
     }
   }
@@ -66,23 +66,23 @@ export default function Search({
         >
           {[
             {
+              id: "session-tab",
+              text: "查詢解析資料",
+              onClick: onTabClick,
+              isSelected: isSessionTabActive,
+            },
+            {
               id: "sql2es-tab",
               text: "SQL to ES / 其他檢索工具",
               onClick: onTabClick,
               isSelected: isSqlTabActive,
             },
-            {
-              id: "payload-tab",
-              text: "解析資料檢索(Payload)",
-              onClick: onTabClick,
-              isSelected: isPayloadTabActive,
-            },
-            {
-              id: "session-tab",
-              text: "解析資料查詢(Session)",
-              onClick: onTabClick,
-              isSelected: isSessionTabActive,
-            },
+            // {
+            //   id: "payload-tab",
+            //   text: "解析資料檢索(Payload)",
+            //   onClick: onTabClick,
+            //   isSelected: isPayloadTabActive,
+            // },
           ].map(({ id, text, onClick, isSelected }) => (
             <li key={id} className="mr-2 last:mr-0" role="presentation">
               <button
@@ -102,27 +102,27 @@ export default function Search({
       <div id="searchTabContent">
         {[
           {
-            id: "sql2es",
-            children: <SearchSql />,
-            isSelected: isSqlTabActive,
-          },
-          {
-            id: "payload",
-            children: <SearchPayload />,
-            isSelected: isPayloadTabActive,
-          },
-          {
             id: "session",
             children: <SearchSession />,
             isSelected: isSessionTabActive,
           },
+          {
+            id: "sql2es",
+            children: <SearchSql />,
+            isSelected: isSqlTabActive,
+          },
+          // {
+          //   id: "payload",
+          //   children: <SearchPayload />,
+          //   isSelected: isPayloadTabActive,
+          // },
         ].map(({ id, children, isSelected }) => (
           <div
             key={id}
             className="hidden aria-selected:block"
             aria-selected={isSelected}
           >
-            {children}
+            {isSelected && children}
           </div>
         ))}
       </div>

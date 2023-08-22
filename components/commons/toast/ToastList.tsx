@@ -36,7 +36,7 @@ export const ToastList = ({ data, x, y, removeToast }: ToastListProps) => {
   return (
     sortedData.length > 0 && (
       <div
-        className={`toast-list--${y}-${x} fixed max-h-screen w-full max-w-md overflow-y-auto overflow-x-hidden p-4 ${
+        className={`toast-list--${y}-${x} fixed z-10 max-h-screen w-full max-w-md overflow-y-auto overflow-x-hidden p-4 ${
           y === "top" ? "top-0" : "bottom-0"
         } ${x === "left" ? "left-0" : "right-0"}`}
         aria-live="assertive"

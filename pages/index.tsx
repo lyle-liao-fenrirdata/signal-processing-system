@@ -1,7 +1,18 @@
 import IndexNavbar from "components/Navbars/IndexNavbar";
 import Footer from "components/Footers/Footer";
+import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+
+const ToastList = dynamic(
+  () => import("@/components/commons/toast/ToastList"),
+  {
+    ssr: false,
+  }
+);
 
 export default function Index() {
+  const router = useRouter();
+  const error = router.query.error ? String(router.query.error) : undefined;
   return (
     <>
       <IndexNavbar />
@@ -32,6 +43,25 @@ export default function Index() {
           alt="..."
         />
       </section>
+
+      {error && (
+        <div className="absolute right-0 top-0 z-10">
+          <ToastList
+            data={[
+              {
+                id: `error-${error}`,
+                message: error,
+                type: "failure",
+              },
+            ]}
+            x="right"
+            y="top"
+            removeToast={() => {
+              router.replace(router.basePath);
+            }}
+          />
+        </div>
+      )}
 
       <Footer />
     </>

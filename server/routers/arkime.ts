@@ -1,68 +1,54 @@
 import { env } from '@/env.mjs';
 import { router, userProcedure, loginProcedure } from '../trpc';
-import { z } from 'zod';
+// import { z } from 'zod';
 import { arkimeSearchSessionSchema } from '../schema/arkime.schema';
 
-// Export type router type signature,
-// NOT the router itself.
 export type ArkimeRouter = typeof arkimeRouter;
 
 export const arkimeRouter = router({
-    searchPayload: userProcedure.input(z.object({
-        host: z.string(),
-        port: z.string(),
-        query: z.string(),
-        stopTime: z.string().nullable(),
-        startTime: z.string().nullable(),
-        arkime_node: z.string().nullable(),
-        // ip_src: z.string(),
-    })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node } }) => {
-        // const client = new DigestClient('admin', '1qaz2wsx', { algorithm: 'MD5' })
-        /**
-         * http://192.168.15.13:8000/arkime_api/payload/?
-         *      host=http://192.168.15.21&
-         *      port=8005&
-         *      query=好嗎&
-         *      arkime_node=arkime01-node&
-         *      ip_src=192.168.15.31
-         */
-        const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
-        url.searchParams.append("host", host);
-        url.searchParams.append("port", port);
-        url.searchParams.append("query", query);
-        if (stopTime) url.searchParams.append("stopTime", stopTime);
-        if (startTime) url.searchParams.append("startTime", startTime);
-        if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
-        // url.searchParams.append("ip_src", ip_src);
+    // searchPayload: userProcedure.input(z.object({
+    //     host: z.string(),
+    //     port: z.string(),
+    //     query: z.string(),
+    //     stopTime: z.string().nullable(),
+    //     startTime: z.string().nullable(),
+    //     arkime_node: z.string().nullable(),
+    //     // ip_src: z.string(),
+    // })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node } }) => {
+    //     // const client = new DigestClient('admin', '1qaz2wsx', { algorithm: 'MD5' })
+    //     /**
+    //      * http://192.168.15.13:8000/arkime_api/payload/?
+    //      *      host=http://192.168.15.21&
+    //      *      port=8005&
+    //      *      query=好嗎&
+    //      *      arkime_node=arkime01-node&
+    //      *      ip_src=192.168.15.31
+    //      */
+    //     const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
+    //     url.searchParams.append("host", host);
+    //     url.searchParams.append("port", port);
+    //     url.searchParams.append("query", query);
+    //     if (stopTime) url.searchParams.append("stopTime", stopTime);
+    //     if (startTime) url.searchParams.append("startTime", startTime);
+    //     if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
+    //     // url.searchParams.append("ip_src", ip_src);
 
-        const response = await fetch(url, { method: "GET" })
-        return await response.json()
-    }),
-    searchSession: userProcedure.input(arkimeSearchSessionSchema).mutation(async ({ input: { host, arkime_node, expression } }) => {
+    //     const response = await fetch(url, { method: "GET" })
+    //     return await response.json()
+    // }),
+    searchSession: userProcedure.input(arkimeSearchSessionSchema).mutation(async ({ input: { host, expression } }) => {
         /**
          *  http://192.168.16.31:8000/arkime_api/sessions/?
          *      host=http://192.168.16.32&
-         *      port=8005&
-         *      arkime_node=dac02&
-         *      ip_src=127.0.0.1&
          *      expression=file = *out*
          */
         try {
-            // TODO: fix this shit
-            // let url = `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}/arkime_api/sessions/`
             const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
-            // url.searchParams.append("host", `http://${host}`);
-            url.searchParams.append("host", `http://192.168.16.32`);
-            // if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
+            url.searchParams.append("host", `http://${host}`);
             url.searchParams.append("expression", expression);
-            // url += `?host=http://${host}`
-            // url += `?host=http://192.168.16.32`
-            // if (arkime_node) url += `&arkime_node=${arkime_node}`
-            // url += `&expression=${expression}`
 
             const response = await fetch(url, { method: "GET" })
             return (await response.json()) as ArkimeSessionData
-            // return { error: JSON.stringify(response.headers), data: undefined }
         } catch (error) {
             return { error: String(error), data: undefined }
         }

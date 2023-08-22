@@ -11,7 +11,6 @@ import {
 export default function SearchSession() {
   const [arkimiSearch, setArkimiSearch] = useState<ArkimeSearchSessionInput>({
     host: "",
-    arkime_node: "",
     expression: "file = *out*",
   });
   const [searchResult, setSearchResult] =
@@ -22,9 +21,9 @@ export default function SearchSession() {
     isError: arkimeHostsIsError,
     data: arkimeHostsData,
   } = trpc.arkime.getArkimeHosts.useQuery(undefined, {
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
     retry: false,
     retryOnMount: false,
     cacheTime: 0,
@@ -50,7 +49,6 @@ export default function SearchSession() {
 
     if (errors) {
       const e: string[] = [];
-      if (errors.arkime_node) e.push(...errors.arkime_node._errors);
       if (errors.host) e.push(...errors.host._errors);
       if (errors.expression) e.push(...errors.expression._errors);
       setSearchError(() => e);
@@ -69,18 +67,44 @@ export default function SearchSession() {
     ) {
       setArkimiSearch((prev) => ({
         ...prev,
-        host: arkimeHostsData.arkime_hosts[0].ip,
-        arkime_node: arkimeHostsData.arkime_hosts[0].hostname,
+        host: arkimeHostsData.arkime_hosts[0]?.ip ?? "",
       }));
     }
   }, [arkimeHostsIsLoading, arkimeHostsIsError, arkimeHostsData]);
 
   return (
     <>
-      <ChartContainer title={<>解析資料檢索(Session)</>}>
+      <ChartContainer title={<>解析資料檢索</>}>
         <div className="mb-3 pt-2">
           <div className="mb-4 grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-4">
             <div className="flex flex-col items-start gap-2">
+              <div className="flex w-full flex-row flex-nowrap items-center justify-start gap-2">
+                <span className="min-w-48 whitespace-nowrap">
+                  Arkime Available Selections
+                </span>
+                <select
+                  name="arkimeAvailavbleSelections"
+                  id="arkimeAvailavbleSelections"
+                  value={arkimiSearch.host}
+                  className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
+                  onChange={(e) =>
+                    setArkimiSearch((d) => ({
+                      ...d,
+                      host: e.target.value,
+                    }))
+                  }
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") onSubmit();
+                  }}
+                >
+                  <option value="">請選擇</option>
+                  {arkimeHostsData?.arkime_hosts.map((host) => (
+                    <option value={host.ip} key={`option-${host.ip}`}>
+                      Host IP: {host.ip}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex w-full flex-row flex-nowrap items-center justify-start gap-2">
                 <span className="min-w-48 whitespace-nowrap">
                   Arikime Viewer Host IP
@@ -92,62 +116,10 @@ export default function SearchSession() {
                   className="relative w-full rounded border-none bg-white px-3 py-2 text-sm text-slate-600 outline-none"
                 />
               </div>
-              <div className="flex w-full flex-row flex-nowrap items-center justify-start gap-2">
-                <span className="min-w-48 whitespace-nowrap">
-                  Arkime Capturer Hostname
-                </span>
-                <input
-                  type="text"
-                  disabled
-                  value={arkimiSearch.arkime_node}
-                  className="relative w-full rounded border-none bg-white px-3 py-2 text-sm text-slate-600 outline-none"
-                />
-              </div>
-              <div className="flex w-full flex-row flex-nowrap items-center justify-start gap-2">
-                <span className="min-w-48 whitespace-nowrap">
-                  Arkime Available Selections
-                </span>
-                <select
-                  name="arkimeAvailavbleSelections"
-                  id="arkimeAvailavbleSelections"
-                  value={JSON.stringify({
-                    hostname: arkimiSearch.arkime_node,
-                    ip: arkimiSearch.host,
-                  })}
-                  className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
-                  onChange={(e) =>
-                    setArkimiSearch((d) => ({
-                      ...d,
-                      arkime_node: JSON.parse(e.target.value).hostname,
-                      host: JSON.parse(e.target.value).ip,
-                    }))
-                  }
-                  onKeyUp={(e) => {
-                    if (e.key === "Enter") onSubmit();
-                  }}
-                >
-                  <option
-                    value={JSON.stringify({
-                      hostname: "",
-                      ip: "",
-                    })}
-                  >
-                    請選擇
-                  </option>
-                  {arkimeHostsData?.arkime_hosts.map((host) => (
-                    <option
-                      value={JSON.stringify(host)}
-                      key={`${host.ip}-${host.hostname}`}
-                    >
-                      Host IP: {host.ip} || Capturer Hostname: {host.hostname}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
             <div className="flex flex-col items-start gap-2">
               <div className="flex w-full flex-row flex-nowrap items-center justify-start gap-2">
-                <span className="min-w-fit whitespace-nowrap">檢索文字</span>
+                <span className="min-w-fit whitespace-nowrap">檢索規格</span>
                 <input
                   type="text"
                   value={arkimiSearch.expression}

@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function IndexNavbar() {
   const [navbarOpen, setNavbarOpen] = React.useState(false);
   return (
-    <nav className="navbar-expand-lg fixed top-0 z-50 flex w-full flex-wrap items-center justify-between bg-white px-2 py-3 shadow">
+    <nav className="navbar-expand-lg fixed top-0 z-10 flex w-full flex-wrap items-center justify-between bg-white px-2 py-3 shadow">
       <div className="container mx-auto flex flex-wrap items-center justify-between px-4">
         <div className="relative flex w-full justify-between lg:static lg:block lg:w-auto lg:justify-start">
           <Link
