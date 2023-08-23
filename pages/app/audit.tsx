@@ -41,6 +41,7 @@ export default function Audit({
     React.useState(false);
   const [activeLog, setActiveLog] = React.useState<
     | (AuditDescriptionInput & {
+        comment: string;
         groups: (AuditDescriptionInput & {
           color: string;
           name: string;
@@ -68,29 +69,61 @@ export default function Audit({
   });
 
   const {
-    mutate: createNewAudit,
-    isError: isCreateNewAuditError,
-    isLoading: isCreateNewAuditLoading,
-    isSuccess: isCreateNewAuditSuccess,
-    error: createNewAuditError,
+    mutate: createNewAuditLog,
+    isError: isCreateNewAuditLogError,
+    isLoading: isCreateNewAuditLogLoading,
+    isSuccess: isCreateNewAuditLogSuccess,
+    error: createNewAuditLogError,
   } = trpc.audit.createNewAuditLog.useMutation({
+    retry: false,
+    onSuccess: () => {
+      refetchUserAuditLog();
+    },
+  });
+
+  const {
+    mutate: lockAuditLog,
+    isError: isLockAudutLogError,
+    isLoading: isLockAudutLogLoading,
+    isSuccess: isLockAudutLogSuccess,
+    error: lockAuditLogError,
+  } = trpc.audit.lockAuditLog.useMutation({
+    retry: false,
+    onSuccess: () => {
+      refetchUserAuditLog();
+      setIsAuditSubmitModalOpen(false);
+    },
+  });
+
+  const {
+    mutate: saveAuditLog,
+    isError: isSaveAuditLogError,
+    isLoading: isSaveAuditLogLoading,
+    isSuccess: isSaveAuditLogSuccess,
+    error: saveAuditLogError,
+  } = trpc.audit.saveAuditLog.useMutation({
     retry: false,
   });
 
-  // useEffect(() => {
-  //   if (
-  //     !isCreateNewAuditError &&
-  //     !isCreateNewAuditLoading &&
-  //     isCreateNewAuditSuccess
-  //   ) {
-  //     refetchUserAuditLog();
-  //   }
-  // }, [
-  //   isCreateNewAuditError,
-  //   isCreateNewAuditLoading,
-  //   isCreateNewAuditSuccess,
-  //   refetchUserAuditLog,
-  // ]);
+  const {
+    mutate: saveAuditGroupLog,
+    isError: isSaveAuditGroupLogError,
+    isLoading: isSaveAuditGroupLogLoading,
+    isSuccess: isSaveAuditGroupLogSuccess,
+    error: saveAuditGroupLogError,
+  } = trpc.audit.saveAuditGroupLog.useMutation({
+    retry: false,
+  });
+
+  const {
+    mutate: saveAuditItemLog,
+    isError: isSaveAuditItemLogError,
+    isLoading: isSaveAuditItemLogLoading,
+    isSuccess: isSaveAuditItemLogSuccess,
+    error: saveAuditItemLogError,
+  } = trpc.audit.saveAuditItemLog.useMutation({
+    retry: false,
+  });
 
   useEffect(() => {
     if (
@@ -103,6 +136,7 @@ export default function Audit({
       if (log) {
         setActiveLog({
           id: log.id,
+          comment: log.audit.comment ?? "",
           description: log.description ?? "",
           groups: log.auditGroupLogs.map((groupLog) => ({
             id: groupLog.id,
@@ -129,6 +163,114 @@ export default function Audit({
     setIsAuditSubmitModalOpen(false);
   }
 
+  function onCheckboxChange(isChecked: boolean, itemId: number) {
+    setActiveLog((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        groups: prev.groups.reduce((prevGroup, currGroup) => {
+          if (currGroup.items.some((item) => item.id === itemId)) {
+            return [
+              ...prevGroup,
+              {
+                ...currGroup,
+                items: currGroup.items.reduce((prevItem, currItem) => {
+                  if (currItem.id === itemId) {
+                    return [
+                      ...prevItem,
+                      {
+                        ...currItem,
+                        isChecked,
+                      },
+                    ];
+                  }
+                  return [...prevItem, currItem];
+                }, [] as typeof currGroup.items),
+              },
+            ];
+          }
+          return [...prevGroup, currGroup];
+        }, [] as typeof prev.groups),
+      };
+    });
+  }
+
+  function onGroupTextboxChange(description: string, groupId: number) {
+    setActiveLog((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        groups: prev.groups.reduce((prevGroup, currGroup) => {
+          if (currGroup.id === groupId) {
+            return [
+              ...prevGroup,
+              {
+                ...currGroup,
+                description,
+              },
+            ];
+          }
+          return [...prevGroup, currGroup];
+        }, [] as typeof prev.groups),
+      };
+    });
+  }
+
+  function onLogTextboxChange(description: string) {
+    setActiveLog((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        description,
+      };
+    });
+  }
+
+  function onSubmit(lock?: boolean) {
+    const log = userAuditLog && userAuditLog.find((log) => !log.isLocked);
+    if (
+      !log ||
+      !activeLog ||
+      isLockAudutLogLoading ||
+      isSaveAuditLogLoading ||
+      isSaveAuditGroupLogLoading ||
+      isSaveAuditItemLogLoading
+    )
+      return;
+    if (log.description !== activeLog.description) {
+      saveAuditLog({ id: activeLog.id, description: activeLog.description });
+    }
+    log.auditGroupLogs.map((groupLog) => {
+      const currGroupLog = activeLog.groups.find((ag) => ag.id === groupLog.id);
+      if (!currGroupLog) return;
+      if (groupLog.description !== currGroupLog.description) {
+        saveAuditGroupLog({
+          id: currGroupLog.id,
+          description: currGroupLog.description,
+        });
+      }
+      groupLog.auditItemLogs.map((itemLog) => {
+        const currItem = currGroupLog.items.find(
+          (item) => item.id === itemLog.id
+        );
+        if (!currItem) return;
+        if (itemLog.isChecked !== currItem.isChecked) {
+          saveAuditItemLog({
+            id: currItem.id,
+            isChecked: currItem.isChecked,
+          });
+        }
+      });
+    });
+    if (lock)
+      setTimeout(() => {
+        lockAuditLog({
+          id: activeLog.id,
+          isLocked: true,
+        });
+      }, 1000);
+  }
+
   return (
     <AdminLayout
       navbarProps={{
@@ -137,49 +279,20 @@ export default function Audit({
       }}
       sidebarProps={{ role, username }}
     >
-      {/* <Container title={<>勾稽表單</>}>
-        <>勾稽表單</>
-      </Container> */}
-      {/* <CardTable
-        color="light"
-        title={<>勾稽紀錄</>}
-        ths={["Project", "Budget", "Status", "Completion", "Action"]}
-        tbodyTrs={[
-          {
-            th: "Argon Design System",
-            tds: [
-              <>$2,500 USD</>,
-              <>
-                <i className="fas fa-circle mr-2 text-orange-500"></i> pending
-              </>,
-              <>
-                <div className="flex items-center">
-                  <span className="mr-2">60%</span>
-                  <div className="relative w-full">
-                    <div className="flex h-2 overflow-hidden rounded bg-red-200 text-xs">
-                      <div
-                        style={{ width: "60%" }}
-                        className="flex flex-col justify-center whitespace-nowrap bg-red-500 text-center text-white shadow-none"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </>,
-              <>
-                <TableDropdown />
-              </>,
-            ],
-          },
-        ]}
-      /> */}
       <Container
         title={
           <div className="flex justify-between text-center">
             <h6 className="text-xl font-bold text-slate-700">勾稽表單</h6>
             <div>
               <button
-                className="mr-4 rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none"
+                className="mr-4 rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none disabled:opacity-50"
                 type="button"
+                disabled={
+                  isLockAudutLogLoading ||
+                  isSaveAuditLogLoading ||
+                  isSaveAuditGroupLogLoading ||
+                  isSaveAuditItemLogLoading
+                }
                 onClick={() => {
                   setIsAuditSubmitModalOpen(() => true);
                 }}
@@ -190,17 +303,17 @@ export default function Audit({
                 className="rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
                 type="button"
                 onClick={() => {
-                  createNewAudit();
+                  createNewAuditLog();
                 }}
                 disabled={
-                  isCreateNewAuditLoading ||
+                  isCreateNewAuditLogLoading ||
                   (userAuditLog && userAuditLog.some((al) => !al.isLocked))
                 }
               >
                 新增紀錄
               </button>
-              {isCreateNewAuditError && (
-                <Errors errors={[createNewAuditError.message]} />
+              {isCreateNewAuditLogError && (
+                <Errors errors={[createNewAuditLogError.message]} />
               )}
             </div>
           </div>
@@ -220,7 +333,7 @@ export default function Audit({
                   上機概要
                 </span>
                 <span className="block"></span>
-                {activeLog.description ?? "無"}
+                {activeLog.comment ?? "無"}
               </span>
               <hr className="col-span-12 border-slate-300" />
               {activeLog.groups.map((group) => (
@@ -260,7 +373,10 @@ export default function Audit({
                           id={`auditItemLog-input-${item.id}`}
                           type="checkbox"
                           className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 "
-                          defaultChecked={false}
+                          checked={item.isChecked}
+                          onChange={(e) => {
+                            onCheckboxChange(e.target.checked, item.id);
+                          }}
                         />
                         <label
                           htmlFor={`auditItemLog-input-${item.id}`}
@@ -278,6 +394,9 @@ export default function Audit({
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                       placeholder="Write your results or findings here..."
                       value={group.description}
+                      onChange={(e) => {
+                        onGroupTextboxChange(e.target.value, group.id);
+                      }}
                     ></textarea>
                   </div>
                 </React.Fragment>
@@ -289,6 +408,9 @@ export default function Audit({
                   className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Write your results or findings here..."
                   value={activeLog.description}
+                  onChange={(e) => {
+                    onLogTextboxChange(e.target.value);
+                  }}
                 ></textarea>
               </div>
               <hr className="col-span-12 border-slate-300" />
@@ -296,7 +418,7 @@ export default function Audit({
                 <button
                   className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none"
                   type="button"
-                  onClick={() => {}}
+                  onClick={() => onSubmit()}
                 >
                   儲存變更
                 </button>
@@ -313,7 +435,7 @@ export default function Audit({
               key={`save audit change`}
               className="mr-2 rounded bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
               type="button"
-              onClick={() => {}}
+              onClick={() => onSubmit(true)}
             >
               提交
             </button>,

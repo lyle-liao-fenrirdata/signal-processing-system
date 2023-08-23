@@ -1,12 +1,8 @@
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { router, userProcedure } from '../trpc';
-import { Prisma } from '@prisma/client';
-import { z } from 'zod';
 import { auditDescriptionSchema, auditIsCheckedSchema, auditLockSchema } from '../schema/audit.schema';
 
-// Export type router type signature,
-// NOT the router itself.
 export type AuditRouter = typeof auditRouter;
 
 export const auditRouter = router({
@@ -15,6 +11,7 @@ export const auditRouter = router({
     getUserAuditLog: userProcedure
         .query(async ({ ctx: { user: { account } } }) => {
             return await prisma.auditLog.findMany({
+                take: 10,
                 where: {
                     user: { account },
                 },
@@ -26,10 +23,19 @@ export const auditRouter = router({
                             auditItemLogs: {
                                 include: {
                                     auditItem: true,
+                                },
+                                orderBy: {
+                                    createdAt: 'desc'
                                 }
                             },
+                        },
+                        orderBy: {
+                            createdAt: 'desc',
                         }
                     }
+                },
+                orderBy: {
+                    createdAt: 'desc',
                 }
             })
         }),
@@ -168,7 +174,7 @@ export const auditRouter = router({
 
             return { ok: true };
         }),
-    suaveAuditItemLog: userProcedure
+    saveAuditItemLog: userProcedure
         .input(auditIsCheckedSchema)
         .mutation(async ({ ctx: { user: { account } }, input: { id, isChecked } }) => {
             const auditItemLog = await prisma.auditItemLog.findUnique({
