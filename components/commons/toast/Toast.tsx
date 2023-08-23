@@ -45,7 +45,7 @@ const Toast = ({ message, type, onClose, children }: ToastProps) => {
             <QuestionIcon />
           </div>
         )}
-        <pre className="whitespace-normal">{message}</pre>
+        <pre className="whitespace-normal break-all">{message}</pre>
       </div>
       {children}
       <button

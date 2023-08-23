@@ -5,8 +5,8 @@ import ToastList from "./toast/ToastList";
 import { iconMap } from "./toast/Toast";
 
 type MessagePayload = {
-  Type?: keyof typeof iconMap;
-  Message?: { [key: string]: string } | string;
+  type?: keyof typeof iconMap;
+  message?: { [key: string]: string } | string;
 };
 
 export default function Toasts() {
@@ -52,7 +52,7 @@ export default function Toasts() {
       console.log("mqtt error", error);
       setMessageQueue({ message: error.message, type: "failure" });
     });
-    client.subscribe(["ftp/new_file_detected", "test/ui"]);
+    client.subscribe(["ftp/new_file_detected", "test/ui", "/netdata/health/+"]);
     client.on("message", (topic, msg) => {
       console.log({ topic, msg: msg.toString() });
       let type: keyof typeof iconMap = "success";
@@ -60,13 +60,13 @@ export default function Toasts() {
       if (["{", "}", ":"].every((c) => message.includes(c))) {
         try {
           const payloadParse = JSON.parse(message) as MessagePayload;
-          if (payloadParse.Type) type = payloadParse.Type;
-          if (payloadParse.Message) {
-            if (typeof payloadParse.Message === "string")
-              message = payloadParse.Message;
+          if (payloadParse.type) type = payloadParse.type;
+          if (payloadParse.message) {
+            if (typeof payloadParse.message === "string")
+              message = payloadParse.message;
             else {
               let tempMsg = "";
-              for (let [key, value] of Object.entries(payloadParse.Message)) {
+              for (let [key, value] of Object.entries(payloadParse.message)) {
                 tempMsg += `${key}: ${value}\n`;
               }
               message = tempMsg;
@@ -84,7 +84,11 @@ export default function Toasts() {
 
     return () => {
       if (client) {
-        client.unsubscribe(["example/ui-test"]);
+        client.subscribe([
+          "ftp/new_file_detected",
+          "test/ui",
+          "/netdata/health/+",
+        ]);
         client.end(true);
       }
       clearToast();

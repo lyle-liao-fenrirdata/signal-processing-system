@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useState } from "react";
-import SearchPayload from "@/components/search/SearchPayload";
+// import SearchPayload from "@/components/search/SearchPayload";
 import SearchSql from "@/components/search/SearchSql";
 import SearchSession from "@/components/search/SearchSession";
 

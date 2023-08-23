@@ -32,7 +32,7 @@ const useMqttStore = create<MqttState>()(
                 messages: [],
                 toast: [],
                 setMessage: (message) => set((state) => ({
-                    messages: [{ ...message, receivedAt: Date.now() }, ...state.messages],
+                    messages: [{ ...message, receivedAt: Date.now() }, ...state.messages.slice(0, 99)],
                     toast: [...state.toast, message]
                 })),
                 removeToast: (id) => set((state) => ({

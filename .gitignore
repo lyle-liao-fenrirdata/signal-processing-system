@@ -38,3 +38,6 @@ next-env.d.ts
 
 # docker env files
 .env.production
+
+# vs-code
+.VSCodeCounter
