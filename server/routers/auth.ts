@@ -75,6 +75,17 @@ export const authRouter = router({
             ctx.res.setHeader('Set-Cookie', `x-token=; Path=/; HttpOnly;expires=${new Date().toUTCString()};SameSite=Strict`);
             return { ok: true };
         }),
+    getCookie: loginProcedure
+        .query(async ({ ctx: { user: { username, account, role } } }) => {
+
+            try {
+                const token = await signUserJWT({ username, account, role })
+                console.log(token)
+                return { ok: true, token };
+            } catch (error) {
+                return { ok: false, error: String(error) }
+            }
+        }),
     getSelfInfo: loginProcedure
         .query(async ({ ctx: { user: { account } } }) => {
             const user = await prisma.user.findUnique({

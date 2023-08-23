@@ -16,12 +16,14 @@ const NavigationItem = ({
   title,
   currentPath,
   FaIconClass,
+  onClick = () => {},
 }: {
   href: string;
   target?: string;
   title: string;
   currentPath?: string;
   FaIconClass: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) => (
   /* eslint-disable-next-line @next/next/no-html-link-for-pages */
   <a
@@ -33,6 +35,7 @@ const NavigationItem = ({
         ? "text-sky-600"
         : "text-slate-700 hover:text-sky-500")
     }
+    onClick={onClick}
   >
     <span>
       <i
@@ -56,6 +59,16 @@ export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
+  const { isSuccess, data, refetch } = trpc.auth.getCookie.useQuery(undefined, {
+    retry: false,
+    retryOnMount: false,
+    refetchOnMount: false,
+    refetchInterval: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchIntervalInBackground: false,
+  });
+
   const { mutate: logout } = trpc.auth.logout.useMutation({
     retry: false,
     onSuccess: () => {
@@ -63,6 +76,22 @@ export default function Sidebar({ role, username }: SidebarProps) {
     },
     onError: (error) => console.log(error),
   });
+
+  function openOtherSiteLnck(
+    url: string,
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isSuccess && data && data.token) {
+      const tgt = new URL(url);
+      tgt.searchParams.append("token", data.token);
+      window.open(tgt, "_blank");
+    } else {
+      console.log(data?.error);
+      refetch();
+    }
+  }
 
   return (
     <nav className="relative z-10 flex flex-wrap items-center justify-between bg-white px-6 py-4 shadow-xl md:fixed md:bottom-0 md:left-0 md:top-0 md:block md:w-40 md:flex-row md:flex-nowrap md:overflow-hidden md:overflow-y-auto">
@@ -167,6 +196,12 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     target="_blank"
                     title="RF設備及資源控制系統"
                     FaIconClass="fas fa-satellite-dish"
+                    onClick={(e) => {
+                      openOtherSiteLnck(
+                        env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK,
+                        e
+                      );
+                    }}
                   />
                 </li>
 
@@ -177,6 +212,12 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     target="_blank"
                     title="前端管理系統(5網)"
                     FaIconClass="fas fa-server"
+                    onClick={(e) => {
+                      openOtherSiteLnck(
+                        env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK,
+                        e
+                      );
+                    }}
                   />
                 </li>
               </>
