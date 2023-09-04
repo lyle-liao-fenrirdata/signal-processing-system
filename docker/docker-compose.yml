@@ -13,6 +13,8 @@ services:
       - ../.env.production
     ports:
       - 3009:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   db:
     image: postgres
