@@ -1,6 +1,6 @@
 version: "3"
 
-name: frontend
+# name: frontend
 services:
   nextjs:
     build:
