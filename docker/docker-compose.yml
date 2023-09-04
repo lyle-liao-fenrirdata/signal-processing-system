@@ -2,23 +2,21 @@ version: "3"
 
 name: frontend
 services:
-  ui:
+  nextjs:
     build:
-      network: host
       context: ../
       dockerfile: docker/nextjs/Dockerfile
     image: signal-process-system-frontend
+    container_name: nextjs
     restart: always
     env_file:
       - ../.env.production
     ports:
-      - 3000:3000
-    extra_hosts:
-      - host.docker.internal:host-gateway
-      - docker.host:192.168.16.31
+      - 3009:3000
 
   db:
     image: postgres
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_PASSWORD: root
@@ -32,18 +30,9 @@ services:
 
   db-viewer:
     image: adminer
+    container_name: adminer
     restart: always
     depends_on:
       - db
     ports:
       - 5433:8080
-
-  nginx:
-    build:
-      context: .
-      dockerfile: nginx/Dockerfile
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - ui

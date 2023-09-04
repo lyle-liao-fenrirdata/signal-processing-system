@@ -28,7 +28,7 @@ export default function Toasts() {
       }, 5000);
     }
 
-    const client = connect(`ws://192.168.16.31:9001`, {
+    const client = connect(`wss://172.16.16.31:9883`, {
       clientId: `mqtt_${Math.random().toString(16).slice(2)}`,
       clean: true,
       connectTimeout: 4000,

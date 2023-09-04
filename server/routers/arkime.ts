@@ -1,41 +1,41 @@
 import { env } from '@/env.mjs';
 import { router, userProcedure, loginProcedure } from '../trpc';
-// import { z } from 'zod';
+import { z } from 'zod';
 import { arkimeSearchSessionSchema } from '../schema/arkime.schema';
 
 export type ArkimeRouter = typeof arkimeRouter;
 
 export const arkimeRouter = router({
-    // searchPayload: userProcedure.input(z.object({
-    //     host: z.string(),
-    //     port: z.string(),
-    //     query: z.string(),
-    //     stopTime: z.string().nullable(),
-    //     startTime: z.string().nullable(),
-    //     arkime_node: z.string().nullable(),
-    //     // ip_src: z.string(),
-    // })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node } }) => {
-    //     // const client = new DigestClient('admin', '1qaz2wsx', { algorithm: 'MD5' })
-    //     /**
-    //      * http://192.168.15.13:8000/arkime_api/payload/?
-    //      *      host=http://192.168.15.21&
-    //      *      port=8005&
-    //      *      query=好嗎&
-    //      *      arkime_node=arkime01-node&
-    //      *      ip_src=192.168.15.31
-    //      */
-    //     const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
-    //     url.searchParams.append("host", host);
-    //     url.searchParams.append("port", port);
-    //     url.searchParams.append("query", query);
-    //     if (stopTime) url.searchParams.append("stopTime", stopTime);
-    //     if (startTime) url.searchParams.append("startTime", startTime);
-    //     if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
-    //     // url.searchParams.append("ip_src", ip_src);
+    searchPayload: userProcedure.input(z.object({
+        host: z.string(),
+        port: z.string(),
+        query: z.string(),
+        stopTime: z.string().nullable(),
+        startTime: z.string().nullable(),
+        arkime_node: z.string().nullable(),
+        // ip_src: z.string(),
+    })).query(async ({ input: { host, port, query, stopTime, startTime, arkime_node } }) => {
+        // const client = new DigestClient('admin', '1qaz2wsx', { algorithm: 'MD5' })
+        /**
+         * http://192.168.15.13:8000/arkime_api/payload/?
+         *      host=http://192.168.15.21&
+         *      port=8005&
+         *      query=好嗎&
+         *      arkime_node=arkime01-node&
+         *      ip_src=192.168.15.31
+         */
+        const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
+        url.searchParams.append("host", host);
+        url.searchParams.append("port", port);
+        url.searchParams.append("query", query);
+        if (stopTime) url.searchParams.append("stopTime", stopTime);
+        if (startTime) url.searchParams.append("startTime", startTime);
+        if (arkime_node) url.searchParams.append("arkime_node", arkime_node);
+        // url.searchParams.append("ip_src", ip_src);
 
-    //     const response = await fetch(url, { method: "GET" })
-    //     return await response.json()
-    // }),
+        const response = await fetch(url, { method: "GET" })
+        return await response.json()
+    }),
     searchSession: userProcedure.input(arkimeSearchSessionSchema).mutation(async ({ input: { host, expression } }) => {
         /**
          *  http://192.168.16.31:8000/arkime_api/sessions/?
