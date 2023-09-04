@@ -5,7 +5,7 @@ services:
   nextjs:
     build:
       context: ../
-      dockerfile: docker/nextjs/Dockerfile
+      dockerfile: nextjs-docker/nextjs/Dockerfile
     image: signal-process-system-frontend
     container_name: nextjs
     restart: always
