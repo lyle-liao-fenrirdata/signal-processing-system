@@ -44,7 +44,7 @@ export const arkimeRouter = router({
          */
         try {
             const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
-            url.searchParams.append("host", `http://${host}`);
+            url.searchParams.append("host", `https://${host}`);
             url.searchParams.append("expression", expression);
 
             const response = await fetch(url, { method: "GET" })

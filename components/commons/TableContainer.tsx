@@ -1,17 +1,5 @@
 import React from "react";
 
-const TableDropdown = () => (
-  <a
-    className="px-3 py-1 text-slate-500"
-    href="#pablo"
-    onClick={(e) => {
-      e.preventDefault();
-    }}
-  >
-    <i className="fas fa-ellipsis-v"></i>
-  </a>
-);
-
 type TableContainer = {
   color: "light" | "dark";
   title: JSX.Element;

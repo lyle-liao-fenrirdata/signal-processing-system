@@ -54,12 +54,16 @@ export default function SearchSql() {
                 value={sqlSearch.query}
                 placeholder="SELECT * FROM arkime_files"
                 className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
-                onChange={(e) =>
+                onChange={(e) => {
+                  const query = e.target.value.replaceAll(
+                    /[;;\/\+\@\#\$\^\{\}\<\>]/g,
+                    ""
+                  );
                   setSqlSearch((d) => ({
                     ...d,
-                    query: e.target.value,
-                  }))
-                }
+                    query,
+                  }));
+                }}
                 onKeyUp={(e) => {
                   if (e.key === "Enter") postElasticSearchTranslate();
                 }}
