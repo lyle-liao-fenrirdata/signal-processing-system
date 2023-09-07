@@ -1,7 +1,8 @@
 import { env } from "@/env.mjs";
 
 export const NetdataNodeBoard = ({ nodeUrl }: { nodeUrl: string }) => {
-  const dataHost = `http://${nodeUrl}:${env.NEXT_PUBLIC_NETDATA_PORT}/`;
+  const dataHost = `/api/netdata?url=${nodeUrl}:${env.NEXT_PUBLIC_NETDATA_PORT}&path=`;
+  // const dataHost = `https://${nodeUrl}:${env.NEXT_PUBLIC_NETDATA_PORT}/`;
 
   return (
     <div className="flex w-full flex-wrap justify-evenly">

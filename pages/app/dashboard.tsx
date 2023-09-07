@@ -109,7 +109,10 @@ export default function Dashboard({
                       hostname: (
                         <a
                           className="ml-3 font-bold text-slate-600 hover:underline"
-                          href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                          href={`https://${node.Status.Addr.replace(
+                            "192.168.",
+                            "172.16."
+                          )}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
                           target="_blank"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -205,43 +208,46 @@ export default function Dashboard({
         />
         {isNodesSuccess &&
           nodes.ok &&
-          nodes.data.map((node) => (
-            <React.Fragment key={node.Description.Hostname}>
-              <ChartContainer
-                title={
-                  <a
-                    className="font-bold hover:underline"
-                    href={`http://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
-                    target="_blank"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {node.Description.Hostname} [{node.Status.Addr}]
-                  </a>
-                }
-              >
-                <>
-                  <NetdataNodeBoard nodeUrl={node.Status.Addr} />
-                  <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
-                    <span
-                      id={node.ID}
-                      className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
-                        node.Spec.Role === "manager"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+          nodes.data.map((node) => {
+            const address = node.Status.Addr.replace("192.168.", "172.16.");
+            return (
+              <React.Fragment key={node.Description.Hostname}>
+                <ChartContainer
+                  title={
+                    <a
+                      className="font-bold hover:underline"
+                      href={`https://${address}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                      target="_blank"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {node.Spec.Role}
+                      {node.Description.Hostname} [{address}]
+                    </a>
+                  }
+                >
+                  <>
+                    <NetdataNodeBoard nodeUrl={address} />
+                    <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
+                      <span
+                        id={node.ID}
+                        className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                          node.Spec.Role === "manager"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {node.Spec.Role}
+                      </span>
                     </span>
-                  </span>
-                </>
-              </ChartContainer>
-              <Script
-                strategy="lazyOnload"
-                type="text/javascript"
-                src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_NETDATA_PORT}/dashboard.js`}
-              />
-            </React.Fragment>
-          ))}
+                  </>
+                </ChartContainer>
+                <Script
+                  strategy="lazyOnload"
+                  type="text/javascript"
+                  src={`/dashboard.js`}
+                />
+              </React.Fragment>
+            );
+          })}
         <ChartContainer title={<>HA PROXY</>}>
           <iframe
             src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
@@ -251,13 +257,13 @@ export default function Dashboard({
             width="100%"
           ></iframe>
         </ChartContainer>
-        <Script id="disable-Bootstrap">
+        {/* <Script id="disable-Bootstrap">
           var netdataNoBootstrap = true; var netdataNoFontAwesome = true; var
           netdataNoDygraphs = true; var netdataNoSparklines = true; var
           netdataNoPeitys = true; var netdataNoGoogleCharts = true; var
           netdataNoMorris = true; var netdataNoD3 = true; var netdataNoC3 =
           true; var netdataNoD3pie = true; var netdataShowHelp = false;
-        </Script>
+        </Script> */}
       </>
     </AdminLayout>
   );
