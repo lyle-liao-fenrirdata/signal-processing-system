@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import useMqttStore, { MqttMessage } from "@/stores/mqtt";
 import ToastList from "./toast/ToastList";
 import { iconMap } from "./toast/Toast";
+import { env } from "@/env.mjs";
 
 type MessagePayload = {
   type?: keyof typeof iconMap;
@@ -28,7 +29,7 @@ export default function Toasts() {
       }, 5000);
     }
 
-    const client = connect(`wss://172.16.16.31:9883`, {
+    const client = connect(env.NEXT_PUBLIC_MOSQUITTO_URL_PORT, {
       clientId: `mqtt_${Math.random().toString(16).slice(2)}`,
       clean: true,
       connectTimeout: 4000,

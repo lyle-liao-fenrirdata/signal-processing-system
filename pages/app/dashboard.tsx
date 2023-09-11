@@ -109,10 +109,11 @@ export default function Dashboard({
                       hostname: (
                         <a
                           className="ml-3 font-bold text-slate-600 hover:underline"
-                          href={`https://${node.Status.Addr.replace(
-                            "192.168.",
-                            "172.16."
-                          )}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                          // href={`https://${node.Status.Addr.replace(
+                          //   "192.168.",
+                          //   "172.16."
+                          // )}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
+                          href={`https://${node.Status.Addr}:${env.NEXT_PUBLIC_NETDATA_PORT}`}
                           target="_blank"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -209,7 +210,8 @@ export default function Dashboard({
         {isNodesSuccess &&
           nodes.ok &&
           nodes.data.map((node) => {
-            const address = node.Status.Addr.replace("192.168.", "172.16.");
+            // const address = node.Status.Addr.replace("192.168.", "172.16.");
+            const address = node.Status.Addr;
             return (
               <React.Fragment key={node.Description.Hostname}>
                 <ChartContainer
@@ -248,7 +250,7 @@ export default function Dashboard({
               </React.Fragment>
             );
           })}
-        <ChartContainer title={<>HA PROXY</>}>
+        {/* <ChartContainer title={<>HA PROXY</>}>
           <iframe
             src={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_HAPROXY_PORT}/`}
             title="HA PROXY"
@@ -256,7 +258,7 @@ export default function Dashboard({
             height={450}
             width="100%"
           ></iframe>
-        </ChartContainer>
+        </ChartContainer> */}
         {/* <Script id="disable-Bootstrap">
           var netdataNoBootstrap = true; var netdataNoFontAwesome = true; var
           netdataNoDygraphs = true; var netdataNoSparklines = true; var

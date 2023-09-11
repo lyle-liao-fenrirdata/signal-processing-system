@@ -3,30 +3,41 @@ import { useState } from "react";
 import { trpc } from "@/utils/trpc";
 import { Flex2ColExt } from "@/components/search/Flex2ColExt";
 import { ChartContainer } from "../commons/ChartContainer";
-import Modal from "../commons/Modal";
 import { env } from "@/env.mjs";
 
 export default function SearchSql() {
+  const example = JSON.stringify(
+    {
+      from: 10,
+      size: 1,
+      query: {
+        match: {
+          "message.addr": "192.168.16.192",
+        },
+      },
+      _source: {
+        excludes: ["*Padding_bytes", "*GSE_data_bytes"],
+      },
+    },
+    undefined,
+    4
+  );
   const [sqlSearch, setSqlSearch] = useState({
-    query: "",
+    query: "select * from parase_test_parse_gse",
     fetch_size: 10,
   });
-  const [showSqlSearchModal, setSqlSearchModal] = useState(false);
-
-  const elasticSearchTranslate = trpc.sqlTranslate.useQuery(sqlSearch, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    retryOnMount: false,
+  const [result, setResult] = useState(null);
+  const { mutate } = trpc.sqlTranslate.useMutation({
     retry: false,
-    enabled: false,
+    onSuccess: (data) => {
+      if (data) {
+        setResult(data);
+      }
+    },
   });
 
   async function postElasticSearchTranslate() {
-    await elasticSearchTranslate.refetch();
-    setSqlSearchModal(true);
+    mutate(sqlSearch);
   }
 
   async function copyToClipboard(text: string) {
@@ -42,10 +53,10 @@ export default function SearchSql() {
   }
 
   return (
-    <>
-      <Flex2ColExt
-        left={
-          // SQL to ES translate
+    <Flex2ColExt
+      left={
+        // SQL to ES translate
+        <>
           <ChartContainer title={<>SQL to ES</>}>
             <div className="mb-3 flex flex-col flex-nowrap items-start gap-2 pt-2">
               <span>請輸入 SQL 語句</span>
@@ -72,7 +83,7 @@ export default function SearchSql() {
                 <input
                   type="text"
                   value={sqlSearch.fetch_size}
-                  placeholder="SELECT * FROM arkime_files"
+                  placeholder="select * from parase_test_parse_gse"
                   className="relative w-1/2 rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
                   onChange={({ target }) => {
                     const fetch_size = Number(target.value);
@@ -99,13 +110,41 @@ export default function SearchSql() {
               </div>
             </div>
           </ChartContainer>
-        }
-        right={
-          // other hyper link (Arkime and Kibana)
+
+          <ChartContainer title={<>Elastic Query</>}>
+            <>
+              <div className="relative w-full flex-auto overflow-y-auto px-6 pb-2">
+                <pre className="max-h-[60vh] pt-2 text-sm leading-relaxed text-slate-500">
+                  {!result
+                    ? "無查詢結果"
+                    : JSON.stringify(result, undefined, 4)}
+                </pre>
+              </div>
+              {/*footer*/}
+              <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 pt-3">
+                <button
+                  key={`SQL: ${sqlSearch.query}`}
+                  className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-xs text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600 disabled:opacity-60 disabled:hover:bg-transparent disabled:hover:text-slate-500"
+                  type="button"
+                  disabled={!result}
+                  onClick={() =>
+                    copyToClipboard(JSON.stringify(result, undefined, 4))
+                  }
+                >
+                  <i className="fas fa-copy"></i> 複製 ES Query
+                </button>
+              </div>
+            </>
+          </ChartContainer>
+        </>
+      }
+      right={
+        // other hyper link (Arkime and Kibana)
+        <>
           <ChartContainer title={<>其他檢索工具</>}>
             <div className="flex flex-col flex-nowrap items-center gap-2 pt-2">
-              {/* <a
-                href={`${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`}
+              <a
+                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/dev_tools`}
                 target="_blank"
               >
                 <Image
@@ -115,61 +154,47 @@ export default function SearchSql() {
                   height={48}
                   className="opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
                 />
-              </a> */}
-              <a
-                href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_KIBANA_PORT}/app/kibana_overview/`}
-                target="_blank"
-                className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
-              >
-                <Image
-                  src="/img/Kibana_Elasticsearch_Logo.svg"
-                  alt="Kibana Elasticsearch"
-                  width={40}
-                  height={40}
-                />
-                <span className="text-3xl font-extrabold text-[#2F2F2F]">
-                  Kibana
-                </span>
               </a>
+              <div className="flex flex-col">
+                <p>
+                  username:{" "}
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard("reader")}
+                    className="hover:opacity-70"
+                  >
+                    reader
+                  </button>
+                </p>
+                <p>
+                  password:{" "}
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard("1qaz2wsx")}
+                    className="hover:opacity-70"
+                  >
+                    ********
+                  </button>
+                </p>
+              </div>
             </div>
           </ChartContainer>
-        }
-      />
-      {/* modal of "SQL to ES translate" result */}
-      {showSqlSearchModal && (
-        <Modal
-          header={`SQL: ${sqlSearch.query}`}
-          actions={[
-            <button
-              key={`SQL: ${sqlSearch.query}`}
-              className="mr-2 rounded border border-solid border-slate-500 bg-transparent px-6 py-3 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
-              type="button"
-              onClick={() =>
-                copyToClipboard(
-                  JSON.stringify(elasticSearchTranslate.data, undefined, 4)
-                )
-              }
-            >
-              <i className="fas fa-copy"></i> 複製 Elascti Query
-            </button>,
-            <button
-              key="closeModal-sql"
-              className="rounded bg-emerald-500 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
-              type="button"
-              onClick={() => setSqlSearchModal(false)}
-            >
-              OK
-            </button>,
-          ]}
-          onCloseModal={() => setSqlSearchModal(false)}
-        >
-          <pre className="max-h-[60vh] text-sm leading-relaxed text-slate-500">
-            Elastic Query:
-            <br />
-            {JSON.stringify(elasticSearchTranslate.data, undefined, 4)}
-          </pre>
-        </Modal>
-      )}
-    </>
+
+          <ChartContainer title={<>Kibana查詢範例</>}>
+            <div className="flex flex-col flex-nowrap items-start gap-2 pt-2">
+              <span className="whitespace-pre">{example}</span>
+
+              <button
+                className="ml-auto rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-xs text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+                type="button"
+                onClick={() => copyToClipboard(example)}
+              >
+                <i className="fas fa-copy"></i> 複製
+              </button>
+            </div>
+          </ChartContainer>
+        </>
+      }
+    />
   );
 }

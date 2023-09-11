@@ -44,7 +44,7 @@ export default function SearchPayload() {
                 <input
                   type="text"
                   value={arkimiSearch.host}
-                  placeholder={env.NEXT_PUBLIC_ARKIME_URL}
+                  placeholder={env.NEXT_PUBLIC_MAIN_NODE_URL}
                   className="relative w-full rounded bg-white px-3 py-2 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:border-transparent focus:outline-none active:outline-none"
                   onChange={(e) =>
                     setArkimiSearch((d) => ({

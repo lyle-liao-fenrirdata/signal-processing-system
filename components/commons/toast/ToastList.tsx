@@ -13,24 +13,24 @@ export const ToastList = ({ data, x, y, removeToast }: ToastListProps) => {
   const listRef = useRef<HTMLDivElement>(null);
   const clearToast = useMqttStore((state) => state.clearToast);
 
-  useEffect(() => {
-    const el = listRef.current;
-    if (el) {
-      if (y === "top") {
-        el.scrollTo({
-          top: el.scrollHeight,
-          left: 0,
-          behavior: "smooth",
-        });
-      } else {
-        el.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [data, y]);
+  // useEffect(() => {
+  //   const el = listRef.current;
+  //   if (el) {
+  //     if (y === "top") {
+  //       el.scrollTo({
+  //         top: el.scrollHeight,
+  //         left: 0,
+  //         behavior: "smooth",
+  //       });
+  //     } else {
+  //       el.scrollTo({
+  //         top: 0,
+  //         left: 0,
+  //         behavior: "smooth",
+  //       });
+  //     }
+  //   }
+  // }, [data, y]);
 
   const sortedData = y === "bottom" ? [...data].reverse() : [...data];
 

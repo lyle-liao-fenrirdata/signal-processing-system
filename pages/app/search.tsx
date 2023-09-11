@@ -3,7 +3,8 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useState } from "react";
 // import SearchPayload from "@/components/search/SearchPayload";
 import SearchSql from "@/components/search/SearchSql";
-import SearchSession from "@/components/search/SearchSession";
+// import SearchSession from "@/components/search/SearchSession";
+import SearchKibana from "@/components/search/SearchKibana";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -32,22 +33,31 @@ export default function Search({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [isSqlTabActive, setIsSqlTabActive] = useState(false);
   // const [isPayloadTabActive, setIsPayloadTabActive] = useState(false);
-  const [isSessionTabActive, setIsSessionTabActive] = useState(true);
+  // const [isSessionTabActive, setIsSessionTabActive] = useState(true);
+  const [isKibanaTabActive, setIsKibanaTabActive] = useState(true);
 
   function onTabClick(e: React.MouseEvent<HTMLButtonElement>) {
     const id = e.currentTarget.id;
     if (id === "sql2es-tab") {
       setIsSqlTabActive(true);
       // setIsPayloadTabActive(false);
-      setIsSessionTabActive(false);
+      // setIsSessionTabActive(false);
+      setIsKibanaTabActive(false);
     } else if (id === "payload-tab") {
       setIsSqlTabActive(false);
       // setIsPayloadTabActive(true);
-      setIsSessionTabActive(false);
+      // setIsSessionTabActive(false);
+      setIsKibanaTabActive(false);
     } else if (id === "session-tab") {
       setIsSqlTabActive(false);
       // setIsPayloadTabActive(false);
-      setIsSessionTabActive(true);
+      // setIsSessionTabActive(true);
+      setIsKibanaTabActive(false);
+    } else if (id === "kibana-tab") {
+      setIsSqlTabActive(false);
+      // setIsPayloadTabActive(false);
+      // setIsSessionTabActive(false);
+      setIsKibanaTabActive(true);
     }
   }
 
@@ -65,11 +75,17 @@ export default function Search({
           role="tablist"
         >
           {[
+            // {
+            //   id: "session-tab",
+            //   text: "查詢解析資料",
+            //   onClick: onTabClick,
+            //   isSelected: isSessionTabActive,
+            // },
             {
-              id: "session-tab",
+              id: "kibana-tab",
               text: "查詢解析資料",
               onClick: onTabClick,
-              isSelected: isSessionTabActive,
+              isSelected: isKibanaTabActive,
             },
             {
               id: "sql2es-tab",
@@ -101,10 +117,15 @@ export default function Search({
       </div>
       <div id="searchTabContent">
         {[
+          // {
+          //   id: "session",
+          //   children: <SearchSession />,
+          //   isSelected: isSessionTabActive,
+          // },
           {
-            id: "session",
-            children: <SearchSession />,
-            isSelected: isSessionTabActive,
+            id: "kibana",
+            children: <SearchKibana />,
+            isSelected: isKibanaTabActive,
           },
           {
             id: "sql2es",

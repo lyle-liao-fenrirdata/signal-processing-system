@@ -24,7 +24,7 @@ export const arkimeRouter = router({
          *      arkime_node=arkime01-node&
          *      ip_src=192.168.15.31
          */
-        const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
+        const url = new URL("/arkime_api/payload/", `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
         url.searchParams.append("host", host);
         url.searchParams.append("port", port);
         url.searchParams.append("query", query);
@@ -43,7 +43,7 @@ export const arkimeRouter = router({
          *      expression=file = *out*
          */
         try {
-            const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
+            const url = new URL("/arkime_api/sessions/", `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`);
             url.searchParams.append("host", `https://${host}`);
             url.searchParams.append("expression", expression);
 
@@ -59,13 +59,13 @@ export const arkimeRouter = router({
                 const arkimeUser = new FormData();
                 arkimeUser.append("username", "apiuser");
                 arkimeUser.append("password", "1qaz@WSX3edc");
-                const tokenUrl = new URL("/api/token/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
+                const tokenUrl = new URL("/api/token/", `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
                 const tokenResponse = await fetch(tokenUrl, { method: "POST", body: arkimeUser })
                 const token = await tokenResponse.json() as ArkimeTokenData
 
                 const tokenHeader = new Headers();
                 tokenHeader.append("Authorization", `Bearer ${token.access}`);
-                const hostsUrl = new URL("/arkime_api/api/arkime-hosts/", `${env.NEXT_PUBLIC_ARKIME_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
+                const hostsUrl = new URL("/arkime_api/api/arkime-hosts/", `${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ARKIME_PORT}`)
                 const hostsResponse = await fetch(hostsUrl, { method: "GET", headers: tokenHeader })
                 const hosts = await hostsResponse.json()
 
