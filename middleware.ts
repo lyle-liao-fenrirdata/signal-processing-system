@@ -16,8 +16,8 @@ export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
     const isAuthPath = pathname.startsWith('/auth');
 
-    // const isGuestPath = ["/app/dashboard", "/app/setting"].some((path) => pathname === path);
-    const isUserPath = ["/app/search", "/app/audit"].some((path) => pathname === path);
+    // const isGuestPath = ["/app", "/app/setting"].some((path) => pathname === path);
+    const isUserPath = ["/app/search", "/app/audit"].some((path) => pathname.indexOf(path) !== -1);
     const isAdminPath = ["/app/permission"].some((path) => pathname === path);
 
     if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.split(';')[0].split(" ")[1];
@@ -25,7 +25,6 @@ export async function middleware(request: NextRequest) {
     console.log({ bearerCookie, isAdminPath, isAuthPath, isUserPath, token })
 
     if (!token) return isAuthPath ? NextResponse.next() : NextResponse.redirect(new URL('/auth/login', request.url));
-    if (pathname === '/app') return NextResponse.redirect(new URL('/app/dashboard', request.url))
 
     try {
 
@@ -38,7 +37,7 @@ export async function middleware(request: NextRequest) {
             response.cookies.delete("x-token");
             return response
         }
-        if (isAuthPath) return NextResponse.redirect(new URL('/app/dashboard', request.url));
+        if (isAuthPath) return NextResponse.redirect(new URL('/app', request.url));
 
         const { username, account, role, exp } = payload;
         const userCheckResult = await fetch('http://localhost:3000/api/auth', {

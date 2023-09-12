@@ -154,7 +154,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
           <ul className="flex list-none flex-col md:min-w-full md:flex-col">
             <li className="items-center">
               <NavigationItem
-                href="/app/dashboard"
+                href="/app"
                 title="儀表板"
                 FaIconClass="fas fa-tv"
                 currentPath={router.pathname}

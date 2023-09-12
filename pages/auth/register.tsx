@@ -67,7 +67,7 @@ export default function Register() {
   }
 
   useEffect(() => {
-    if (isSuccess && data.ok) router.push("/app/dashboard");
+    if (isSuccess && data.ok) router.push("/app");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, isSuccess]);
 

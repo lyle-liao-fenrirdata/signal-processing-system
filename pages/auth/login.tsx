@@ -26,7 +26,7 @@ export default function Login() {
   } = trpc.auth.login.useMutation({
     retry: false,
     onSuccess: () => {
-      router.replace("/app/dashboard");
+      router.replace("/app");
     },
   });
 

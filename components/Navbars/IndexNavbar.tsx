@@ -13,15 +13,15 @@ export default function IndexNavbar() {
           >
             訊號處理系統
           </Link>
-          <button
+          {/* <button
             className="block cursor-pointer rounded border border-solid border-transparent bg-transparent px-3 py-1 text-xl leading-none outline-none focus:outline-none lg:hidden"
             type="button"
             onClick={() => setNavbarOpen(!navbarOpen)}
           >
             <i className="fas fa-bars"></i>
-          </button>
+          </button> */}
         </div>
-        <div
+        {/* <div
           className={
             "flex-grow items-center bg-white lg:flex lg:bg-opacity-0 lg:shadow-none" +
             (navbarOpen ? " block" : " hidden")
@@ -39,7 +39,7 @@ export default function IndexNavbar() {
               </a>
             </li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </nav>
   );
