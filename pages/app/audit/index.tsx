@@ -11,6 +11,19 @@ import {
   AuditDescriptionInput,
   AuditIsCheckedSchemaInput,
 } from "@/server/schema/audit.schema";
+import debounce from "lodash.debounce";
+import { formatDate } from "@/utils/formats";
+import DropTableContainer from "@/components/commons/DropTableContainer";
+import { useRouter } from "next/router";
+
+export type ActiveLog = AuditDescriptionInput & {
+  comment: string;
+  groups: (AuditDescriptionInput & {
+    color: string;
+    name: string;
+    items: (AuditIsCheckedSchemaInput & { name: string })[];
+  })[];
+};
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -37,19 +50,30 @@ export default function Audit({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const { query, push, pathname, route } = useRouter();
+  const queryHistoryLog = getParamValue("history");
+
+  function getParamValue(name: string) {
+    const value = query[name];
+    return !value
+      ? value
+      : Array.isArray(value)
+      ? value.map((el) => decodeURIComponent(el))
+      : decodeURIComponent(value);
+  }
+
+  function onHistoryLogClick(id: number, pathname: string) {
+    if (window) {
+      const url = new URL(pathname, window.location.href);
+      url.searchParams.append("history", String(id));
+      push(url);
+    }
+  }
+
+  const [isSync, setIsSync] = React.useState<boolean | "na">(true);
   const [isAuditSubmitModalOpen, setIsAuditSubmitModalOpen] =
     React.useState(false);
-  const [activeLog, setActiveLog] = React.useState<
-    | (AuditDescriptionInput & {
-        comment: string;
-        groups: (AuditDescriptionInput & {
-          color: string;
-          name: string;
-          items: (AuditIsCheckedSchemaInput & { name: string })[];
-        })[];
-      })
-    | null
-  >(null);
+  const [activeLog, setActiveLog] = React.useState<ActiveLog | null>(null);
 
   const {
     isError: isUserAuditLogError,
@@ -67,6 +91,8 @@ export default function Audit({
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   });
+
+  const historyAuditLog = userAuditLog?.filter(({ isLocked }) => isLocked);
 
   const {
     mutate: createNewAuditLog,
@@ -103,6 +129,7 @@ export default function Audit({
     error: saveAuditLogError,
   } = trpc.audit.saveAuditLog.useMutation({
     retry: false,
+    onSuccess: () => debouncedRefetchUserAuditLog(),
   });
 
   const {
@@ -113,6 +140,7 @@ export default function Audit({
     error: saveAuditGroupLogError,
   } = trpc.audit.saveAuditGroupLog.useMutation({
     retry: false,
+    onSuccess: () => debouncedRefetchUserAuditLog(),
   });
 
   const {
@@ -123,6 +151,7 @@ export default function Audit({
     error: saveAuditItemLogError,
   } = trpc.audit.saveAuditItemLog.useMutation({
     retry: false,
+    onSuccess: () => debouncedRefetchUserAuditLog(),
   });
 
   useEffect(() => {
@@ -150,6 +179,10 @@ export default function Audit({
             })),
           })),
         });
+        setIsSync(() => true);
+      } else {
+        setIsSync(() => "na");
+        setActiveLog(null);
       }
     }
   }, [
@@ -164,6 +197,7 @@ export default function Audit({
   }
 
   function onCheckboxChange(isChecked: boolean, itemId: number) {
+    setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
       return {
@@ -196,6 +230,7 @@ export default function Audit({
   }
 
   function onGroupTextboxChange(description: string, groupId: number) {
+    setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
       return {
@@ -217,6 +252,7 @@ export default function Audit({
   }
 
   function onLogTextboxChange(description: string) {
+    setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
       return {
@@ -226,17 +262,20 @@ export default function Audit({
     });
   }
 
-  function onSubmit(lock?: boolean) {
+  const debouncedSyncInput = debounce(syncInput, 1000);
+  const debouncedRefetchUserAuditLog = debounce(refetchUserAuditLog, 1001);
+
+  function lockLog() {
+    if (activeLog)
+      lockAuditLog({
+        id: activeLog.id,
+        isLocked: true,
+      });
+  }
+
+  function syncInput() {
     const log = userAuditLog && userAuditLog.find((log) => !log.isLocked);
-    if (
-      !log ||
-      !activeLog ||
-      isLockAudutLogLoading ||
-      isSaveAuditLogLoading ||
-      isSaveAuditGroupLogLoading ||
-      isSaveAuditItemLogLoading
-    )
-      return;
+    if (!log || !activeLog) return;
     if (log.description !== activeLog.description) {
       saveAuditLog({ id: activeLog.id, description: activeLog.description });
     }
@@ -262,14 +301,12 @@ export default function Audit({
         }
       });
     });
-    if (lock)
-      setTimeout(() => {
-        lockAuditLog({
-          id: activeLog.id,
-          isLocked: true,
-        });
-      }, 1000);
   }
+
+  useEffect(() => {
+    debouncedSyncInput();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLog]);
 
   return (
     <AdminLayout
@@ -281,11 +318,18 @@ export default function Audit({
     >
       <Container
         title={
-          <div className="flex justify-between text-center">
-            <h6 className="text-xl font-bold text-slate-700">勾稽表單</h6>
-            <div>
+          <div className="flex items-center justify-between">
+            <h6 className="font-bold text-slate-700">勾稽表單</h6>
+            <div className="flex flex-row gap-4">
+              <div className="flex items-center text-xs">
+                {isSync === "na" ? null : isSync ? (
+                  <span className="text-emerald-700">已儲存✅</span>
+                ) : (
+                  <span className="text-red-600">同步中...</span>
+                )}
+              </div>
               <button
-                className="mr-4 rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none disabled:opacity-50"
+                className="rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none disabled:opacity-50"
                 type="button"
                 disabled={
                   isLockAudutLogLoading ||
@@ -327,103 +371,92 @@ export default function Audit({
           <span>無在用紀錄</span>
         ) : (
           <div className="grid grid-cols-12 gap-4">
-            <React.Fragment key={`auditLog-${activeLog.id}`}>
-              <span className="col-span-12 mt-2 block w-full rounded p-2.5 text-base">
-                <span className="mb-2 block font-semibold text-gray-900">
-                  上機概要
-                </span>
-                <span className="block"></span>
-                {activeLog.comment ?? "無"}
+            <span className="col-span-12 mt-2 block w-full rounded p-2.5 text-base">
+              <span className="mb-2 block font-semibold text-gray-900">
+                上機概要
               </span>
-              <hr className="col-span-12 border-slate-300" />
-              {activeLog.groups.map((group) => (
-                <React.Fragment key={`auditGroupLog-${group.id}`}>
-                  <div
-                    className={`col-span-3 flex items-center justify-center rounded ${
-                      group.color === Color.Blue
-                        ? "bg-sky-50"
-                        : group.color === Color.Gray
-                        ? "bg-neutral-50"
-                        : group.color === Color.Green
-                        ? "bg-green-50"
-                        : group.color === Color.Orange
-                        ? "bg-orange-50"
-                        : group.color === Color.Pink
-                        ? "bg-pink-50"
-                        : group.color === Color.Purple
-                        ? "bg-purple-50"
-                        : group.color === Color.Red
-                        ? "bg-red-50"
-                        : group.color === Color.Yellow
-                        ? "bg-yellow-50"
-                        : "bg-slate-50"
-                    }`}
-                  >
-                    <span className="inline-block px-3 py-1 text-base font-semibold">
-                      {group.name}
-                    </span>
-                  </div>
-                  <div className="col-span-5 flex flex-col justify-center gap-2">
-                    {group.items.map((item) => (
-                      <div
-                        key={`auditItemLog-${item.id}`}
-                        className="items-top relative flex flex-nowrap items-center space-x-2"
-                      >
-                        <input
-                          id={`auditItemLog-input-${item.id}`}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 "
-                          checked={item.isChecked}
-                          onChange={(e) => {
-                            onCheckboxChange(e.target.checked, item.id);
-                          }}
-                        />
-                        <label
-                          htmlFor={`auditItemLog-input-${item.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {item.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="col-span-4">
-                    <textarea
-                      id="message"
-                      rows={4}
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Write your results or findings here..."
-                      value={group.description}
-                      onChange={(e) => {
-                        onGroupTextboxChange(e.target.value, group.id);
-                      }}
-                    ></textarea>
-                  </div>
-                </React.Fragment>
-              ))}
-              <div className="col-span-12">
-                <textarea
-                  id="message"
-                  rows={4}
-                  className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Write your results or findings here..."
-                  value={activeLog.description}
-                  onChange={(e) => {
-                    onLogTextboxChange(e.target.value);
-                  }}
-                ></textarea>
-              </div>
-              <hr className="col-span-12 border-slate-300" />
-              <div className="col-span-12 flex flex-row justify-end gap-4">
-                <button
-                  className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none"
-                  type="button"
-                  onClick={() => onSubmit()}
+              <span className="block"></span>
+              {activeLog.comment ?? "無"}
+            </span>
+            <hr className="col-span-12 border-slate-300" />
+            {activeLog.groups.map((group) => (
+              <React.Fragment key={`auditGroupLog-${group.id}`}>
+                <div
+                  className={`col-span-3 flex items-center justify-center rounded ${
+                    group.color === Color.Blue
+                      ? "bg-sky-50"
+                      : group.color === Color.Gray
+                      ? "bg-neutral-50"
+                      : group.color === Color.Green
+                      ? "bg-green-50"
+                      : group.color === Color.Orange
+                      ? "bg-orange-50"
+                      : group.color === Color.Pink
+                      ? "bg-pink-50"
+                      : group.color === Color.Purple
+                      ? "bg-purple-50"
+                      : group.color === Color.Red
+                      ? "bg-red-50"
+                      : group.color === Color.Yellow
+                      ? "bg-yellow-50"
+                      : "bg-slate-50"
+                  }`}
                 >
-                  儲存變更
-                </button>
-              </div>
-            </React.Fragment>
+                  <span className="inline-block px-3 py-1 text-base font-semibold">
+                    {group.name}
+                  </span>
+                </div>
+                <div className="col-span-5 flex flex-col justify-center gap-2">
+                  {group.items.map((item) => (
+                    <div
+                      key={`auditItemLog-${item.id}`}
+                      className="items-top relative flex flex-nowrap items-center space-x-2"
+                    >
+                      <input
+                        id={`auditItemLog-input-${item.id}`}
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 "
+                        checked={item.isChecked}
+                        onChange={(e) => {
+                          onCheckboxChange(e.target.checked, item.id);
+                        }}
+                      />
+                      <label
+                        htmlFor={`auditItemLog-input-${item.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {item.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="col-span-4">
+                  <textarea
+                    id="message"
+                    rows={4}
+                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Write your results or findings here..."
+                    value={group.description}
+                    onChange={(e) => {
+                      onGroupTextboxChange(e.target.value, group.id);
+                    }}
+                  ></textarea>
+                </div>
+              </React.Fragment>
+            ))}
+            <div className="col-span-12">
+              <textarea
+                id="message"
+                rows={4}
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Write your results or findings here..."
+                value={activeLog.description}
+                onChange={(e) => {
+                  onLogTextboxChange(e.target.value);
+                }}
+              ></textarea>
+            </div>
+            <hr className="col-span-12 border-slate-300" />
           </div>
         )}
       </Container>
@@ -435,7 +468,7 @@ export default function Audit({
               key={`save audit change`}
               className="mr-2 rounded bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
               type="button"
-              onClick={() => onSubmit(true)}
+              onClick={() => debounce(lockLog, 500)()}
             >
               提交
             </button>,
@@ -459,6 +492,129 @@ export default function Audit({
             請按「提交」送出紀錄。
           </div>
         </Modal>
+      )}
+
+      {/* 歷史紀錄 */}
+      {isUserAuditLogLoading ? (
+        <span>Fetching... Loading...</span>
+      ) : isUserAuditLogError ? (
+        <Errors errors={[userAuditLogError?.message]} />
+      ) : !historyAuditLog || !historyAuditLog.length ? (
+        <span>無歷史紀錄</span>
+      ) : (
+        <DropTableContainer
+          title={<>歷史表單</>}
+          ths={["建立時間", "提交時間"]}
+          tbodyTrs={historyAuditLog.map((log) => ({
+            key: `history ${log.id}`,
+            onClick: () => onHistoryLogClick(log.id, pathname),
+            content:
+              queryHistoryLog &&
+              (Array.isArray(queryHistoryLog)
+                ? queryHistoryLog.some((q) => q === String(log.id))
+                : queryHistoryLog === String(log.id)) ? (
+                <div className="grid grid-cols-12 gap-4">
+                  <span className="col-span-12 mt-2 block w-full rounded p-2.5 text-base">
+                    <span className="mb-2 block font-semibold text-gray-900">
+                      上機概要
+                    </span>
+                    <span className="block"></span>
+                    {log.description ?? "無"}
+                  </span>
+                  <hr className="col-span-12 border-slate-300" />
+                  {log.auditGroupLogs.map((group) => (
+                    <React.Fragment key={`histroy-auditGroupLog-${group.id}`}>
+                      <div
+                        className={`col-span-3 flex items-center justify-center rounded ${
+                          group.auditGroup.color === Color.Blue
+                            ? "bg-sky-50"
+                            : group.auditGroup.color === Color.Gray
+                            ? "bg-neutral-50"
+                            : group.auditGroup.color === Color.Green
+                            ? "bg-green-50"
+                            : group.auditGroup.color === Color.Orange
+                            ? "bg-orange-50"
+                            : group.auditGroup.color === Color.Pink
+                            ? "bg-pink-50"
+                            : group.auditGroup.color === Color.Purple
+                            ? "bg-purple-50"
+                            : group.auditGroup.color === Color.Red
+                            ? "bg-red-50"
+                            : group.auditGroup.color === Color.Yellow
+                            ? "bg-yellow-50"
+                            : "bg-slate-50"
+                        }`}
+                      >
+                        <span className="inline-block px-3 py-1 text-base font-semibold">
+                          {group.auditGroup.name}
+                        </span>
+                      </div>
+                      <div className="col-span-5 flex flex-col justify-center gap-2">
+                        {group.auditItemLogs.map((item) => (
+                          <div
+                            key={`history-auditItemLog-${item.id}`}
+                            className="items-top relative flex flex-nowrap items-center space-x-2"
+                          >
+                            <input
+                              id={`auditItemLog-input-${item.id}`}
+                              type="checkbox"
+                              disabled
+                              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 "
+                              checked={item.isChecked}
+                            />
+                            <label
+                              htmlFor={`auditItemLog-input-${item.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {item.auditItem.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="col-span-4">
+                        <textarea
+                          id="message"
+                          rows={4}
+                          disabled
+                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="Write your results or findings here..."
+                          value={group.description || "無"}
+                        ></textarea>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                  <div className="col-span-12">
+                    <textarea
+                      id="message"
+                      rows={4}
+                      disabled
+                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                      placeholder="Write your results or findings here..."
+                      value={log.description || "無"}
+                    ></textarea>
+                  </div>
+                  <hr className="col-span-12 border-slate-300" />
+                </div>
+              ) : undefined,
+            tds: [
+              formatDate.format(log.createdAt),
+              formatDate.format(
+                Math.max(
+                  Number(log.updatedAt),
+                  ...historyAuditLog[0].auditGroupLogs
+                    .map((g) =>
+                      [
+                        g.updatedAt,
+                        ...g.auditItemLogs.map((i) => i.updatedAt),
+                      ].flat()
+                    )
+                    .flat()
+                    .map((d) => Number(d))
+                )
+              ),
+            ],
+          }))}
+        />
       )}
     </AdminLayout>
   );

@@ -25,14 +25,18 @@ export const auditRouter = router({
                                     auditItem: true,
                                 },
                                 orderBy: {
-                                    createdAt: 'desc'
+                                    auditItem: {
+                                        order: 'asc'
+                                    },
                                 }
                             },
                         },
                         orderBy: {
-                            createdAt: 'desc',
+                            auditGroup: {
+                                order: 'asc',
+                            }
                         }
-                    }
+                    },
                 },
                 orderBy: {
                     createdAt: 'desc',
@@ -55,7 +59,7 @@ export const auditRouter = router({
             ])
             if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有此使用者。" });
             if (historyAudit) throw new TRPCError({ code: "CONFLICT", message: "尚有未完成紀錄，請先結案提交。" });
-            if (!audit) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 可使用的表單，請聯繫管理者。" });
+            if (!audit) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有可使用的表單，請聯繫管理者。" });
 
             await prisma.auditLog.create({
                 data: {

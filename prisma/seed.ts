@@ -46,6 +46,17 @@ async function main() {
     console.log(userResults)
     const [admin, user, userA, userB] = userResults
 
+    const colorArray = Object.keys(Color) as (keyof typeof Color)[]
+
+    await Promise.all([
+        await prisma.auditItemLog.deleteMany({}),
+        await prisma.auditGroupLog.deleteMany({}),
+        await prisma.auditLog.deleteMany({}),
+    ])
+    await prisma.auditItem.deleteMany({})
+    await prisma.auditGroup.deleteMany({})
+    await prisma.audit.deleteMany({})
+
     await prisma.audit.createMany({
         data: [
             { createdById: admin.id, createdAt: new Date(new Date().setDate(new Date().getDate() - 2)), comment: "text comment" },
@@ -54,35 +65,123 @@ async function main() {
         ]
     })
 
-    const auditIds = await prisma.audit.findMany({
+    const inactiveAuditIds = await prisma.audit.findMany({
+        where: { isActive: false },
         select: {
             id: true,
         }
     });
-
-    const colorArray = Object.keys(Color) as (keyof typeof Color)[]
-    await Promise.all(auditIds.map(async ({ id }, index) => {
+    await Promise.all(inactiveAuditIds.map(async ({ id: auditId }, index) => {
         await prisma.auditGroup.createMany({
             data: Array.from({ length: index + 2 }, (_, i) => ({
-                name: `Fake ${id}-${i + 1}`,
-                auditId: id,
+                name: `Fake ${auditId}-${i + 1}`,
+                auditId,
                 color: colorArray[(index + i + 1) % colorArray.length],
+                order: i + 1
             }))
         })
     }))
 
-    const auditGroups = await prisma.auditGroup.findMany({
+    const inactiveAuditGroups = await prisma.auditGroup.findMany({
+        where: {
+            audit: {
+                isActive: false,
+            },
+        },
         select: {
             id: true,
             name: true,
             color: true,
+            order: true,
         }
     })
-    await Promise.all(auditGroups.map(async ({ id, name, color }, index) => {
+    await Promise.all(inactiveAuditGroups.map(async ({ id: auditGroupId, name, color }, index) => {
         await prisma.auditItem.createMany({
             data: Array.from({ length: (index % 3) + 2 }, (_, i) => ({
                 name: `Item ${i + 1} of ${name} in ${color}`,
-                auditGroupId: id
+                auditGroupId,
+                order: i + 1
+            }))
+        })
+    }))
+
+    const activeAuditIds = await prisma.audit.findMany({
+        where: { isActive: true },
+        select: {
+            id: true,
+        }
+    });
+    if (!activeAuditIds[0]) return;
+    const activeAuditId = activeAuditIds[0].id
+    const auditGroupData = [
+        {
+            name: "解析系統狀況",
+            color: Color.Blue,
+            items: [
+                { name: "解析節點，是否均在線" },
+                { name: "解析容器，是否均在運行" },
+                { name: "解析節點，是否負載過高" },
+                { name: "解析容器，是否負載過高" },
+            ]
+        },
+        {
+            name: "解析結果狀況",
+            color: Color.Green,
+            items: [
+                { name: "(如在錄製)接收檔案，是否持續更新" },
+                { name: "(如在錄製)接收檔案，是否持續解析" },
+                { name: "查詢解析衛星、極化、中心頻率、側錄時間，是否符合" },
+            ]
+        },
+        {
+            name: "錄製系統狀況",
+            color: Color.Purple,
+            items: [
+                { name: "錄製節點，是否均在線" },
+                { name: "錄製容器，是否均在運行" },
+                { name: "錄製節點，是否負載過高" },
+                { name: "錄製容器，是否負載過高" },
+                { name: "(如有變更)錄製硬體設定，是否更新" }
+            ]
+        },
+        {
+            name: "錄製設備狀況",
+            color: Color.Orange,
+            items: [
+                { name: "(如有變更)錄製資訊設定，是否更新" },
+                { name: "(如在錄製)錄製流路，是否於解析系統中設定相符" },
+                { name: "(如在錄製)錄製流路，是否可於解析系統中查詢結果" },
+            ]
+        }
+    ]
+    await prisma.auditGroup.createMany({
+        data: auditGroupData.map(({ name, color }, i) => ({
+            name,
+            auditId: activeAuditId,
+            color,
+            order: i + 1
+        }))
+    })
+
+    const activeAuditGroups = await Promise.all(auditGroupData
+        .map(async ({ name, items }) => {
+            const group = await prisma.auditGroup.findFirst({
+                where: { name },
+                select: {
+                    id: true,
+                }
+            })
+            return {
+                group,
+                items,
+            }
+        }))
+    await Promise.all(activeAuditGroups.map(async ({ items, group }) => {
+        await prisma.auditItem.createMany({
+            data: items.map(({ name }, i) => ({
+                name,
+                auditGroupId: group!.id,
+                order: i + 1
             }))
         })
     }))

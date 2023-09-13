@@ -31,7 +31,7 @@ const NavigationItem = ({
     target={target}
     className={
       "group flex flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold " +
-      (currentPath && currentPath.indexOf(href) !== -1
+      (currentPath === href
         ? "text-sky-600"
         : "text-slate-700 hover:text-sky-500")
     }
@@ -40,7 +40,7 @@ const NavigationItem = ({
     <span>
       <i
         className={`${FaIconClass} w-5 text-sm ${
-          currentPath && currentPath.indexOf(href) !== -1
+          currentPath == href
             ? "text-sky-600"
             : "opacity-25 group-hover:text-sky-500 group-hover:opacity-100"
         }`}
