@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-export default function Audit({
+export default function History({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -104,7 +104,7 @@ export default function Audit({
                       上機概要
                     </span>
                     <span className="block text-xs">
-                      {log.description ?? "無"}
+                      {log.audit.comment ?? "無"}
                     </span>
                   </span>
                   {log.auditGroupLogs.map((group) => (
@@ -112,22 +112,22 @@ export default function Audit({
                       <div
                         className={`col-span-3 flex items-center justify-center rounded ${
                           group.auditGroup.color === Color.Blue
-                            ? "bg-sky-50"
+                            ? "bg-sky-200"
                             : group.auditGroup.color === Color.Gray
-                            ? "bg-neutral-50"
+                            ? "bg-neutral-200"
                             : group.auditGroup.color === Color.Green
-                            ? "bg-green-50"
+                            ? "bg-green-200"
                             : group.auditGroup.color === Color.Orange
-                            ? "bg-orange-50"
+                            ? "bg-orange-200"
                             : group.auditGroup.color === Color.Pink
-                            ? "bg-pink-50"
+                            ? "bg-pink-200"
                             : group.auditGroup.color === Color.Purple
-                            ? "bg-purple-50"
+                            ? "bg-purple-200"
                             : group.auditGroup.color === Color.Red
-                            ? "bg-red-50"
+                            ? "bg-red-200"
                             : group.auditGroup.color === Color.Yellow
-                            ? "bg-yellow-50"
-                            : "bg-slate-50"
+                            ? "bg-yellow-200"
+                            : "bg-slate-200"
                         }`}
                       >
                         <span className="inline-block px-3 py-1 text-sm font-semibold">

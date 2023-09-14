@@ -1,15 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { Container } from "@/components/commons/Container";
 import Modal from "@/components/commons/Modal";
 import { trpc } from "@/utils/trpc";
-import { Color } from "@prisma/client";
+import { Color, Role } from "@prisma/client";
 import { Errors } from "@/components/commons/Errors";
 import {
   AuditDescriptionInput,
-  AuditIsCheckedSchemaInput,
+  AuditIsCheckedInput,
 } from "@/server/schema/audit.schema";
 import debounce from "lodash.debounce";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export type ActiveLog = AuditDescriptionInput & {
   groups: (AuditDescriptionInput & {
     color: string;
     name: string;
-    items: (AuditIsCheckedSchemaInput & { name: string })[];
+    items: (AuditIsCheckedInput & { name: string })[];
   })[];
 };
 
@@ -238,8 +238,13 @@ export default function Audit({
     });
   }
 
-  const debouncedSyncInput = debounce(syncInput, 2800);
-  const debouncedRefetchUserAuditLog = debounce(refetchUserAuditLog, 1000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSyncInput = useCallback(debounce(syncInput, 2000), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedRefetchUserAuditLog = useCallback(
+    debounce(refetchUserAuditLog, 1000),
+    []
+  );
 
   function lockLog() {
     if (activeLog)
@@ -249,14 +254,14 @@ export default function Audit({
       });
   }
 
-  function syncInput() {
-    const log = userAuditLog && userAuditLog.find((log) => !log.isLocked);
-    if (!log || !activeLog) return;
-    if (log.description !== activeLog.description) {
-      saveAuditLog({ id: activeLog.id, description: activeLog.description });
+  function syncInput(auditLog: typeof userAuditLog, active: typeof activeLog) {
+    const log = auditLog && auditLog.find((log) => !log.isLocked);
+    if (!log || !active) return;
+    if (log.description !== active.description) {
+      saveAuditLog({ id: active.id, description: active.description });
     }
     log.auditGroupLogs.map((groupLog) => {
-      const currGroupLog = activeLog.groups.find((ag) => ag.id === groupLog.id);
+      const currGroupLog = active.groups.find((ag) => ag.id === groupLog.id);
       if (!currGroupLog) return;
       if (groupLog.description !== currGroupLog.description) {
         saveAuditGroupLog({
@@ -280,7 +285,7 @@ export default function Audit({
   }
 
   useEffect(() => {
-    debouncedSyncInput();
+    debouncedSyncInput(userAuditLog, activeLog);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLog]);
 
@@ -295,7 +300,17 @@ export default function Audit({
       <Container
         title={
           <div className="flex items-center justify-between">
-            <h6 className="font-bold text-slate-700">勾稽表單</h6>
+            <div className="flex flex-row items-center gap-2">
+              <h6 className="font-bold text-slate-700">勾稽表單</h6>
+              {role === Role.ADMIN && (
+                <a
+                  href="/app/audit/edit"
+                  className="text-xs text-slate-400 hover:underline"
+                >
+                  編輯
+                </a>
+              )}
+            </div>
             <div className="flex flex-row items-center gap-4">
               <div className="text-xs">
                 {isSync === "na" ? null : isSync ? (
@@ -365,22 +380,22 @@ export default function Audit({
                 <div
                   className={`col-span-3 flex items-center justify-center rounded ${
                     group.color === Color.Blue
-                      ? "bg-sky-50"
+                      ? "bg-sky-200"
                       : group.color === Color.Gray
-                      ? "bg-neutral-50"
+                      ? "bg-neutral-200"
                       : group.color === Color.Green
-                      ? "bg-green-50"
+                      ? "bg-green-200"
                       : group.color === Color.Orange
-                      ? "bg-orange-50"
+                      ? "bg-orange-200"
                       : group.color === Color.Pink
-                      ? "bg-pink-50"
+                      ? "bg-pink-200"
                       : group.color === Color.Purple
-                      ? "bg-purple-50"
+                      ? "bg-purple-200"
                       : group.color === Color.Red
-                      ? "bg-red-50"
+                      ? "bg-red-200"
                       : group.color === Color.Yellow
-                      ? "bg-yellow-50"
-                      : "bg-slate-50"
+                      ? "bg-yellow-200"
+                      : "bg-slate-200"
                   }`}
                 >
                   <span className="inline-block px-3 py-1 text-base font-semibold">
