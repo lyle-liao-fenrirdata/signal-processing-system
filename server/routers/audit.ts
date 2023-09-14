@@ -8,12 +8,13 @@ export type AuditRouter = typeof auditRouter;
 export const auditRouter = router({
     getLiveAudit: userProcedure
         .query(async () => { return await getLiveAudit() }),
-    getUserAuditLog: userProcedure
+    getUserActiveAuditLog: userProcedure
         .query(async ({ ctx: { user: { account } } }) => {
             return await prisma.auditLog.findMany({
                 take: 10,
                 where: {
                     user: { account },
+                    isLocked: false,
                 },
                 include: {
                     audit: true,
@@ -217,6 +218,42 @@ export const auditRouter = router({
             });
 
             return { ok: true };
+        }),
+    getUserHistoryAuditLog: userProcedure
+        .query(async ({ ctx: { user: { account } } }) => {
+            return await prisma.auditLog.findMany({
+                take: 10,
+                where: {
+                    user: { account },
+                    isLocked: true,
+                },
+                include: {
+                    audit: true,
+                    auditGroupLogs: {
+                        include: {
+                            auditGroup: true,
+                            auditItemLogs: {
+                                include: {
+                                    auditItem: true,
+                                },
+                                orderBy: {
+                                    auditItem: {
+                                        order: 'asc'
+                                    },
+                                }
+                            },
+                        },
+                        orderBy: {
+                            auditGroup: {
+                                order: 'asc',
+                            }
+                        }
+                    },
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                }
+            })
         }),
 });
 

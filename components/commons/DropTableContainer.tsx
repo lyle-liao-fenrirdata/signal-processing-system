@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 type DropTableProp = {
   title: JSX.Element;
@@ -25,7 +25,7 @@ export default function DropTableContainer({
           </div>
         </div>
       </div>
-      <div className="block w-full overflow-x-auto">
+      <div className="block w-full overflow-x-auto pb-4">
         <table className="w-full border-collapse items-center bg-transparent">
           <thead>
             <tr>
@@ -41,21 +41,31 @@ export default function DropTableContainer({
           </thead>
           <tbody>
             {tbodyTrs.map(({ key, onClick, content, tds }) => (
-              <tr
-                key={key}
-                className="cursor-pointer hover:bg-slate-100"
-                onClick={onClick}
-              >
-                {tds.map((td, ind) => (
-                  <td
-                    key={`${key}-${ind}`}
-                    className="whitespace-nowrap border-l-0 border-r-0 border-t-0 p-4 px-6 align-middle text-xs"
-                  >
-                    {td}
-                  </td>
-                ))}
-                {content && <td colSpan={ths.length}>{content}</td>}
-              </tr>
+              <Fragment key={key}>
+                <tr
+                  className="cursor-pointer hover:bg-slate-100"
+                  onClick={onClick}
+                  id={key}
+                >
+                  {tds.map((td, ind) => (
+                    <td
+                      key={`${key}-${ind}`}
+                      className="whitespace-nowrap border-l-0 border-r-0 border-t-0 p-4 px-6 align-middle text-xs"
+                    >
+                      {td}
+                    </td>
+                  ))}
+                </tr>
+                <>
+                  {content && (
+                    <tr>
+                      <td className="px-6" colSpan={ths.length}>
+                        {content}
+                      </td>
+                    </tr>
+                  )}
+                </>
+              </Fragment>
             ))}
           </tbody>
         </table>
