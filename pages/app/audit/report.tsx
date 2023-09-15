@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-export default function History({
+export default function Report({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {

@@ -8,7 +8,6 @@ import { trpc } from "@/utils/trpc";
 import { Color } from "@prisma/client";
 import { Errors } from "@/components/commons/Errors";
 import debounce from "lodash.debounce";
-import Link from "next/link";
 import DropTableContainer from "@/components/commons/DropTableContainer";
 import { useRouter } from "next/router";
 import { formatDate } from "@/utils/formats";
@@ -16,6 +15,7 @@ import {
   AuditGroupInput,
   AuditGroupItemCommonInput,
 } from "@/server/schema/audit.schema";
+import { CloseIcon } from "@/components/commons/toast/Icon";
 
 export type ActiveAudit = {
   id: number;
@@ -125,6 +125,30 @@ export default function Edit({
       setIsDeleteModalOpen(false);
     },
   });
+
+  const { mutate: deleteAuditGroup, isLoading: isDeleteAudutGroupLoading } =
+    trpc.audit.deleteAuditGroup.useMutation({
+      retry: false,
+      onSuccess: () => refetchAudit(),
+    });
+
+  const { mutate: deleteAuditItem, isLoading: isDeleteAudutItemLoading } =
+    trpc.audit.deleteAuditItem.useMutation({
+      retry: false,
+      onSuccess: () => refetchAudit(),
+    });
+
+  const { mutate: createAuditGroup, isLoading: isCreateAudutGroupLoading } =
+    trpc.audit.createAuditGroup.useMutation({
+      retry: false,
+      onSuccess: () => refetchAudit(),
+    });
+
+  const { mutate: createAuditItem, isLoading: isCreateAudutItemLoading } =
+    trpc.audit.createAuditItem.useMutation({
+      retry: false,
+      onSuccess: () => refetchAudit(),
+    });
 
   const {
     mutate: activateAudit,
@@ -283,55 +307,154 @@ export default function Edit({
     });
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSyncInput = useCallback(debounce(syncInput, 2000), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedRefetchUserAuditLog = useCallback(
-    debounce(refetchAudit, 1000),
-    []
-  );
+  function onDeleteAuditGroup(id: number) {
+    deleteAuditGroup({ id });
+  }
 
-  function syncInput(auditLog: typeof audit, active: typeof activeLog) {
-    const log =
-      active && auditLog && auditLog.find((log) => active.id === log.id);
-    if (!log || !active) return;
-    if (log.comment !== active.comment) {
-      saveAudit({ id: active.id, comment: active.comment });
-    }
-    log.auditGroups.map((group) => {
-      const currGroup = active.groups.find((ag) => ag.id === group.id);
-      if (!currGroup) return;
-      if (
-        group.name !== currGroup.name ||
-        group.color !== currGroup.color ||
-        group.order !== currGroup.order
-      ) {
-        saveAuditGroup({
-          id: currGroup.id,
-          name: currGroup.name,
-          color: currGroup.color,
-          order: currGroup.order,
-        });
-      }
-      group.auditItems.map((item) => {
-        const currItem = currGroup.items.find((i) => i.id === item.id);
-        if (!currItem) return;
-        if (item.name !== currItem.name || item.order !== currItem.order) {
-          console.log(item.name, currItem.name, item.order, currItem.order);
-          saveAuditItem({
-            id: currItem.id,
-            name: currItem.name,
-            order: currItem.order,
-          });
+  function onDeleteAudtiItem(id: number) {
+    deleteAuditItem({ id });
+  }
+
+  function onCreateAuditGroup(id: number) {
+    createAuditGroup({ id });
+  }
+
+  function onCreateAudtiItem(id: number) {
+    createAuditItem({ id });
+  }
+
+  function onAuditSwap(
+    layer: "group" | "item",
+    direction: "prev" | "next",
+    currId: number
+  ) {
+    setIsSync(false);
+    setActiveLog((prev) => {
+      if (!prev) return prev;
+      const flatIdOrder = prev.groups
+        .map(({ id, order, items }) => [
+          { id, order, layer: "group" },
+          ...items.map(({ id, order }) => ({ id, order, layer: "item" })),
+        ])
+        .flat();
+
+      let needSwap: Omit<(typeof flatIdOrder)[number], "layer"> | null = null;
+      let swapTo: Omit<(typeof flatIdOrder)[number], "layer"> | null = null;
+
+      for (let i = 0; i < flatIdOrder.length; i++) {
+        let index = i;
+        if (direction === "next") index = -i - 1;
+        const curr = flatIdOrder.at(index);
+        if (!curr) break;
+        if (layer !== curr.layer) continue;
+        if (curr.id === currId) {
+          needSwap = { ...curr };
+          break;
         }
-      });
+        swapTo = { ...curr };
+      }
+
+      if (!swapTo || !needSwap) return prev;
+
+      return {
+        ...prev,
+        groups: prev.groups.map((g) => {
+          if (layer === "group" && g.id === needSwap!.id) {
+            return {
+              ...g,
+              order: swapTo!.order,
+            };
+          } else if (layer === "group" && g.id === swapTo!.id) {
+            return {
+              ...g,
+              order: needSwap!.order,
+            };
+          } else if (
+            layer === "item" &&
+            g.items.some((i) => i.id === needSwap!.id)
+          ) {
+            return {
+              ...g,
+              items: g.items.map((i) => {
+                if (i.id === needSwap!.id) {
+                  return {
+                    ...i,
+                    order: swapTo!.order,
+                  };
+                } else if (i.id === swapTo!.id) {
+                  return {
+                    ...i,
+                    order: needSwap!.order,
+                  };
+                }
+                return i;
+              }),
+            };
+          }
+
+          return g;
+        }),
+      };
     });
   }
+
+  const syncInput = useCallback(
+    (auditLog: typeof audit, active: typeof activeLog) => {
+      let isUpdateFlag = false;
+      const log =
+        active && auditLog && auditLog.find((log) => active.id === log.id);
+      if (!log || !active) return;
+      if (log.comment !== active.comment) {
+        saveAudit({ id: active.id, comment: active.comment });
+        isUpdateFlag = true;
+      }
+      log.auditGroups.map((group) => {
+        const currGroup = active.groups.find((ag) => ag.id === group.id);
+        if (!currGroup) return;
+        if (
+          group.name !== currGroup.name ||
+          group.color !== currGroup.color ||
+          group.order !== currGroup.order
+        ) {
+          saveAuditGroup({
+            id: currGroup.id,
+            name: currGroup.name,
+            color: currGroup.color,
+            order: currGroup.order,
+          });
+          isUpdateFlag = true;
+        }
+        group.auditItems.map((item) => {
+          const currItem = currGroup.items.find((i) => i.id === item.id);
+          if (!currItem) return;
+          if (item.name !== currItem.name || item.order !== currItem.order) {
+            saveAuditItem({
+              id: currItem.id,
+              name: currItem.name,
+              order: currItem.order,
+            });
+            isUpdateFlag = true;
+          }
+        });
+      });
+      if (!isUpdateFlag) setIsSync(true);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
     debouncedSyncInput(audit, activeLog);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLog]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSyncInput = useCallback(debounce(syncInput, 2000), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedRefetchUserAuditLog = useCallback(
+    debounce(refetchAudit, 300),
+    []
+  );
 
   return (
     <AdminLayout
@@ -388,9 +511,9 @@ export default function Edit({
                   </button>
                 </>
               )}
-              {/* {isCreateNewAuditLogError && (
-                <Errors errors={[createNewAuditLogError.message]} />
-              )} */}
+              {isCreateNewAuditError && (
+                <Errors errors={[createNewAuditError.message]} />
+              )}
             </div>
           </div>
         }
@@ -419,10 +542,10 @@ export default function Edit({
               ></textarea>
             </span>
             <hr className="col-span-12 border-slate-300" />
-            {activeLog.groups.map((group) => (
+            {activeLog.groups.map((group, gIndex, { length: gLen }) => (
               <React.Fragment key={`auditGroup-${group.id}`}>
                 <div
-                  className={`col-span-5 flex items-center gap-2.5 rounded p-2.5 ${
+                  className={`col-span-4 flex flex-col items-center justify-center gap-y-2.5 rounded p-2.5 ${
                     group.color === Color.Blue
                       ? "bg-sky-200"
                       : group.color === Color.Gray
@@ -442,10 +565,38 @@ export default function Edit({
                       : "bg-slate-200"
                   }`}
                 >
+                  <div className="ml-auto flex flex-row flex-nowrap gap-2 text-slate-700">
+                    <button
+                      type="button"
+                      disabled={!gIndex || !isSync}
+                      onClick={() => onAuditSwap("group", "prev", group.id)}
+                      className="col-span-1 h-6 w-6 rounded border-none bg-transparent transition-all hover:bg-slate-500 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      disabled={gIndex + 1 === gLen || !isSync}
+                      onClick={() => onAuditSwap("group", "next", group.id)}
+                      className="col-span-1 h-6 w-6 rounded border-none bg-transparent transition-all hover:bg-slate-500 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isDeleteAudutGroupLoading || !isSync}
+                      onClick={() => onDeleteAuditGroup(group.id)}
+                      className="col-span-1 h-6 w-6 rounded border-none transition-all hover:bg-slate-500 hover:text-white"
+                    >
+                      <center>
+                        <CloseIcon />
+                      </center>
+                    </button>
+                  </div>
                   <input
                     id={`auditAudit-input-${group.id}`}
                     type="text"
-                    className="grow rounded border-gray-300 bg-white text-sm focus:ring-blue-500"
+                    className="w-full rounded border-gray-300 bg-white text-sm focus:ring-blue-500"
                     value={group.name}
                     onChange={(e) => {
                       onGroupInputChange(e.target.value, group.id);
@@ -456,7 +607,7 @@ export default function Edit({
                     name="arkimeAvailavbleSelections"
                     id="arkimeAvailavbleSelections"
                     value={group.color}
-                    className="shrink-0 rounded border-gray-300 bg-white px-3 pl-2 pr-8 text-sm outline-none focus:border-transparent focus:outline-none active:outline-none"
+                    className="ml-auto shrink-0 rounded border-gray-300 bg-white px-3 pl-2 pr-8 text-sm outline-none focus:border-transparent focus:outline-none active:outline-none"
                     onChange={(e) => {
                       onGroupSelectChange(e.target.value as Color, group.id);
                     }}
@@ -471,11 +622,11 @@ export default function Edit({
                     ))}
                   </select>
                 </div>
-                <div className="col-span-7 flex flex-col justify-center gap-2">
-                  {group.items.map((item) => (
+                <div className="col-span-8 flex flex-col justify-center gap-2">
+                  {group.items.map((item, iIndex, { length: iLen }) => (
                     <div
                       key={`auditItemLog-${item.id}`}
-                      className="items-top relative flex flex-nowrap items-center space-x-2"
+                      className="relative flex w-full flex-nowrap items-center space-x-2"
                     >
                       <input
                         id={`auditItem-input-${item.id}`}
@@ -486,11 +637,55 @@ export default function Edit({
                           onItemInputChange(e.target.value, item.id);
                         }}
                       />
+                      <div className="ml-auto flex shrink-0 flex-row flex-nowrap gap-2 text-slate-700">
+                        <button
+                          type="button"
+                          disabled={!iIndex || !isSync}
+                          onClick={() => onAuditSwap("item", "prev", item.id)}
+                          className="col-span-1 h-6 w-6 rounded border-none bg-transparent transition-all hover:bg-slate-500 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          disabled={iIndex + 1 === iLen || !isSync}
+                          onClick={() => onAuditSwap("item", "next", item.id)}
+                          className="col-span-1 h-6 w-6 rounded border-none bg-transparent transition-all hover:bg-slate-500 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                        >
+                          ↓
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isDeleteAudutItemLoading || !isSync}
+                          onClick={() => onDeleteAudtiItem(item.id)}
+                          className="col-span-1 h-6 w-6 rounded border-none bg-transparent transition-all hover:bg-slate-500 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-700"
+                        >
+                          <center>
+                            <CloseIcon />
+                          </center>
+                        </button>
+                      </div>
                     </div>
                   ))}
+                  <button
+                    type="button"
+                    disabled={isCreateAudutItemLoading}
+                    onClick={() => onCreateAudtiItem(group.id)}
+                    className="w-full rounded border transition-all hover:bg-slate-500 hover:text-white"
+                  >
+                    新增項目 +
+                  </button>
                 </div>
               </React.Fragment>
             ))}
+            <button
+              type="button"
+              disabled={isCreateAudutGroupLoading}
+              onClick={() => onCreateAuditGroup(activeLog.id)}
+              className="col-span-12 rounded border transition-all hover:bg-slate-500 hover:text-white"
+            >
+              新增群組 +
+            </button>
             <hr className="col-span-12 border-slate-300" />
           </div>
         )}
@@ -578,11 +773,11 @@ export default function Edit({
 
       <DropTableContainer
         title={<>歷史表單</>}
-        ths={["Record ID", "建立時間", "狀態", "建立者"]}
+        ths={["Record ID", "建立時間", "狀態", "建立者", "使用次數"]}
         tbodyTrs={
           !audit
             ? []
-            : audit.map((log) => ({
+            : audit.map((log, index) => ({
                 key: `history-${log.id}`,
                 onClick: () => onHistoryLogClick(log.id, pathname),
                 content:
@@ -647,6 +842,9 @@ export default function Edit({
                   formatDate.format(log.createdAt),
                   log.isActive ? "✔️ 在用" : "❌ 停用",
                   log.createdBy.username,
+                  !index && !log.isActive
+                    ? "編輯中"
+                    : String(log._count.AuditLogs),
                 ],
               }))
         }

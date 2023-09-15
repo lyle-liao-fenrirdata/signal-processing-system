@@ -48,7 +48,7 @@ export default function Audit({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [isSync, setIsSync] = React.useState<boolean | "na">(true);
+  const [isSync, setIsSync] = React.useState<boolean>(true);
   const [isAuditSubmitModalOpen, setIsAuditSubmitModalOpen] =
     React.useState(false);
   const [activeLog, setActiveLog] = React.useState<ActiveLog | null>(null);
@@ -135,7 +135,7 @@ export default function Audit({
       !isUserAuditLogError &&
       !isUserAuditLogLoading &&
       isUserAuditLogSuccess &&
-      userAuditLog.length
+      userAuditLog
     ) {
       const log = userAuditLog.find((log) => !log.isLocked);
       if (log) {
@@ -157,7 +157,6 @@ export default function Audit({
         });
         setIsSync(() => true);
       } else {
-        setIsSync(() => "na");
         setActiveLog(null);
       }
     }
@@ -238,14 +237,6 @@ export default function Audit({
     });
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSyncInput = useCallback(debounce(syncInput, 2000), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedRefetchUserAuditLog = useCallback(
-    debounce(refetchUserAuditLog, 1000),
-    []
-  );
-
   function lockLog() {
     if (activeLog)
       lockAuditLog({
@@ -254,40 +245,57 @@ export default function Audit({
       });
   }
 
-  function syncInput(auditLog: typeof userAuditLog, active: typeof activeLog) {
-    const log = auditLog && auditLog.find((log) => !log.isLocked);
-    if (!log || !active) return;
-    if (log.description !== active.description) {
-      saveAuditLog({ id: active.id, description: active.description });
-    }
-    log.auditGroupLogs.map((groupLog) => {
-      const currGroupLog = active.groups.find((ag) => ag.id === groupLog.id);
-      if (!currGroupLog) return;
-      if (groupLog.description !== currGroupLog.description) {
-        saveAuditGroupLog({
-          id: currGroupLog.id,
-          description: currGroupLog.description,
-        });
+  const syncInput = useCallback(
+    (auditLog: typeof userAuditLog, active: typeof activeLog) => {
+      let isUpdateFlag = false;
+      const log = auditLog && auditLog.find((log) => !log.isLocked);
+      if (!log || !active) return;
+      if (log.description !== active.description) {
+        saveAuditLog({ id: active.id, description: active.description });
+        isUpdateFlag = true;
       }
-      groupLog.auditItemLogs.map((itemLog) => {
-        const currItem = currGroupLog.items.find(
-          (item) => item.id === itemLog.id
-        );
-        if (!currItem) return;
-        if (itemLog.isChecked !== currItem.isChecked) {
-          saveAuditItemLog({
-            id: currItem.id,
-            isChecked: currItem.isChecked,
+      log.auditGroupLogs.map((groupLog) => {
+        const currGroupLog = active.groups.find((ag) => ag.id === groupLog.id);
+        if (!currGroupLog) return;
+        if (groupLog.description !== currGroupLog.description) {
+          saveAuditGroupLog({
+            id: currGroupLog.id,
+            description: currGroupLog.description,
           });
+          isUpdateFlag = true;
         }
+        groupLog.auditItemLogs.map((itemLog) => {
+          const currItem = currGroupLog.items.find(
+            (item) => item.id === itemLog.id
+          );
+          if (!currItem) return;
+          if (itemLog.isChecked !== currItem.isChecked) {
+            saveAuditItemLog({
+              id: currItem.id,
+              isChecked: currItem.isChecked,
+            });
+            isUpdateFlag = true;
+          }
+        });
       });
-    });
-  }
+      if (!isUpdateFlag) setIsSync(true);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
     debouncedSyncInput(userAuditLog, activeLog);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLog]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSyncInput = useCallback(debounce(syncInput, 2000), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedRefetchUserAuditLog = useCallback(
+    debounce(refetchUserAuditLog, 300),
+    []
+  );
 
   return (
     <AdminLayout
@@ -303,50 +311,60 @@ export default function Audit({
             <div className="flex flex-row items-center gap-2">
               <h6 className="font-bold text-slate-700">勾稽表單</h6>
               {role === Role.ADMIN && (
-                <a
-                  href="/app/audit/edit"
-                  className="text-xs text-slate-400 hover:underline"
-                >
-                  編輯
-                </a>
+                <>
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a
+                    href="/app/audit/edit"
+                    className="text-xs text-slate-400 hover:underline"
+                  >
+                    編輯
+                  </a>
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a
+                    href="/app/audit/report"
+                    className="text-xs text-slate-400 hover:underline"
+                  >
+                    報表
+                  </a>
+                </>
               )}
             </div>
-            <div className="flex flex-row items-center gap-4">
-              <div className="text-xs">
-                {isSync === "na" ? null : isSync ? (
-                  <span className="text-emerald-700">已儲存✅</span>
-                ) : (
-                  <span className="text-red-600">同步中...</span>
-                )}
-              </div>
-              <button
-                className="rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none disabled:opacity-50"
-                type="button"
-                disabled={
-                  isLockAudutLogLoading ||
-                  isSaveAuditLogLoading ||
-                  isSaveAuditGroupLogLoading ||
-                  isSaveAuditItemLogLoading
-                }
-                onClick={() => {
-                  setIsAuditSubmitModalOpen(() => true);
-                }}
-              >
-                提交紀錄
-              </button>
-              <button
-                className="rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
-                type="button"
-                onClick={() => {
-                  createNewAuditLog();
-                }}
-                disabled={
-                  isCreateNewAuditLogLoading ||
-                  (userAuditLog && userAuditLog.some((al) => !al.isLocked))
-                }
-              >
-                新增紀錄
-              </button>
+            <div className="flex flex-row items-center gap-4 text-xs">
+              {activeLog ? (
+                <>
+                  {isSync ? (
+                    <span className="text-emerald-700">已儲存✅</span>
+                  ) : (
+                    <span className="text-red-600">同步中...</span>
+                  )}
+                  <button
+                    className="rounded border border-slate-700 px-4 py-2 text-xs font-bold shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none disabled:opacity-50"
+                    type="button"
+                    disabled={
+                      isLockAudutLogLoading ||
+                      isSaveAuditLogLoading ||
+                      isSaveAuditGroupLogLoading ||
+                      isSaveAuditItemLogLoading
+                    }
+                    onClick={() => {
+                      setIsAuditSubmitModalOpen(() => true);
+                    }}
+                  >
+                    提交紀錄
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
+                  type="button"
+                  onClick={() => {
+                    createNewAuditLog();
+                  }}
+                  disabled={isCreateNewAuditLogLoading}
+                >
+                  新增紀錄
+                </button>
+              )}
               <Link
                 href="/app/audit/histroy"
                 className="text-xs text-slate-400 hover:underline"

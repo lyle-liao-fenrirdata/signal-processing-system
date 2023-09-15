@@ -33,7 +33,7 @@ model Audit {
   isActive    Boolean      @default(false)
   comment     String?
   createdById Int
-  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdBy   User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   deletedAt   DateTime?
   auditGroups AuditGroup[]
@@ -45,9 +45,9 @@ model AuditLog {
   isLocked       Boolean         @default(false)
   description    String?
   userId         Int
-  user           User            @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   auditId        Int
-  audit          Audit           @relation(fields: [auditId], references: [id])
+  audit          Audit           @relation(fields: [auditId], references: [id], onDelete: Cascade)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   auditGroupLogs AuditGroupLog[]
@@ -59,7 +59,7 @@ model AuditGroup {
   order          Int             @default(autoincrement())
   color          Color           @default(Default)
   auditId        Int
-  audit          Audit           @relation(fields: [auditId], references: [id])
+  audit          Audit           @relation(fields: [auditId], references: [id], onDelete: Cascade)
   auditItems     AuditItem[]
   auditGroupLogs AuditGroupLog[]
 }
@@ -68,11 +68,11 @@ model AuditGroupLog {
   id            Int            @id @default(autoincrement())
   description   String?
   auditGroupId  Int
-  auditGroup    AuditGroup     @relation(fields: [auditGroupId], references: [id])
+  auditGroup    AuditGroup     @relation(fields: [auditGroupId], references: [id], onDelete: Cascade)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   auditLogId    Int
-  auditLog      AuditLog       @relation(fields: [auditLogId], references: [id])
+  auditLog      AuditLog       @relation(fields: [auditLogId], references: [id], onDelete: Cascade)
   auditItemLogs AuditItemLog[]
 }
 
@@ -81,7 +81,7 @@ model AuditItem {
   name         String
   order        Int            @default(autoincrement())
   auditGroupId Int
-  auditGroups  AuditGroup     @relation(fields: [auditGroupId], references: [id])
+  auditGroups  AuditGroup     @relation(fields: [auditGroupId], references: [id], onDelete: Cascade)
   auditLogs    AuditItemLog[]
 }
 
@@ -89,11 +89,11 @@ model AuditItemLog {
   id              Int           @id @default(autoincrement())
   isChecked       Boolean       @default(false)
   auditItemId     Int
-  auditItem       AuditItem     @relation(fields: [auditItemId], references: [id])
+  auditItem       AuditItem     @relation(fields: [auditItemId], references: [id], onDelete: Cascade)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   auditGroupLogId Int
-  auditGroupLog   AuditGroupLog @relation(fields: [auditGroupLogId], references: [id])
+  auditGroupLog   AuditGroupLog @relation(fields: [auditGroupLogId], references: [id], onDelete: Cascade)
 }
 
 enum Color {
@@ -107,31 +107,3 @@ enum Color {
   Pink
   Red
 }
-
-// model Recording {
-//   id Int @id @default(autoincrement())
-// }
-
-// model RecordingLinkId {
-//   id           Int    @id @default(autoincrement())
-//   SatelliteID  String
-//   Polarization String
-//   Frequency    BigInt
-// }
-
-// const JSON_format_from_Zack_in_Line_group = {
-//     "InputPort": 1,
-//     "OutputPort": 1,
-//     "LinkID": {
-//         "SatelliteID": "AA",
-//         "Polarization": "V",
-//         "Frequency": 12500250000
-//     },
-//     "ServerIP": "192.168.016.101",
-//     "ServerPort": 1234,
-//     "ServerCh": 1,
-//     "ServerType": "HDLC/DVB/IP",
-//     "Timestamp": UnixTime(seconds),
-//     "Capture": "Enable/Disable"
-//     "FileName": "CCV1250025000_YYYYMMDDHHmmssfff"
-// }

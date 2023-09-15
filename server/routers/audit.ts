@@ -279,11 +279,16 @@ export const auditRouter = router({
                         select: {
                             username: true,
                         }
+                    },
+                    _count: {
+                        select: {
+                            AuditLogs: true,
+                        }
                     }
                 },
                 orderBy: {
                     createdAt: 'desc',
-                }
+                },
             })
 
             return audit
@@ -329,9 +334,86 @@ export const auditRouter = router({
 
             return { ok: true };
         }),
-    deleteAudit: adminProcedure
+    createAuditGroup: adminProcedure
         .input(auditIdSchema)
         .mutation(async ({ ctx: { user: { account } }, input: { id } }) => {
+            const [user, audit] = await Promise.all([
+                await prisma.user.findUnique({ where: { account }, select: { id: true } }),
+                await prisma.audit.findUnique({
+                    where: {
+                        id
+                    },
+                    include: {
+                        auditGroups: {
+                            take: 1,
+                            select: {
+                                order: true,
+                            },
+                            orderBy: {
+                                order: 'desc'
+                            }
+                        }
+                    }
+                }),
+            ])
+            if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有此使用者。" });
+            if (!audit) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有可使用的表單，請聯繫管理者。" });
+            if (audit.isActive) throw new TRPCError({ code: "CONFLICT", message: "錯誤！ 表單已在使用，請編輯新的表單。" });
+
+            await prisma.auditGroup.create({
+                data: {
+                    name: "",
+                    order: audit.auditGroups[0]?.order + 1 || 1,
+                    auditId: id,
+                }
+            })
+
+            return { ok: true };
+        }),
+    createAuditItem: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ ctx: { user: { account } }, input: { id } }) => {
+            const [user, auditGroup] = await Promise.all([
+                await prisma.user.findUnique({ where: { account }, select: { id: true } }),
+                await prisma.auditGroup.findUnique({
+                    where: {
+                        id
+                    },
+                    include: {
+                        auditItems: {
+                            take: 1,
+                            select: {
+                                order: true,
+                            },
+                            orderBy: {
+                                order: 'desc'
+                            }
+                        },
+                        audit: {
+                            select: {
+                                isActive: true,
+                            }
+                        }
+                    }
+                }),
+            ])
+            if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有此使用者。" });
+            if (!auditGroup) throw new TRPCError({ code: "NOT_FOUND", message: "錯誤！ 沒有可使用的表單，請聯繫管理者。" });
+            if (auditGroup.audit.isActive) throw new TRPCError({ code: "CONFLICT", message: "錯誤！ 表單已在使用，請編輯新的表單。" });
+
+            await prisma.auditItem.create({
+                data: {
+                    name: "",
+                    order: auditGroup.auditItems[0]?.order + 1 || 1,
+                    auditGroupId: id,
+                }
+            })
+
+            return { ok: true };
+        }),
+    deleteAudit: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ input: { id } }) => {
             const audit = await prisma.audit.findUnique({
                 where: {
                     id,
@@ -347,6 +429,42 @@ export const auditRouter = router({
                 data: {
                     deletedAt: new Date(),
                 }
+            })
+
+            return { ok: true };
+        }),
+    deleteAuditGroup: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ input: { id } }) => {
+            const auditGroup = await prisma.auditGroup.findUnique({
+                where: {
+                    id,
+                },
+            })
+            if (!auditGroup) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
+
+            await prisma.auditGroup.delete({
+                where: {
+                    id,
+                },
+            })
+
+            return { ok: true };
+        }),
+    deleteAuditItem: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ input: { id } }) => {
+            const auditItem = await prisma.auditItem.findUnique({
+                where: {
+                    id,
+                },
+            })
+            if (!auditItem) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
+
+            await prisma.auditItem.delete({
+                where: {
+                    id,
+                },
             })
 
             return { ok: true };
@@ -392,7 +510,6 @@ export const auditRouter = router({
             });
             if (!audit) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
             if (audit.deletedAt) throw new TRPCError({ code: "CONFLICT", message: "資料已刪除，不可操作。" });
-            console.log(audit.comment, audit.comment === comment ? "===" : "!==", comment)
             if (audit.comment === comment) throw new TRPCError({ code: "BAD_REQUEST", message: "沒有內容變更。" });
 
             await prisma.audit.update({
