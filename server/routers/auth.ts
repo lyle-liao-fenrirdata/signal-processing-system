@@ -15,7 +15,7 @@ export const authRouter = router({
     register: publicProcedure
         .input(registerUserSchema)
         .mutation(async ({ input: { username, account, password }, ctx }) => {
-            const user = await prisma.user.findUnique({ where: { username }, select: { id: true } })
+            const user = await prisma.user.findUnique({ where: { account }, select: { id: true } })
             if (user) {
                 throw new TRPCError({
                     code: "CONFLICT",
