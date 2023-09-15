@@ -17,10 +17,30 @@ import Link from "next/link";
 export type ActiveLog = AuditDescriptionInput & {
   comment: string;
   groups: (AuditDescriptionInput & {
-    color: string;
+    color: Color;
     name: string;
     items: (AuditIsCheckedInput & { name: string })[];
   })[];
+};
+
+export const getAuditGroupBgColor = (color: Color) => {
+  return color === Color.Blue
+    ? "bg-sky-200"
+    : color === Color.Gray
+    ? "bg-neutral-200"
+    : color === Color.Green
+    ? "bg-green-200"
+    : color === Color.Orange
+    ? "bg-orange-200"
+    : color === Color.Pink
+    ? "bg-pink-200"
+    : color === Color.Purple
+    ? "bg-purple-200"
+    : color === Color.Red
+    ? "bg-red-200"
+    : color === Color.Yellow
+    ? "bg-yellow-200"
+    : "bg-slate-200";
 };
 
 export const getServerSideProps: GetServerSideProps<{
@@ -396,25 +416,9 @@ export default function Audit({
             {activeLog.groups.map((group) => (
               <React.Fragment key={`auditGroupLog-${group.id}`}>
                 <div
-                  className={`col-span-3 flex items-center justify-center rounded ${
-                    group.color === Color.Blue
-                      ? "bg-sky-200"
-                      : group.color === Color.Gray
-                      ? "bg-neutral-200"
-                      : group.color === Color.Green
-                      ? "bg-green-200"
-                      : group.color === Color.Orange
-                      ? "bg-orange-200"
-                      : group.color === Color.Pink
-                      ? "bg-pink-200"
-                      : group.color === Color.Purple
-                      ? "bg-purple-200"
-                      : group.color === Color.Red
-                      ? "bg-red-200"
-                      : group.color === Color.Yellow
-                      ? "bg-yellow-200"
-                      : "bg-slate-200"
-                  }`}
+                  className={`col-span-3 flex items-center justify-center rounded ${getAuditGroupBgColor(
+                    group.color
+                  )}`}
                 >
                   <span className="inline-block px-3 py-1 text-base font-semibold">
                     {group.name}

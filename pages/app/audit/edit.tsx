@@ -16,6 +16,7 @@ import {
   AuditGroupItemCommonInput,
 } from "@/server/schema/audit.schema";
 import { CloseIcon } from "@/components/commons/toast/Icon";
+import { getAuditGroupBgColor } from ".";
 
 export type ActiveAudit = {
   id: number;
@@ -545,25 +546,9 @@ export default function Edit({
             {activeLog.groups.map((group, gIndex, { length: gLen }) => (
               <React.Fragment key={`auditGroup-${group.id}`}>
                 <div
-                  className={`col-span-4 flex flex-col items-center justify-center gap-y-2.5 rounded p-2.5 ${
-                    group.color === Color.Blue
-                      ? "bg-sky-200"
-                      : group.color === Color.Gray
-                      ? "bg-neutral-200"
-                      : group.color === Color.Green
-                      ? "bg-green-200"
-                      : group.color === Color.Orange
-                      ? "bg-orange-200"
-                      : group.color === Color.Pink
-                      ? "bg-pink-200"
-                      : group.color === Color.Purple
-                      ? "bg-purple-200"
-                      : group.color === Color.Red
-                      ? "bg-red-200"
-                      : group.color === Color.Yellow
-                      ? "bg-yellow-200"
-                      : "bg-slate-200"
-                  }`}
+                  className={`col-span-4 flex flex-col items-center justify-center gap-y-2.5 rounded p-2.5 ${getAuditGroupBgColor(
+                    group.color
+                  )}`}
                 >
                   <div className="ml-auto flex flex-row flex-nowrap gap-2 text-slate-700">
                     <button
@@ -794,25 +779,9 @@ export default function Edit({
                       {log.auditGroups.map((group) => (
                         <Fragment key={`histroy-auditGroupLog-${group.id}`}>
                           <div
-                            className={`col-span-5 flex items-center justify-center rounded ${
-                              group.color === Color.Blue
-                                ? "bg-sky-200"
-                                : group.color === Color.Gray
-                                ? "bg-neutral-200"
-                                : group.color === Color.Green
-                                ? "bg-green-200"
-                                : group.color === Color.Orange
-                                ? "bg-orange-200"
-                                : group.color === Color.Pink
-                                ? "bg-pink-200"
-                                : group.color === Color.Purple
-                                ? "bg-purple-200"
-                                : group.color === Color.Red
-                                ? "bg-red-200"
-                                : group.color === Color.Yellow
-                                ? "bg-yellow-200"
-                                : "bg-slate-200"
-                            }`}
+                            className={`col-span-5 flex items-center justify-center rounded ${getAuditGroupBgColor(
+                              group.color
+                            )}`}
                           >
                             <span className="inline-block px-3 py-1 text-sm font-semibold">
                               {group.name}
