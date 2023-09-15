@@ -7,7 +7,7 @@ type DropTableProp = {
     key: string;
     onClick: () => void;
     content: ReactNode | undefined;
-    tds: string[];
+    tds: (string | JSX.Element)[];
   }[];
 };
 

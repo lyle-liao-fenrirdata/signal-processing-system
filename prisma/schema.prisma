@@ -12,7 +12,7 @@ datasource db {
 model User {
   id        Int        @id @default(autoincrement())
   account   String     @unique
-  username  String     @unique
+  username  String
   password  String
   role      Role       @default(GUEST)
   createdAt DateTime   @default(now())

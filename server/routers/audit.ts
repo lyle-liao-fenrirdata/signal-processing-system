@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { adminProcedure, router, userProcedure } from '../trpc';
-import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema, auditGroupSchema, auditIdSchema, auditIsCheckedSchema, auditLockSchema } from '../schema/audit.schema';
+import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema, auditGroupSchema, auditIdSchema, auditIsCheckedSchema, auditLockSchema, auditLogQuerySchema } from '../schema/audit.schema';
 
 export type AuditRouter = typeof auditRouter;
 
@@ -292,6 +292,67 @@ export const auditRouter = router({
             })
 
             return audit
+        }),
+    getAllAuditLog: adminProcedure
+        .input(auditLogQuerySchema)
+        .query(async ({ input: { account, role, isLock, createAtFrom, createAtTo, updatedAtFrom, updateAtTo } }) => {
+            const [users, audit] = await Promise.all([
+                await prisma.user.findMany({
+                    where: {
+                        deletedAt: null
+                    },
+                    select: {
+                        username: true,
+                        account: true,
+                    },
+                    distinct: ['account']
+                }),
+                await prisma.auditLog.findMany({
+                    where: {
+                        audit: {
+                            deletedAt: null
+                        },
+                    },
+                    include: {
+                        audit: true,
+                        auditGroupLogs: {
+                            include: {
+                                auditGroup: true,
+                                auditItemLogs: {
+                                    include: {
+                                        auditItem: true,
+                                    },
+                                    orderBy: {
+                                        createdAt: 'desc'
+                                    }
+                                }
+                            },
+                            orderBy: {
+                                createdAt: 'desc'
+                            },
+                        },
+                        user: {
+                            select: {
+                                username: true,
+                                role: true,
+                                account: true,
+                            },
+
+                        }
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                })
+            ])
+
+            return {
+                users,
+                audit: audit
+                    .filter(a => !account || a.user.account === account)
+                    .filter(a => !role || a.user.role === role)
+                    .filter(a => isLock === undefined || a.isLocked === isLock)
+            }
         }),
     createNewAudit: adminProcedure
         .mutation(async ({ ctx: { user: { account } } }) => {
