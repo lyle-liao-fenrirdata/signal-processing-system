@@ -5,6 +5,8 @@ import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema,
 
 export type AuditRouter = typeof auditRouter;
 
+export const getAllAuditLogPageSize = 10;
+
 export const auditRouter = router({
     getLiveAudit: userProcedure
         .query(async () => { return await getLiveAudit() }),
@@ -295,24 +297,34 @@ export const auditRouter = router({
         }),
     getAllAuditLog: adminProcedure
         .input(auditLogQuerySchema)
-        .query(async ({ input: { account, role, isLock, createAtFrom, createAtTo, updatedAtFrom, updateAtTo } }) => {
-            const [users, audit] = await Promise.all([
-                await prisma.user.findMany({
-                    where: {
-                        deletedAt: null
-                    },
-                    select: {
-                        username: true,
-                        account: true,
-                    },
-                    distinct: ['account']
-                }),
+        .query(async ({ input: { account, role, isLock, createAtFrom, createAtTo, updatedAtFrom, updateAtTo, page } }) => {
+
+            const skipPage = page === undefined ? 0 : page > 0 ? page - 1 : 0
+
+            const searchParam: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
+                audit: {
+                    deletedAt: null,
+                },
+            }
+
+            if (account) searchParam.user = { account }
+            if (role) searchParam.user ? searchParam.user.role = role : searchParam.user = { role }
+            if (isLock !== undefined) searchParam.isLocked = isLock
+
+            if (createAtFrom && !createAtTo) searchParam.createdAt = { gt: createAtFrom }
+            if (!createAtFrom && createAtTo) searchParam.createdAt = { lte: new Date(createAtTo.setHours(23, 59, 59, 999)) }
+            if (createAtFrom && createAtTo) searchParam.createdAt = { gt: createAtFrom, lte: new Date(createAtTo.setHours(23, 59, 59, 999)) }
+
+            if (updatedAtFrom && !updateAtTo) searchParam.createdAt = { gt: updatedAtFrom }
+            if (!updatedAtFrom && updateAtTo) searchParam.createdAt = { lt: new Date(updateAtTo.setHours(23, 59, 59, 999)) }
+            if (updatedAtFrom && updateAtTo) searchParam.createdAt = { gt: updatedAtFrom, lte: new Date(updateAtTo.setHours(23, 59, 59, 999)) }
+
+            const [count, audit] = await Promise.all([
+                await prisma.auditLog.count({ where: searchParam, select: { id: true } }),
                 await prisma.auditLog.findMany({
-                    where: {
-                        audit: {
-                            deletedAt: null
-                        },
-                    },
+                    skip: skipPage * getAllAuditLogPageSize,
+                    take: getAllAuditLogPageSize,
+                    where: searchParam,
                     include: {
                         audit: true,
                         auditGroupLogs: {
@@ -347,11 +359,8 @@ export const auditRouter = router({
             ])
 
             return {
-                users,
-                audit: audit
-                    .filter(a => !account || a.user.account === account)
-                    .filter(a => !role || a.user.role === role)
-                    .filter(a => isLock === undefined || a.isLocked === isLock)
+                count,
+                audit,
             }
         }),
     createNewAudit: adminProcedure

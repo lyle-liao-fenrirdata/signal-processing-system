@@ -1,14 +1,15 @@
-import { Fragment, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { trpc } from "@/utils/trpc";
 import { Errors } from "@/components/commons/Errors";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime, formatDate } from "@/utils/formats";
 import DropTableContainer from "@/components/commons/DropTableContainer";
 import { getAuditGroupBgColor } from ".";
 import { Role } from "@prisma/client";
 import { AuditLogQueryInput } from "@/server/schema/audit.schema";
+import { getAllAuditLogPageSize } from "@/server/routers/audit";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -37,19 +38,23 @@ export default function Report({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [activeIds, setActiveIds] = useState<number[]>([]);
   const [isUseFilter, setIsUseFilter] = useState(false);
-  const [filterProps, setFilterProps] = useState<AuditLogQueryInput>({});
-
+  const [filterProps, setFilterProps] = useState<AuditLogQueryInput>({
+    page: 1,
+  });
   const { isError, data, isLoading, error } =
-    trpc.audit.getAllAuditLog.useQuery(isUseFilter ? filterProps : {}, {
-      retry: false,
-      retryOnMount: false,
-      refetchOnMount: false,
-      refetchInterval: false,
-      refetchIntervalInBackground: false,
-    });
+    trpc.audit.getAllAuditLog.useQuery(
+      isUseFilter ? filterProps : { page: filterProps.page },
+      {
+        retry: false,
+        retryOnMount: false,
+        refetchOnMount: false,
+        refetchInterval: false,
+        refetchIntervalInBackground: false,
+      }
+    );
 
   const tbodyTrs = (
-    d: Exclude<typeof data, undefined>,
+    d: Exclude<typeof data, undefined>["audit"],
     isUseFilter: boolean
   ) => {
     const empty = [
@@ -60,7 +65,7 @@ export default function Report({
         tds: ["沒有資料"],
       },
     ];
-    const mainData = d.audit.map((log) => ({
+    const mainData = d.map((log) => ({
       key: `history-${log.id}`,
       onClick: () =>
         setActiveIds((prev) => {
@@ -78,7 +83,7 @@ export default function Report({
             <span className="block text-xs">{log.audit.comment ?? ""}</span>
           </span>
           {log.auditGroupLogs.map((group) => (
-            <Fragment key={`histroy-auditGroupLog-${group.id}`}>
+            <Fragment key={`histroy-audit-group-log-${group.id}`}>
               <div
                 className={`col-span-3 flex items-center justify-center rounded ${getAuditGroupBgColor(
                   group.auditGroup.color
@@ -91,18 +96,19 @@ export default function Report({
               <div className="col-span-5 flex flex-col justify-center gap-2">
                 {group.auditItemLogs.map((item) => (
                   <div
-                    key={`history-auditItemLog-${item.id}`}
+                    key={`history-audit-item-log-${item.id}`}
                     className="items-top relative flex flex-nowrap items-center space-x-2"
                   >
                     <input
-                      id={`auditItemLog-input-${item.id}`}
+                      id={`history-audit-item-log-input-${item.id}`}
                       type="checkbox"
-                      disabled
+                      readOnly
                       className="h-3 w-3 rounded border-none border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 "
                       checked={item.isChecked}
+                      defaultChecked={item.isChecked}
                     />
                     <label
-                      htmlFor={`auditItemLog-input-${item.id}`}
+                      htmlFor={`history-audit-item-log-input-${item.id}`}
                       className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       {item.auditItem.name}
@@ -136,18 +142,18 @@ export default function Report({
         String(log.id),
         String(`${log.user.username} (${log.user.account})`),
         String(log.user.role),
-        formatDate.format(log.createdAt),
+        formatDateTime.format(log.createdAt),
         log.isLocked ? "✔️ 是" : "❗否",
         log.isLocked
-          ? formatDate.format(log.updatedAt)
-          : formatDate.format(
+          ? formatDateTime.format(log.updatedAt)
+          : formatDateTime.format(
               Math.max(
                 Number(log.updatedAt),
-                ...d.audit[0].auditGroupLogs
-                  .map((g) =>
+                ...log.auditGroupLogs
+                  .map(({ updatedAt, auditItemLogs }) =>
                     [
-                      g.updatedAt,
-                      ...g.auditItemLogs.map((i) => i.updatedAt),
+                      updatedAt,
+                      ...auditItemLogs.map(({ updatedAt }) => updatedAt),
                     ].flat()
                   )
                   .flat()
@@ -167,7 +173,7 @@ export default function Report({
             key="filter-clean"
             className="ml-auto mt-auto rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-xs font-bold text-slate-500 outline-none transition-all hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
             type="button"
-            onClick={() => setFilterProps(() => ({}))}
+            onClick={() => setFilterProps(({ page }) => ({ page: 1 }))}
           >
             清除
           </button>,
@@ -181,15 +187,22 @@ export default function Report({
               setFilterProps((prev) => ({
                 ...prev,
                 account: e.target.value,
+                page: 1,
               }))
             }
           >
             <option value="">無</option>
-            {d.users.map((user) => (
-              <option key={user.account} value={user.account}>
-                {`${user.username} (${user.account})`}
-              </option>
-            ))}
+            {d
+              .map(({ user }) => `${user.username} (${user.account})`)
+              .filter((usr, ind, arr) => arr.indexOf(usr) === ind)
+              .map((userString) => (
+                <option
+                  key={`filter-user-option-${userString}`}
+                  value={userString.slice(userString.indexOf("(") + 1, -1)}
+                >
+                  {userString}
+                </option>
+              ))}
           </select>,
           <select
             key="filter-role"
@@ -201,6 +214,7 @@ export default function Report({
               setFilterProps((prev) => ({
                 ...prev,
                 role: (!e.target.value ? undefined : e.target.value) as Role,
+                page: 1,
               }))
             }
           >
@@ -216,9 +230,20 @@ export default function Report({
                 type="date"
                 id="filter-createAt-start"
                 name="filter-createAt-start"
-                value="2018-07-22"
-                min="2018-01-01"
-                max="2018-12-31"
+                value={
+                  (filterProps.createAtFrom &&
+                    formatDate(filterProps.createAtFrom)) ||
+                  ""
+                }
+                onChange={(e) =>
+                  setFilterProps((prev) => ({
+                    ...prev,
+                    createAtFrom: new Date(e.target.value),
+                    page: 1,
+                  }))
+                }
+                onKeyDown={(e) => e.preventDefault()}
+                min="2023-06-01"
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -228,9 +253,20 @@ export default function Report({
                 type="date"
                 id="filter-createAt-end"
                 name="filter-createAt-end"
-                value="2018-07-22"
-                min="2018-01-01"
-                max="2018-12-31"
+                value={
+                  (filterProps.createAtTo &&
+                    formatDate(filterProps.createAtTo)) ||
+                  ""
+                }
+                onChange={(e) =>
+                  setFilterProps((prev) => ({
+                    ...prev,
+                    createAtTo: new Date(e.target.value),
+                    page: 1,
+                  }))
+                }
+                // onKeyDown={(e) => e.preventDefault()}
+                min="2023-06-01"
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -240,19 +276,24 @@ export default function Report({
             name="filter-isActive"
             id="filter-isActive"
             className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
-            defaultValue=""
+            value={
+              filterProps.isLock === true
+                ? "true"
+                : filterProps.isLock === false
+                ? "false"
+                : ""
+            }
             onChange={(e) =>
               setFilterProps((prev) => ({
                 ...prev,
-                isLock: !e.target.value
-                  ? undefined
-                  : e.target.value === "isLock",
+                isLock: !e.target.value ? undefined : e.target.value === "true",
+                page: 1,
               }))
             }
           >
             <option value="">無</option>
-            <option value="isLock">已提交</option>
-            <option value="isNotLock">未提交</option>
+            <option value="true">已提交</option>
+            <option value="false">未提交</option>
           </select>,
           <div key="filter-createAt" className="flex flex-col gap-2">
             <div className="flex flex-row flex-nowrap items-center gap-2">
@@ -261,9 +302,20 @@ export default function Report({
                 type="date"
                 id="filter-updatedAt-start"
                 name="filter-updatedAt-start"
-                value="2018-07-22"
-                min="2018-01-01"
-                max="2018-12-31"
+                value={
+                  (filterProps.updatedAtFrom &&
+                    formatDate(filterProps.updatedAtFrom)) ||
+                  ""
+                }
+                onChange={(e) =>
+                  setFilterProps((prev) => ({
+                    ...prev,
+                    updatedAtFrom: new Date(e.target.value),
+                    page: 1,
+                  }))
+                }
+                onKeyDown={(e) => e.preventDefault()}
+                min="2023-06-01"
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -273,9 +325,20 @@ export default function Report({
                 type="date"
                 id="filter-updatedAt-end"
                 name="filter-updatedAt-end"
-                value="2018-07-22"
-                min="2018-01-01"
-                max="2018-12-31"
+                value={
+                  (filterProps.updateAtTo &&
+                    formatDate(filterProps.updateAtTo)) ||
+                  ""
+                }
+                onChange={(e) =>
+                  setFilterProps((prev) => ({
+                    ...prev,
+                    updateAtTo: new Date(e.target.value),
+                    page: 1,
+                  }))
+                }
+                onKeyDown={(e) => e.preventDefault()}
+                min="2023-06-01"
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -304,37 +367,88 @@ export default function Report({
       ) : !data ? (
         <span>登載紀錄</span>
       ) : (
-        <DropTableContainer
-          title={
-            <div className="flex items-center justify-between">
-              <h6 className="font-bold text-slate-700">登載紀錄</h6>
-              <div className="flex items-center gap-2 px-4 py-2 text-sm">
-                <input
-                  id="isUseFilter"
-                  name="isUseFilter"
-                  checked={isUseFilter}
-                  className="h-4 w-4 cursor-pointer rounded border border-slate-700 text-xs outline-none focus:outline-none"
-                  type="checkbox"
-                  onClick={() => {
-                    setIsUseFilter((prev) => !prev);
-                  }}
-                />
-                <label htmlFor="isUseFilter" className="cursor-pointer">
-                  篩選
-                </label>
+        <>
+          <DropTableContainer
+            title={
+              <div className="flex items-center justify-between">
+                <h6 className="font-bold text-slate-700">登載紀錄</h6>
+                <div className="flex items-center gap-2 px-4 py-2 text-sm">
+                  <input
+                    id="isUseFilter"
+                    name="isUseFilter"
+                    checked={isUseFilter}
+                    className="h-4 w-4 cursor-pointer rounded border border-slate-700 text-xs outline-none focus:outline-none"
+                    type="checkbox"
+                    onChange={() => {
+                      setIsUseFilter((prev) => !prev);
+                    }}
+                  />
+                  <label htmlFor="isUseFilter" className="cursor-pointer">
+                    篩選
+                  </label>
+                </div>
               </div>
-            </div>
-          }
-          ths={[
-            "Record ID",
-            "建立人員(帳號)",
-            "權限",
-            "建立時間",
-            "已提交",
-            "最後變更時間",
-          ]}
-          tbodyTrs={tbodyTrs(data, isUseFilter)}
-        />
+            }
+            ths={[
+              "Record ID",
+              "建立人員(帳號)",
+              "權限",
+              "建立時間",
+              "已提交",
+              "最後變更時間",
+            ]}
+            tbodyTrs={tbodyTrs(data.audit, isUseFilter)}
+          />
+          <nav className="flex flex-row justify-center">
+            <ul className="flex list-none flex-wrap gap-2 rounded pl-0">
+              <li>
+                <button
+                  disabled={filterProps.page <= 1}
+                  className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight text-slate-500 disabled:border-slate-200 disabled:bg-slate-200 disabled:text-white"
+                  onClick={() =>
+                    setFilterProps((prev) => ({ ...prev, page: 1 }))
+                  }
+                >
+                  <i className="fas fa-chevron-left -ml-px"></i>
+                  <i className="fas fa-chevron-left -ml-px"></i>
+                </button>
+              </li>
+              {Array.from({
+                length: Math.ceil(data.count.id / getAllAuditLogPageSize),
+              }).map((_, c) => (
+                <li key={`paginator-page-${c + 1}`}>
+                  <button
+                    disabled={c + 1 === filterProps.page}
+                    className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight disabled:bg-slate-500 disabled:text-white"
+                    onClick={() =>
+                      setFilterProps((prev) => ({ ...prev, page: c + 1 }))
+                    }
+                  >
+                    {c + 1}
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button
+                  disabled={
+                    filterProps.page >=
+                    Math.ceil(data.count.id / getAllAuditLogPageSize)
+                  }
+                  className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight text-slate-500 disabled:border-slate-200 disabled:bg-slate-200 disabled:text-white"
+                  onClick={() =>
+                    setFilterProps((prev) => ({
+                      ...prev,
+                      page: Math.ceil(data.count.id / getAllAuditLogPageSize),
+                    }))
+                  }
+                >
+                  <i className="fas fa-chevron-right -mr-px"></i>
+                  <i className="fas fa-chevron-right -mr-px"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </>
       )}
     </AdminLayout>
   );
