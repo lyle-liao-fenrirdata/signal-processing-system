@@ -328,9 +328,22 @@ export const auditRouter = router({
             if (!createAtFrom && createAtTo) searchParam.createdAt = { lte: new Date(createAtTo.setHours(23, 59, 59, 999)) }
             if (createAtFrom && createAtTo) searchParam.createdAt = { gt: createAtFrom, lte: new Date(createAtTo.setHours(23, 59, 59, 999)) }
 
-            if (updatedAtFrom && !updateAtTo) searchParam.createdAt = { gt: updatedAtFrom }
-            if (!updatedAtFrom && updateAtTo) searchParam.createdAt = { lt: new Date(updateAtTo.setHours(23, 59, 59, 999)) }
-            if (updatedAtFrom && updateAtTo) searchParam.createdAt = { gt: updatedAtFrom, lte: new Date(updateAtTo.setHours(23, 59, 59, 999)) }
+            if (updatedAtFrom || updateAtTo) {
+                let updatedAt: (typeof searchParam)['updatedAt'] = {}
+                if (updatedAtFrom) updatedAt.gt = updatedAtFrom
+                if (updateAtTo) updatedAt.lte = new Date(updateAtTo.setHours(23, 59, 59, 999))
+                searchParam.updatedAt = updatedAt
+                searchParam.auditGroupLogs = {
+                    every: {
+                        updatedAt,
+                        auditItemLogs: {
+                            every: {
+                                updatedAt
+                            }
+                        }
+                    }
+                }
+            }
 
             const [count, audit] = await Promise.all([
                 await prisma.auditLog.count({ where: searchParam, select: { id: true } }),

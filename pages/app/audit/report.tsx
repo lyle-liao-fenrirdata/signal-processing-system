@@ -245,6 +245,7 @@ export default function Report({
                 }
                 onKeyDown={(e) => e.preventDefault()}
                 min="2023-06-01"
+                max={formatDate()}
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -266,8 +267,9 @@ export default function Report({
                     page: 1,
                   }))
                 }
-                // onKeyDown={(e) => e.preventDefault()}
+                onKeyDown={(e) => e.preventDefault()}
                 min="2023-06-01"
+                max={formatDate()}
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -317,6 +319,7 @@ export default function Report({
                 }
                 onKeyDown={(e) => e.preventDefault()}
                 min="2023-06-01"
+                max={formatDate()}
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
@@ -340,6 +343,7 @@ export default function Report({
                 }
                 onKeyDown={(e) => e.preventDefault()}
                 min="2023-06-01"
+                max={formatDate()}
                 className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
               />
             </div>
