@@ -8,7 +8,7 @@ import { UpdateUserInput, updateUserSchema } from "@/server/schema/auth.schema";
 import { useRouter } from "next/router";
 import ModalExtChangetPassword from "@/components/settings/ModalExtChangePassword";
 import { Container } from "@/components/commons/Container";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -162,7 +162,7 @@ export default function Settings({
                     type="text"
                     disabled
                     className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                    defaultValue={formatDate.format(data.createdAt)}
+                    defaultValue={formatDateTime.format(data.createdAt)}
                   />
                 </div>
               </div>
@@ -178,7 +178,7 @@ export default function Settings({
                     type="text"
                     disabled
                     className="w-full rounded border-0 bg-white px-3 py-3 text-sm text-slate-600 placeholder-slate-300 shadow transition-all duration-150 ease-linear focus:outline-none focus:ring"
-                    defaultValue={formatDate.format(data.updatedAt)}
+                    defaultValue={formatDateTime.format(data.updatedAt)}
                   />
                 </div>
               </div>

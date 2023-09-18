@@ -10,7 +10,7 @@ import { Errors } from "@/components/commons/Errors";
 import debounce from "lodash.debounce";
 import DropTableContainer from "@/components/commons/DropTableContainer";
 import { useRouter } from "next/router";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 import {
   AuditGroupInput,
   AuditGroupItemCommonInput,
@@ -808,7 +808,7 @@ export default function Edit({
                   ) : undefined,
                 tds: [
                   String(log.id),
-                  formatDate.format(log.createdAt),
+                  formatDateTime.format(log.createdAt),
                   log.isActive ? "✔️ 在用" : "❌ 停用",
                   log.createdBy.username,
                   !index && !log.isActive

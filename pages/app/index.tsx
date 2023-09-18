@@ -10,7 +10,7 @@ import { NetdataNodeBoard } from "@/components/dashboard/NetdataNodeBoard";
 import { Errors } from "@/components/commons/Errors";
 import { Flex2Col } from "@/components/commons/Flex2Col";
 import { trpc } from "@/utils/trpc";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -90,7 +90,7 @@ export default function Dashboard({
                 <>
                   Nodes{" "}
                   <span className="font-normal">
-                    [資料更新時間: {formatDate.format(nodesDataUpdatedAt)}]
+                    [資料更新時間: {formatDateTime.format(nodesDataUpdatedAt)}]
                   </span>
                 </>
               }
@@ -162,7 +162,8 @@ export default function Dashboard({
                 <>
                   Services{" "}
                   <span className="font-normal">
-                    [資料更新時間: {formatDate.format(servicesDataUpdatedAt)}]
+                    [資料更新時間:{" "}
+                    {formatDateTime.format(servicesDataUpdatedAt)}]
                   </span>
                 </>
               }
@@ -195,7 +196,7 @@ export default function Dashboard({
                         ) : (
                           <i className="fas fa-circle-xmark text-red-500"></i>
                         ),
-                      updatedAt: formatDate.format(
+                      updatedAt: formatDateTime.format(
                         Date.parse(service.UpdatedAt)
                       ),
                     }))}

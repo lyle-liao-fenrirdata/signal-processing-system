@@ -1,5 +1,5 @@
 import { UserInfo } from "@/pages/app/permission";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 
 export const PermissionTable = ({
   users,
@@ -57,10 +57,10 @@ export const PermissionTable = ({
               {Boolean(user.deletedAt) ? "停用" : "啟用"}
             </td>
             <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-              {formatDate.format(user.createdAt)}
+              {formatDateTime.format(user.createdAt)}
             </td>
             <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-              {formatDate.format(user.updatedAt)}
+              {formatDateTime.format(user.updatedAt)}
             </td>
           </tr>
         ))

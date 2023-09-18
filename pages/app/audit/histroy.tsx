@@ -4,7 +4,7 @@ import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { trpc } from "@/utils/trpc";
 import { Errors } from "@/components/commons/Errors";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 import DropTableContainer from "@/components/commons/DropTableContainer";
 import { getAuditGroupBgColor } from ".";
 
@@ -141,8 +141,8 @@ export default function History({
             ) : undefined,
             tds: [
               String(log.id),
-              formatDate.format(log.createdAt),
-              formatDate.format(
+              formatDateTime.format(log.createdAt),
+              formatDateTime.format(
                 Math.max(
                   Number(log.updatedAt),
                   ...data[0].auditGroupLogs

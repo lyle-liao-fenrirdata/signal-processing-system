@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import useMqttStore from "@/stores/mqtt";
 import Toast, { iconMap } from "@/components/commons/toast/Toast";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 
 export default function NotifyBoard() {
   const messages = useMqttStore((state) => state.messages);
@@ -44,7 +44,7 @@ export default function NotifyBoard() {
           onClose={() => removeMessage(message.id)}
         >
           <span className="absolute bottom-1 right-2 bg-transparent p-1 leading-none text-inherit opacity-75">
-            通知時間: {formatDate.format(message.receivedAt)}
+            通知時間: {formatDateTime.format(message.receivedAt)}
           </span>
         </Toast>
       ))}

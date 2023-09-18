@@ -10,7 +10,7 @@ import { Errors } from "@/components/commons/Errors";
 import ModalExt from "@/components/permission/ModalExt";
 import Modal from "@/components/commons/Modal";
 import ModalExtResetPassword from "@/components/permission/ModalExtResetPassword";
-import { formatDate } from "@/utils/formats";
+import { formatDateTime } from "@/utils/formats";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -285,7 +285,7 @@ export default function Permission({
                 註冊時間
               </th>
               <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                {formatDate.format(userInfo.createdAt)}
+                {formatDateTime.format(userInfo.createdAt)}
               </td>
             </tr>
             <tr>
@@ -293,7 +293,7 @@ export default function Permission({
                 最後變更時間
               </th>
               <td className="whitespace-nowrap border-l-0 border-r-0 border-t-0 px-6 py-2 align-middle text-xs">
-                {formatDate.format(userInfo.updatedAt)}
+                {formatDateTime.format(userInfo.updatedAt)}
               </td>
             </tr>
             <tr>
