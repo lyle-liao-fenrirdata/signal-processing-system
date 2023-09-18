@@ -55,7 +55,7 @@ export default function SearchKibana() {
             className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
           >
             <span className="text-3xl font-extrabold text-[#2F2F2F]">
-              <i className="fa-solid fa-table-columns pr-2"></i>
+              <i className="fas fa-table-columns pr-2"></i>
               Discover <span className="text-base">(查詢)</span>
             </span>
           </a>
@@ -65,7 +65,7 @@ export default function SearchKibana() {
             className="flex h-12 flex-row flex-nowrap items-center justify-start opacity-80 transition-all duration-300 hover:scale-110 hover:opacity-100"
           >
             <span className="text-3xl font-extrabold text-[#2F2F2F]">
-              <i className="fa-solid fa-gauge pr-2"></i>
+              <i className="fas fa-gauge pr-2"></i>
               Dashboard <span className="text-base">(統計)</span>
             </span>
           </a>

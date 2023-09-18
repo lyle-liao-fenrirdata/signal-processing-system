@@ -9,7 +9,8 @@ import DropTableContainer from "@/components/commons/DropTableContainer";
 import { getAuditGroupBgColor } from ".";
 import { Role } from "@prisma/client";
 import { AuditLogQueryInput } from "@/server/schema/audit.schema";
-import { getAllAuditLogPageSize } from "@/server/routers/audit";
+
+export const adminAuditLogPageSize = 10;
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -414,7 +415,7 @@ export default function Report({
                 </button>
               </li>
               {Array.from({
-                length: Math.ceil(data.count.id / getAllAuditLogPageSize),
+                length: Math.ceil(data.count.id / adminAuditLogPageSize),
               }).map((_, c) => (
                 <li key={`paginator-page-${c + 1}`}>
                   <button
@@ -432,13 +433,13 @@ export default function Report({
                 <button
                   disabled={
                     filterProps.page >=
-                    Math.ceil(data.count.id / getAllAuditLogPageSize)
+                    Math.ceil(data.count.id / adminAuditLogPageSize)
                   }
                   className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight text-slate-500 disabled:border-slate-200 disabled:bg-slate-200 disabled:text-white"
                   onClick={() =>
                     setFilterProps((prev) => ({
                       ...prev,
-                      page: Math.ceil(data.count.id / getAllAuditLogPageSize),
+                      page: Math.ceil(data.count.id / adminAuditLogPageSize),
                     }))
                   }
                 >

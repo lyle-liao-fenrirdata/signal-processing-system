@@ -2,10 +2,11 @@ import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { adminProcedure, router, userProcedure } from '../trpc';
 import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema, auditGroupSchema, auditIdSchema, auditIsCheckedSchema, auditLockSchema, auditLogQuerySchema } from '../schema/audit.schema';
+import { z } from 'zod';
+import { adminAuditLogPageSize } from '@/pages/app/audit/report';
+import { userAuditLogPageSize } from '@/pages/app/audit/histroy';
 
 export type AuditRouter = typeof auditRouter;
-
-export const getAllAuditLogPageSize = 10;
 
 export const auditRouter = router({
     getLiveAudit: userProcedure
@@ -222,40 +223,52 @@ export const auditRouter = router({
             return { ok: true };
         }),
     getUserHistoryAuditLog: userProcedure
-        .query(async ({ ctx: { user: { account } } }) => {
-            return await prisma.auditLog.findMany({
-                take: 10,
-                where: {
-                    user: { account },
-                    isLocked: true,
-                },
-                include: {
-                    audit: true,
-                    auditGroupLogs: {
-                        include: {
-                            auditGroup: true,
-                            auditItemLogs: {
-                                include: {
-                                    auditItem: true,
-                                },
-                                orderBy: {
-                                    auditItem: {
-                                        order: 'asc'
+        .input(z.object({ page: z.number() }))
+        .query(async ({ ctx: { user: { account } }, input: { page } }) => {
+
+            const skipPage = page === undefined ? 0 : page > 0 ? page - 1 : 0
+
+            const searchParam: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
+                user: { account },
+                isLocked: true,
+            }
+
+            const [count, auditLog] = await Promise.all([
+                await prisma.auditLog.count({ where: searchParam, select: { id: true } }),
+                await prisma.auditLog.findMany({
+                    skip: skipPage * userAuditLogPageSize,
+                    take: userAuditLogPageSize,
+                    where: searchParam,
+                    include: {
+                        audit: true,
+                        auditGroupLogs: {
+                            include: {
+                                auditGroup: true,
+                                auditItemLogs: {
+                                    include: {
+                                        auditItem: true,
                                     },
-                                }
+                                    orderBy: {
+                                        auditItem: {
+                                            order: 'asc'
+                                        },
+                                    }
+                                },
                             },
-                        },
-                        orderBy: {
-                            auditGroup: {
-                                order: 'asc',
+                            orderBy: {
+                                auditGroup: {
+                                    order: 'asc',
+                                }
                             }
-                        }
+                        },
                     },
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                }
-            })
+                    orderBy: {
+                        createdAt: 'desc',
+                    }
+                })
+            ])
+
+            return { count, auditLog }
         }),
     getAllAudit: adminProcedure
         .query(async () => {
@@ -322,8 +335,8 @@ export const auditRouter = router({
             const [count, audit] = await Promise.all([
                 await prisma.auditLog.count({ where: searchParam, select: { id: true } }),
                 await prisma.auditLog.findMany({
-                    skip: skipPage * getAllAuditLogPageSize,
-                    take: getAllAuditLogPageSize,
+                    skip: skipPage * adminAuditLogPageSize,
+                    take: adminAuditLogPageSize,
                     where: searchParam,
                     include: {
                         audit: true,
