@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     const isAuthPath = pathname.startsWith('/auth');
 
     // const isGuestPath = ["/app", "/app/setting"].some((path) => pathname === path);
-    const isUserPath = ["/app/search", "/app/audit"].some((path) => pathname.indexOf(path) !== -1);
+    const isUserPath = ["/app/search", "/app/audit", "/app/files"].some((path) => pathname.indexOf(path) !== -1);
     const isAdminPath = ["/app/permission"].some((path) => pathname === path);
 
     if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.split(';')[0].split(" ")[1];

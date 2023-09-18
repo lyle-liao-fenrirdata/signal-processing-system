@@ -182,6 +182,15 @@ export default function Sidebar({ role, username }: SidebarProps) {
 
                 <li className="items-center">
                   <NavigationItem
+                    href="/app/files"
+                    title="檔案管理"
+                    FaIconClass="fas fa-folder-open"
+                    currentPath={router.pathname}
+                  />
+                </li>
+
+                <li className="items-center">
+                  <NavigationItem
                     href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                     target="_blank"
                     title="容器叢集"
@@ -189,7 +198,6 @@ export default function Sidebar({ role, username }: SidebarProps) {
                   />
                 </li>
 
-                {/* TODO: 需要更新 href 位置 */}
                 <li className="items-center">
                   <NavigationItem
                     href={env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK}
@@ -205,7 +213,6 @@ export default function Sidebar({ role, username }: SidebarProps) {
                   />
                 </li>
 
-                {/* TODO: 需要更新 href 位置 */}
                 <li className="items-center">
                   <NavigationItem
                     href={env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK}
