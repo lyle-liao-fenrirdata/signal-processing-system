@@ -156,26 +156,22 @@ export default function SearchSql() {
                 />
               </a>
               <div className="flex flex-col">
-                <p>
-                  username:{" "}
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard("reader")}
-                    className="hover:opacity-70"
-                  >
-                    reader
-                  </button>
-                </p>
-                <p>
-                  password:{" "}
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard("1qaz2wsx")}
-                    className="hover:opacity-70"
-                  >
-                    ********
-                  </button>
-                </p>
+                <center className="text-xs italic">按一下即可複製</center>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard("reader")}
+                  className="hover:opacity-70"
+                >
+                  username: reader
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard("1qaz2wsx")}
+                  className="hover:opacity-70"
+                >
+                  password: ********
+                </button>
               </div>
             </div>
           </ChartContainer>
