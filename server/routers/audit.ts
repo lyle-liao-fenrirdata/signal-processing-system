@@ -5,6 +5,7 @@ import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema,
 import { z } from 'zod';
 import { adminAuditLogPageSize } from '@/pages/app/audit/report';
 import { userAuditLogPageSize } from '@/pages/app/audit/histroy';
+import { auditPageSize } from '@/pages/app/audit/edit';
 
 export type AuditRouter = typeof auditRouter;
 
@@ -271,42 +272,52 @@ export const auditRouter = router({
             return { count, auditLog }
         }),
     getAllAudit: adminProcedure
-        .query(async () => {
+        .input(z.object({ page: z.number() }))
+        .query(async ({ input: { page } }) => {
 
-            const audit = await prisma.audit.findMany({
-                where: {
-                    deletedAt: null
-                },
-                include: {
-                    auditGroups: {
-                        include: {
-                            auditItems: {
-                                orderBy: {
-                                    order: 'asc'
-                                },
+            const skipPage = page === undefined ? 0 : page > 0 ? page - 1 : 0
+
+            const searchParam: Exclude<Exclude<Parameters<typeof prisma.audit.findMany>[number], undefined>['where'], undefined> = {
+                deletedAt: null
+            }
+
+            const [count, audit] = await Promise.all([
+                await prisma.audit.count({ where: searchParam, select: { id: true } }),
+                await prisma.audit.findMany({
+                    skip: skipPage * auditPageSize,
+                    take: auditPageSize,
+                    where: searchParam,
+                    include: {
+                        auditGroups: {
+                            include: {
+                                auditItems: {
+                                    orderBy: {
+                                        order: 'asc'
+                                    },
+                                }
+                            },
+                            orderBy: {
+                                order: 'asc'
                             }
                         },
-                        orderBy: {
-                            order: 'asc'
+                        createdBy: {
+                            select: {
+                                username: true,
+                            }
+                        },
+                        _count: {
+                            select: {
+                                AuditLogs: true,
+                            }
                         }
                     },
-                    createdBy: {
-                        select: {
-                            username: true,
-                        }
+                    orderBy: {
+                        createdAt: 'desc',
                     },
-                    _count: {
-                        select: {
-                            AuditLogs: true,
-                        }
-                    }
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            })
+                })
+            ])
 
-            return audit
+            return { count, audit }
         }),
     getAllAuditLog: adminProcedure
         .input(auditLogQuerySchema)

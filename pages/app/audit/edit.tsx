@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -17,6 +17,9 @@ import {
 } from "@/server/schema/audit.schema";
 import { CloseIcon } from "@/components/commons/toast/Icon";
 import { getAuditGroupBgColor } from ".";
+import Paginator from "@/components/commons/Paginator";
+
+export const auditPageSize = 10;
 
 export type ActiveAudit = {
   id: number;
@@ -51,6 +54,8 @@ export default function Edit({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [page, setPage] = useState(1);
+
   const { query, push, pathname } = useRouter();
   const queryHistoryLog = getParamValue("id");
 
@@ -86,19 +91,22 @@ export default function Edit({
   const {
     isError: isAuditError,
     isSuccess: isAuditSuccess,
-    data: audit,
+    data,
     isLoading: isAuditLoading,
     error: auditError,
     refetch: refetchAudit,
-  } = trpc.audit.getAllAudit.useQuery(undefined, {
-    retry: false,
-    retryOnMount: false,
-    refetchOnMount: false,
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-  });
+  } = trpc.audit.getAllAudit.useQuery(
+    { page },
+    {
+      retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const {
     mutate: createNewAudit,
@@ -199,8 +207,13 @@ export default function Edit({
   });
 
   useEffect(() => {
-    if (!isAuditError && !isAuditLoading && isAuditSuccess && audit.length) {
-      const log = audit[0];
+    if (
+      !isAuditError &&
+      !isAuditLoading &&
+      isAuditSuccess &&
+      data.audit.length
+    ) {
+      const log = data.audit[0];
       if (!log.isActive) {
         setActiveLog({
           id: log.id,
@@ -224,7 +237,7 @@ export default function Edit({
         setActiveLog(null);
       }
     }
-  }, [isAuditError, isAuditLoading, isAuditSuccess, audit, username]);
+  }, [isAuditError, isAuditLoading, isAuditSuccess, data?.audit, username]);
 
   function closeActivateSubmitModal() {
     setIsActivateModalOpen(false);
@@ -400,10 +413,12 @@ export default function Edit({
   }
 
   const syncInput = useCallback(
-    (auditLog: typeof audit, active: typeof activeLog) => {
+    (
+      auditLog: Exclude<typeof data, undefined>["audit"],
+      active: typeof activeLog
+    ) => {
       let isUpdateFlag = false;
-      const log =
-        active && auditLog && auditLog.find((log) => active.id === log.id);
+      const log = active && auditLog.find((log) => active.id === log.id);
       if (!log || !active) return;
       if (log.comment !== active.comment) {
         saveAudit({ id: active.id, comment: active.comment });
@@ -445,7 +460,7 @@ export default function Edit({
   );
 
   useEffect(() => {
-    debouncedSyncInput(audit, activeLog);
+    if (data) debouncedSyncInput(data.audit, activeLog);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLog]);
 
@@ -760,9 +775,9 @@ export default function Edit({
         title={<>歷史表單</>}
         ths={["Record ID", "建立時間", "狀態", "建立者", "使用次數"]}
         tbodyTrs={
-          !audit
+          !data
             ? []
-            : audit.map((log, index) => ({
+            : data.audit.map((log, index) => ({
                 key: `history-${log.id}`,
                 onClick: () => onHistoryLogClick(log.id, pathname),
                 content:
@@ -818,6 +833,18 @@ export default function Edit({
               }))
         }
       />
+      {data && (
+        <Paginator
+          totalRecordNumber={data.count.id}
+          pageButtonProps={Array.from({
+            length: Math.ceil(data.count.id / auditPageSize),
+          }).map((_, c) => ({
+            disabled: c + 1 === page,
+            onClick: () => setPage(() => c + 1),
+            children: c + 1,
+          }))}
+        />
+      )}
     </AdminLayout>
   );
 }
