@@ -18,14 +18,14 @@ export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
   return (
     <>
       <nav className="absolute left-0 top-0 z-10 flex w-full items-center bg-transparent py-4 md:flex-row md:flex-nowrap md:justify-start md:bg-slate-800">
-        <div className="mx-autp flex w-full flex-wrap items-center justify-between px-4 md:flex-nowrap md:px-10">
+        <div className="hidden w-full flex-wrap items-center justify-between px-4 md:flex md:flex-nowrap md:px-10">
           {/* Title */}
           <div className="flex flex-row gap-2">
             {breadcrumbs.map((page, index) => (
               <span key={page.title}>
                 <a
                   href={page.href}
-                  className="hidden text-lg font-semibold uppercase text-white lg:inline-block"
+                  className="inline-block text-lg font-semibold uppercase text-white"
                 >
                   {page.title}
                 </a>

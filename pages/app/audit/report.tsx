@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useState } from "react";
 
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -9,6 +9,7 @@ import DropTableContainer from "@/components/commons/DropTableContainer";
 import { getAuditGroupBgColor } from ".";
 import { Role } from "@prisma/client";
 import { AuditLogQueryInput } from "@/server/schema/audit.schema";
+import Paginator from "@/components/commons/Paginator";
 
 export const adminAuditLogPageSize = 10;
 
@@ -404,55 +405,17 @@ export default function Report({
             ]}
             tbodyTrs={tbodyTrs(data.audit, isUseFilter)}
           />
-          <nav className="flex flex-row justify-center">
-            <ul className="flex list-none flex-wrap gap-2 rounded pl-0">
-              <li>
-                <button
-                  disabled={filterProps.page <= 1}
-                  className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight text-slate-500 disabled:border-slate-200 disabled:bg-slate-200 disabled:text-white"
-                  onClick={() =>
-                    setFilterProps((prev) => ({ ...prev, page: 1 }))
-                  }
-                >
-                  <i className="fas fa-chevron-left -ml-px"></i>
-                  <i className="fas fa-chevron-left -ml-px"></i>
-                </button>
-              </li>
-              {Array.from({
-                length: Math.ceil(data.count.id / adminAuditLogPageSize),
-              }).map((_, c) => (
-                <li key={`paginator-page-${c + 1}`}>
-                  <button
-                    disabled={c + 1 === filterProps.page}
-                    className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight disabled:bg-slate-500 disabled:text-white"
-                    onClick={() =>
-                      setFilterProps((prev) => ({ ...prev, page: c + 1 }))
-                    }
-                  >
-                    {c + 1}
-                  </button>
-                </li>
-              ))}
-              <li>
-                <button
-                  disabled={
-                    filterProps.page >=
-                    Math.ceil(data.count.id / adminAuditLogPageSize)
-                  }
-                  className="relative flex h-8 w-8 items-center justify-center rounded-full border border-solid border-slate-500 bg-white p-0 text-xs font-semibold leading-tight text-slate-500 disabled:border-slate-200 disabled:bg-slate-200 disabled:text-white"
-                  onClick={() =>
-                    setFilterProps((prev) => ({
-                      ...prev,
-                      page: Math.ceil(data.count.id / adminAuditLogPageSize),
-                    }))
-                  }
-                >
-                  <i className="fas fa-chevron-right -mr-px"></i>
-                  <i className="fas fa-chevron-right -mr-px"></i>
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <Paginator
+            totalRecordNumber={data.count.id}
+            pageButtonProps={Array.from({
+              length: Math.ceil(data.count.id / adminAuditLogPageSize),
+            }).map((_, c) => ({
+              disabled: c + 1 === filterProps.page,
+              onClick: () =>
+                setFilterProps((prev) => ({ ...prev, page: c + 1 })),
+              children: c + 1,
+            }))}
+          />
         </>
       )}
     </AdminLayout>
