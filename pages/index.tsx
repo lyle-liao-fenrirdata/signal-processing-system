@@ -28,7 +28,7 @@ export default function Index() {
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
                   href="/app"
-                  className="get-started mb-1 mr-1 rounded bg-slate-400 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
+                  className="rounded bg-slate-700 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
                   進入系統
                 </a>

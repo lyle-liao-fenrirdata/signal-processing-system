@@ -20,7 +20,7 @@ const NavigationItem = ({
 }: {
   href: string;
   target?: string;
-  title: string;
+  title: string | JSX.Element;
   currentPath?: string;
   FaIconClass: string;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
@@ -183,8 +183,14 @@ export default function Sidebar({ role, username }: SidebarProps) {
                 <li className="items-center">
                   <NavigationItem
                     href="/app/files"
-                    title="檔案管理"
-                    FaIconClass="fas fa-folder-open"
+                    title={
+                      <>
+                        MongoDB
+                        <br />
+                        檔案管理
+                      </>
+                    }
+                    FaIconClass="fas fa-leaf"
                     currentPath={router.pathname}
                   />
                 </li>
@@ -217,7 +223,13 @@ export default function Sidebar({ role, username }: SidebarProps) {
                   <NavigationItem
                     href={env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK}
                     target="_blank"
-                    title="前端管理系統(5網)"
+                    title={
+                      <>
+                        前端管理
+                        <br />
+                        系統(5網)
+                      </>
+                    }
                     FaIconClass="fas fa-server"
                     onClick={(e) => {
                       openOtherSiteLnck(

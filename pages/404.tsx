@@ -1,7 +1,10 @@
 import IndexNavbar from "components/Navbars/IndexNavbar";
 import Footer from "components/Footers/Footer";
+import { useRouter } from "next/router";
 
 export default function Custom404() {
+  const router = useRouter();
+
   return (
     <>
       <IndexNavbar />
@@ -20,10 +23,16 @@ export default function Custom404() {
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
                   href="/"
-                  className="get-started mb-1 mr-1 rounded bg-slate-400 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
+                  className="mr-2 rounded bg-slate-700 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
                   回首頁
                 </a>
+                <button
+                  className="rounded bg-white px-6 py-4 text-sm font-bold uppercase text-slate-700 shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
+                  onClick={() => router.back()}
+                >
+                  回上一頁
+                </button>
               </div>
             </div>
           </div>
