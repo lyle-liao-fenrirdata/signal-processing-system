@@ -233,7 +233,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     FaIconClass="fas fa-server"
                     onClick={(e) => {
                       openOtherSiteLnck(
-                        env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK,
+                        env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK,
                         e
                       );
                     }}
