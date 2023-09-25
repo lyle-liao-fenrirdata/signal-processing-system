@@ -7,7 +7,7 @@ export default function AuthNavbar() {
         <div className="relative flex w-full justify-between lg:static lg:block lg:w-auto lg:justify-start">
           <Link
             href="/"
-            className="mr-4 inline-block whitespace-nowrap py-2 text-sm font-bold uppercase leading-relaxed text-white"
+            className="mr-4 inline-block whitespace-nowrap py-2 text-sm font-bold leading-relaxed text-white"
           >
             訊號處理系統
           </Link>

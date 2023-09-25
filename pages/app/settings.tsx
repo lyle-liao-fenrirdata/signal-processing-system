@@ -104,7 +104,7 @@ export default function Settings({
                 {data.account}
               </h6>
               <button
-                className="rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
+                className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
                 type="button"
                 onClick={() => setIsChangePasswordModalOpen(true)}
               >
@@ -114,14 +114,12 @@ export default function Settings({
           }
         >
           <form>
-            <h6 className="mb-6 text-sm font-bold uppercase text-slate-400">
-              個人資訊
-            </h6>
+            <h6 className="mb-6 text-sm font-bold text-slate-400">個人資訊</h6>
             <div className="flex flex-wrap">
               <div className="w-full px-4 lg:w-6/12">
                 <div className="relative mb-3 w-full">
                   <label
-                    className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                    className="mb-2 block text-xs font-bold text-slate-600"
                     htmlFor="grid-password"
                   >
                     使用者名稱
@@ -137,7 +135,7 @@ export default function Settings({
               <div className="w-full px-4 lg:w-6/12">
                 <div className="relative mb-3 w-full">
                   <label
-                    className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                    className="mb-2 block text-xs font-bold text-slate-600"
                     htmlFor="grid-password"
                   >
                     使用者權限
@@ -153,7 +151,7 @@ export default function Settings({
               <div className="w-full px-4 lg:w-6/12">
                 <div className="relative mb-3 w-full">
                   <label
-                    className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                    className="mb-2 block text-xs font-bold text-slate-600"
                     htmlFor="grid-password"
                   >
                     帳號註冊時間
@@ -169,7 +167,7 @@ export default function Settings({
               <div className="w-full px-4 lg:w-6/12">
                 <div className="relative mb-3 w-full">
                   <label
-                    className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                    className="mb-2 block text-xs font-bold text-slate-600"
                     htmlFor="grid-password"
                   >
                     最後變更時間
@@ -186,14 +184,14 @@ export default function Settings({
 
             <hr className="border-b-1 mt-6 border-slate-300" />
 
-            <h6 className="mb-6 mt-3 text-sm font-bold uppercase text-slate-400">
+            <h6 className="mb-6 mt-3 text-sm font-bold text-slate-400">
               變更設定
             </h6>
             <div className="flex flex-wrap gap-4">
               <div className="lg:w-12/12 w-full px-4">
                 <div className="relative mb-3 w-full">
                   <label
-                    className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                    className="mb-2 block text-xs font-bold text-slate-600"
                     htmlFor="grid-password"
                   >
                     使用者名稱
@@ -217,7 +215,7 @@ export default function Settings({
               </div>
               {isUpdateError && <Errors errors={[updateError.message]} />}
               <button
-                className="ml-auto mr-4 rounded bg-slate-700 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
+                className="ml-auto mr-4 rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600"
                 type="button"
                 onClick={onSubmit}
               >

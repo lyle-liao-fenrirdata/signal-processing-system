@@ -39,7 +39,7 @@ export default function TableContainer({
                 <th
                   key={th}
                   className={
-                    "whitespace-nowrap border border-l-0 border-r-0 border-solid px-6 py-3 text-left align-middle text-xs font-semibold uppercase " +
+                    "whitespace-nowrap border border-l-0 border-r-0 border-solid px-6 py-3 text-left align-middle text-xs font-semibold " +
                     (color === "light"
                       ? "border-slate-100 bg-slate-50 text-slate-500"
                       : "border-slate-500 bg-slate-600 text-slate-200")

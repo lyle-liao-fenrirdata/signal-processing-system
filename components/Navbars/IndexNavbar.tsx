@@ -9,7 +9,7 @@ export default function IndexNavbar() {
         <div className="relative flex w-full justify-between lg:static lg:block lg:w-auto lg:justify-start">
           <Link
             href="/"
-            className="mr-4 inline-block whitespace-nowrap py-2 text-sm font-bold uppercase leading-relaxed text-slate-700"
+            className="mr-4 inline-block whitespace-nowrap py-2 text-sm font-bold leading-relaxed text-slate-700"
           >
             訊號處理系統
           </Link>
@@ -31,7 +31,7 @@ export default function IndexNavbar() {
           <ul className="mr-auto flex list-none flex-col lg:flex-row">
             <li className="flex items-center">
               <a
-                className="flex items-center px-3 py-4 text-xs font-bold uppercase text-slate-700 hover:text-slate-500 lg:py-2"
+                className="flex items-center px-3 py-4 text-xs font-bold text-slate-700 hover:text-slate-500 lg:py-2"
                 href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus?ref=nnjs-index-navbar"
               >
                 <i className="far fa-file-alt leading-lg mr-2 text-lg text-slate-400" />{" "}

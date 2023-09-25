@@ -107,7 +107,7 @@ export default function ModalExtResetPassword({
       <form>
         <div className="relative mb-3 w-full">
           <label
-            className="mb-2 block text-xs font-bold uppercase text-slate-600"
+            className="mb-2 block text-xs font-bold text-slate-600"
             htmlFor="account"
           >
             帳號
@@ -120,7 +120,7 @@ export default function ModalExtResetPassword({
 
         <div className="relative mb-3 w-full">
           <label
-            className="mb-2 block text-xs font-bold uppercase text-slate-600"
+            className="mb-2 block text-xs font-bold text-slate-600"
             htmlFor="password"
           >
             密碼
@@ -151,7 +151,7 @@ export default function ModalExtResetPassword({
 
         <div className="relative mb-3 w-full">
           <label
-            className="mb-2 block text-xs font-bold uppercase text-slate-600"
+            className="mb-2 block text-xs font-bold text-slate-600"
             htmlFor="passwordConfirm"
           >
             再次輸入密碼

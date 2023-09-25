@@ -25,7 +25,7 @@ export default function AppNavbar({ breadcrumbs, username }: NavbarProps) {
               <span key={page.title}>
                 <a
                   href={page.href}
-                  className="inline-block text-lg font-semibold uppercase text-white"
+                  className="inline-block text-lg font-semibold text-white"
                 >
                   {page.title}
                 </a>

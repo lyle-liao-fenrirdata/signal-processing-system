@@ -122,7 +122,7 @@ export default function Dashboard({
                       ),
                       state: (
                         <span
-                          className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                          className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium ${
                             node.Status.State === "ready"
                               ? "bg-green-100 text-green-800"
                               : node.Status.State === "down"
@@ -137,7 +137,7 @@ export default function Dashboard({
                       ),
                       availability: (
                         <span
-                          className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                          className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium ${
                             node.Spec.Availability === "active"
                               ? "bg-green-100 text-green-800"
                               : node.Spec.Availability === "pause"
@@ -232,7 +232,7 @@ export default function Dashboard({
                     <span className="text-md absolute -top-4 right-2 inline-block rounded bg-transparent font-semibold drop-shadow-lg">
                       <span
                         id={node.ID}
-                        className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium uppercase ${
+                        className={`mr-2 rounded px-2.5 py-0.5 text-xs font-medium ${
                           node.Spec.Role === "manager"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-gray-100 text-gray-800"

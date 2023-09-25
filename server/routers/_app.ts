@@ -5,11 +5,11 @@ import { env } from '@/env.mjs';
 import { z } from 'zod';
 import { userProcedure, router } from '../trpc';
 import { arkimeRouter } from './arkime';
-import { recordingRouter } from './recording';
 import { authRouter } from './auth';
 import { permissionRouter } from './permission';
 import { swarmRouter } from './swarm';
 import { auditRouter } from './audit';
+import { filesRouter } from './files';
 
 export const appRouter = router({
     auth: authRouter,
@@ -30,7 +30,7 @@ export const appRouter = router({
         });
         return await res.json()
     }),
-    recording: recordingRouter,
+    files: filesRouter,
     permission: permissionRouter,
     swarm: swarmRouter,
     audit: auditRouter,

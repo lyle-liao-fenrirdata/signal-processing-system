@@ -23,12 +23,12 @@ export default function Custom404() {
                 {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
                   href="/"
-                  className="mr-2 rounded bg-slate-700 px-6 py-4 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
+                  className="mr-2 rounded bg-slate-700 px-6 py-4 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                 >
                   回首頁
                 </a>
                 <button
-                  className="rounded bg-white px-6 py-4 text-sm font-bold uppercase text-slate-700 shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
+                  className="rounded bg-white px-6 py-4 text-sm font-bold text-slate-700 shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-500"
                   onClick={() => router.back()}
                 >
                   回上一頁

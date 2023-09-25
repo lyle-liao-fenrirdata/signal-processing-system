@@ -76,7 +76,7 @@ export default function Login() {
                 <form>
                   <div className="relative mb-3 w-full">
                     <label
-                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      className="mb-2 block text-xs font-bold text-slate-600"
                       htmlFor="account"
                     >
                       帳號
@@ -105,7 +105,7 @@ export default function Login() {
 
                   <div className="relative mb-3 w-full">
                     <label
-                      className="mb-2 block text-xs font-bold uppercase text-slate-600"
+                      className="mb-2 block text-xs font-bold text-slate-600"
                       htmlFor="password"
                     >
                       密碼
@@ -135,7 +135,7 @@ export default function Login() {
                   <div className="mt-6 text-center">
                     <button
                       disabled={isLoading}
-                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600 disabled:opacity-30"
+                      className="mb-1 mr-1 w-full rounded bg-slate-800 px-6 py-3 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-slate-600 disabled:opacity-30"
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
