@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
         if (isAdminPath && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
 
         const isRoleOrNameChange = trueUsername !== username || trueRole !== role
-        const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 1; // less than one hour to be exprired
+        const isAboutToExpired = exp && exp <= (Date.now() / 1000) + 60 * 60 * 6; // less than six hour to be exprired
 
         const requestHeader = new Headers(request.headers);
         requestHeader.set("x-username", encodeURIComponent(trueUsername));
@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
         return response;
     } catch (error) {
         console.error("middleware error", error);
-        return NextResponse.redirect(new URL(`/?${new URLSearchParams({ error: String(error) })}`, request.url));
+        return NextResponse.redirect(new URL(`/?${new URLSearchParams({ error: "can not login, please contact administrator" })}`, request.url));
     }
 }
 

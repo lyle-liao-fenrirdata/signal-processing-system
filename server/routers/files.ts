@@ -37,20 +37,3 @@ export const filesRouter = router({
             };
         })
 });
-
-// const JSON_format_from_Zack_in_Line_group = {
-//     "InputPort": 1,
-//     "OutputPort": 1,
-//     "LinkID": {
-//         "SatelliteID": "AA",
-//         "Polarization": "V",
-//         "Frequency": 12500250000
-//     },
-//     "ServerIP": "192.168.016.101",
-//     "ServerPort": 1234,
-//     "ServerCh": 1,
-//     "ServerType": "HDLC/DVB/IP",
-//     "Timestamp": UnixTime(seconds),
-//     "Capture": "Enable/Disable"
-//     "RecordId": "CCV1250025000_YYYYMMDDHHmmssfff"
-// }
