@@ -5,6 +5,7 @@ import { env } from '@/env.mjs';
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const inputDir = searchParams.get('dir') || 'home/'
+    console.log({ searchParams, inputDir, dir: env.MOUNT_DIR })
     try {
         await fs.access(env.MOUNT_DIR, fs.constants.R_OK)
     } catch (e) {
@@ -13,15 +14,18 @@ export async function GET(request: NextRequest) {
     }
 
     const dir = inputDir.replace('home/', env.MOUNT_DIR);
+    console.log('after "fs.access R_OK: "', { MOUNT_DIR: env.MOUNT_DIR })
 
     try {
         await fs.access(dir, fs.constants.R_OK)
     } catch (e) {
         return NextResponse.error()
     }
+    console.log('after "fs.access R_OK: "', { dir })
     const dirFiles = await fs.readdir(dir, {
         withFileTypes: true,
     });
+    console.log('after "fs.readdir: "', dirFiles)
     const files = await Promise.all(dirFiles.filter((dirent) => dirent.isFile()).map(async (dirent) => {
         const { birthtimeMs, size } = await fs.stat(`${dir}${dirent.name}`)
         return { birthtimeMs, size, name: dirent.name }
