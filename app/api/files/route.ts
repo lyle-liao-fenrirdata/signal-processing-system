@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import { NextRequest, NextResponse } from "next/server";
+import { env } from '@/env.mjs';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
         await fs.mkdir('./public/mount')
     }
 
-    const dir = inputDir.replace('home/', './public/mount/');
+    const dir = inputDir.replace('home/', env.MOUNT_DIR);
 
     try {
         await fs.access(dir, fs.constants.R_OK)
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const path = `${dir.replace('home/', './public/mount/')}${file.name}`;
+    const path = `${dir.replace('home/', 'env.MOUNT_DIR')}${file.name}`;
 
     // check if file already exist
     try {
@@ -66,7 +67,7 @@ export async function PUT(request: Request) {
     const dirname = await request.text()
     if (!dirname) return NextResponse.json({ ok: false });
 
-    const path = dirname.replace('home/', './public/mount/');
+    const path = dirname.replace('home/', 'env.MOUNT_DIR');
 
     // check if file already exist
     try {
@@ -84,7 +85,7 @@ export async function DELETE(request: NextRequest) {
     if (!dirToDel) return NextResponse.json({ ok: false });
 
     const dirname = decodeURIComponent(dirToDel);
-    const path = dirname.replace('home/', './public/mount/');
+    const path = dirname.replace('home/', 'env.MOUNT_DIR');
 
     // check if file already exist
     try {
@@ -117,8 +118,8 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ ok: false })
     }
 
-    oldPath = oldPath.replace('home/', './public/mount/');
-    newPath = newPath.replace('home/', './public/mount/');
+    oldPath = oldPath.replace('home/', 'env.MOUNT_DIR');
+    newPath = newPath.replace('home/', 'env.MOUNT_DIR');
 
     // check if new dir not exist
     try {
