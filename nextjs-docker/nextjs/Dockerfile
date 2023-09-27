@@ -54,7 +54,7 @@ COPY --from=builder --link --chown=1001:1001 /app/public ./public
 COPY --from=builder --link --chown=1001:1001 /app/.next/standalone ./
 COPY --from=builder --link --chown=1001:1001 /app/.next/static ./.next/static
 
-RUN chmod 777 -R /app/public
+USER nextjs
 
 EXPOSE 3000
 

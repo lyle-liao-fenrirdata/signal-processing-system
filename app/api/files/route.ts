@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const path = `${dir.replace('home/', 'env.MOUNT_DIR')}${file.name}`;
+    const path = `${dir.replace('home/', env.MOUNT_DIR)}${file.name}`;
 
     // check if file already exist
     try {
@@ -71,7 +71,7 @@ export async function PUT(request: Request) {
     const dirname = await request.text()
     if (!dirname) return NextResponse.json({ ok: false });
 
-    const path = dirname.replace('home/', 'env.MOUNT_DIR');
+    const path = dirname.replace('home/', env.MOUNT_DIR);
 
     // check if file already exist
     try {
@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest) {
     if (!dirToDel) return NextResponse.json({ ok: false });
 
     const dirname = decodeURIComponent(dirToDel);
-    const path = dirname.replace('home/', 'env.MOUNT_DIR');
+    const path = dirname.replace('home/', env.MOUNT_DIR);
 
     // check if file already exist
     try {
@@ -122,8 +122,8 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ ok: false })
     }
 
-    oldPath = oldPath.replace('home/', 'env.MOUNT_DIR');
-    newPath = newPath.replace('home/', 'env.MOUNT_DIR');
+    oldPath = oldPath.replace('home/', env.MOUNT_DIR);
+    newPath = newPath.replace('home/', env.MOUNT_DIR);
 
     // check if new dir not exist
     try {

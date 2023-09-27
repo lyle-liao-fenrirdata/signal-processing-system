@@ -7,7 +7,7 @@ services:
       context: ../
       dockerfile: nextjs-docker/nextjs/Dockerfile
     image: signal-process-system-frontend
-    user: "${UID}:${GID}"
+    user: ${UID}:${GID}
     container_name: nextjs
     restart: always
     env_file:
@@ -17,9 +17,10 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - type: bind
-        source: /mnt/iscsi_mongodb/files/
-        target: /app/public/mount/
+      - /mnt/iscsi_mongodb/files:/app/public/mount:rw
+      # - type: bind
+      #   source: /mnt/iscsi_mongodb/files/
+      #   target: /app/public/mount/
 
   db:
     image: postgres
