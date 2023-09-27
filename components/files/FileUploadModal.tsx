@@ -5,10 +5,12 @@ import { env } from "@/env.mjs";
 
 type FileUploadModalProps = {
   onCloseModal: MouseEventHandler<HTMLButtonElement>;
+  dir: string;
 };
 
 export default function FileUploadModal({
   onCloseModal,
+  dir,
 }: FileUploadModalProps) {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -35,6 +37,7 @@ export default function FileUploadModal({
           .map(async (_, i) => {
             const data = new FormData();
             const theFile = file[i];
+            data.set("dir", dir);
             data.set("file", theFile);
             if (uploadedFile.map((file) => file.name).includes(theFile.name))
               return;
@@ -56,11 +59,10 @@ export default function FileUploadModal({
             return resBody as { ok: boolean };
           })
       );
-      if (!results.filter((res) => !res || !res.ok).length) setFile(null);
+      if (!results.filter((res) => !res?.ok).length) router.reload();
     } catch (e: any) {
       console.error(e);
     }
-    router.reload();
     setIsUploading(false);
   };
 

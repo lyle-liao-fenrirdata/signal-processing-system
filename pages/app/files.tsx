@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { Fragment, useState } from "react";
 import dynamic from "next/dynamic";
 import AdminLayout from "@/components/layouts/App";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { Container } from "@/components/commons/Container";
 import { env } from "@/env.mjs";
+import { Role } from "@prisma/client";
+import { formatDateTime, formatFileSize } from "@/utils/formats";
 const DirAddModal = dynamic(() => import("@/components/files/DirAddModal"), {
   ssr: false,
 });
@@ -14,10 +16,27 @@ const FileUploadModal = dynamic(
     ssr: false,
   }
 );
+const DeleteModal = dynamic(() => import("@/components/files/DeleteModal"), {
+  ssr: false,
+});
+const RenameDirModal = dynamic(
+  () => import("@/components/files/RenameDirModal"),
+  {
+    ssr: false,
+  }
+);
 
 type DirContent = {
-  files: string[];
-  dirs: string[];
+  files: {
+    birthtimeMs: number;
+    size: number;
+    name: string;
+  }[];
+  dirs: {
+    nfiles: number;
+    ndirs: number;
+    name: string;
+  }[];
 };
 
 export const getServerSideProps: GetServerSideProps<{
@@ -44,13 +63,18 @@ export const getServerSideProps: GetServerSideProps<{
     dirs: [],
   };
   try {
-    // console.log("\x1b[33m", dirContent, "\x1b[0m");
     const dirRes = await fetch(
       env.NEXT_PUBLIC_FILES_API_URL + `?dir=${encodeURIComponent(dir)}`
     );
+    // console.log("\x1b[33m", dirRes.status, "\x1b[0m");
     dirContent = await dirRes.json();
-  } catch (e) {
-    console.error(String(e));
+  } catch {
+    return {
+      redirect: {
+        destination: "/app/files",
+        permanent: false,
+      },
+    };
   }
 
   return {
@@ -72,6 +96,8 @@ export default function Settings({
   const router = useRouter();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isDirModalOpen, setIsDirModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState("");
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState("");
 
   return (
     <AdminLayout
@@ -108,35 +134,93 @@ export default function Settings({
       >
         {/* <p className="">當前路徑: {dir}</p> */}
         <div className="text-sm text-slate-700">
-          <p className="">當前路徑: {dir}</p>
+          <p>
+            <i className="fa-solid fa-folder-tree pr-2"></i>
+            {dir &&
+              dir.split("/").map((d, i, arr) => (
+                <Fragment key={d}>
+                  {i + 1 === arr.length ? null : (
+                    <span
+                      className="cursor-pointer hover:underline"
+                      onClick={() =>
+                        router.push(
+                          "/app/files?dir=" +
+                            encodeURIComponent(arr.slice(0, i + 1).join("/"))
+                        )
+                      }
+                    >
+                      {d + "/"}
+                    </span>
+                  )}
+                </Fragment>
+              ))}
+          </p>
           <hr className="border-b-1 my-4 border-slate-300" />
           {dirContent && (
             <>
-              {dirContent.dirs.map((dirname) => (
-                <button
-                  key={"dir.path-" + dirname}
-                  className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
-                  onClick={() =>
-                    router.push(
-                      "/app/files?dir=" +
-                        encodeURIComponent(`${dir}/${dirname}`)
-                    )
-                  }
+              {dirContent.dirs.map((dirsDir) => (
+                <div
+                  key={"dir.path-" + dirsDir.name}
+                  className="flex flex-row items-center gap-2 pl-1"
                 >
-                  <i className="fas fa-folder"></i>
-                  {dirname}
-                </button>
+                  <button
+                    className="text-red-100 hover:text-red-500 disabled:text-transparent hover:disabled:text-transparent"
+                    disabled={role !== Role.ADMIN}
+                    onClick={() =>
+                      setIsDeleteModalOpen(`${dir}${dirsDir.name}/`)
+                    }
+                  >
+                    <i className="fas fa-folder-minus"></i>
+                  </button>
+                  <button
+                    className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
+                    onClick={() =>
+                      router.push(
+                        "/app/files?dir=" +
+                          encodeURIComponent(`${dir}${dirsDir.name}/`)
+                      )
+                    }
+                  >
+                    <i className="fas fa-folder"></i>
+                    {dirsDir.name}
+                  </button>
+                  <p className="ml-auto text-xs text-slate-700">
+                    內有 {dirsDir.ndirs}個資料夾 {dirsDir.nfiles}個檔案
+                  </p>
+                  <button
+                    className="text-slate-500 hover:text-slate-700"
+                    onClick={() => setIsRenameModalOpen(dirsDir.name)}
+                  >
+                    <i className="fas fa-file-pen"></i>
+                  </button>
+                </div>
               ))}
               <hr className="border-b-1 my-4 border-slate-300" />
-              {dirContent.files.map((filename) => (
-                <button
-                  key={"dir.path-" + filename}
-                  className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
-                  // onClick={() => setDir(dir.path)}
+              {dirContent.files.map((file) => (
+                <div
+                  key={"dir.path-" + file.name}
+                  className="flex flex-row items-center gap-2 pl-1"
                 >
-                  <i className="fas fa-file"></i>
-                  {filename}
-                </button>
+                  <button
+                    className="text-red-100 hover:text-red-500"
+                    onClick={() => setIsDeleteModalOpen(`${dir}${file.name}`)}
+                  >
+                    <i className="fas fa-file-excel px-1"></i>
+                  </button>
+                  <button
+                    className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
+                    // onClick={() => setDir(dir.path)}
+                  >
+                    <i className="fas fa-file"></i>
+                    {file.name}
+                  </button>
+                  <p className="ml-auto text-xs text-slate-700">
+                    {formatFileSize(file.size)}
+                  </p>
+                  <p className="text-xs text-slate-700">
+                    {formatDateTime.format(file.birthtimeMs)}
+                  </p>
+                </div>
               ))}
             </>
           )}
@@ -144,11 +228,29 @@ export default function Settings({
       </Container>
 
       {isUploadModalOpen && (
-        <FileUploadModal onCloseModal={() => setIsUploadModalOpen(false)} />
+        <FileUploadModal
+          dir={dir}
+          onCloseModal={() => setIsUploadModalOpen(false)}
+        />
       )}
 
       {isDirModalOpen && (
-        <DirAddModal onCloseModal={() => setIsDirModalOpen(false)} />
+        <DirAddModal dir={dir} onCloseModal={() => setIsDirModalOpen(false)} />
+      )}
+
+      {!!isDeleteModalOpen && (
+        <DeleteModal
+          dir={isDeleteModalOpen}
+          onCloseModal={() => setIsDeleteModalOpen("")}
+        />
+      )}
+
+      {!!isRenameModalOpen && (
+        <RenameDirModal
+          dir={dir}
+          currentName={isRenameModalOpen}
+          onCloseModal={() => setIsRenameModalOpen("")}
+        />
       )}
     </AdminLayout>
   );

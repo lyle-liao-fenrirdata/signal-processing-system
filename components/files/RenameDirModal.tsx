@@ -5,31 +5,39 @@ import { env } from "@/env.mjs";
 
 const notAllowedFilename = /[\\/:*?"<>|'"]/g;
 
-type DirAddModalProps = {
+type RenameDirModalProps = {
   onCloseModal: MouseEventHandler<HTMLButtonElement>;
   dir: string;
+  currentName: string;
 };
 
-export default function DirAddModal({ onCloseModal, dir }: DirAddModalProps) {
+export default function RenameDirModal({
+  onCloseModal,
+  dir,
+  currentName,
+}: RenameDirModalProps) {
   const router = useRouter();
-  const [dirname, setDirname] = useState<string>("");
+  const [dirname, setDirname] = useState<string>(() => currentName);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const onDirSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
+  const onRenameDirSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsUploading(true);
     if (!dirname || dirname.match(notAllowedFilename)) return;
     try {
       const res = await fetch(env.NEXT_PUBLIC_FILES_API_URL, {
-        method: "PUT",
-        body: `${dir}${dirname}`,
+        method: "PATCH",
+        body: JSON.stringify({
+          oldPath: dir + currentName,
+          newPath: dir + dirname,
+        }),
       });
       const resBody = await res.json();
       if (resBody.ok) {
         router.reload();
       } else {
-        setError("建立失敗(可能原因: 路徑重複)");
+        setError("更新失敗(可能原因: 路徑重複)");
       }
     } catch (e: any) {
       console.error(e);
@@ -39,16 +47,16 @@ export default function DirAddModal({ onCloseModal, dir }: DirAddModalProps) {
 
   return (
     <Modal
-      header="輸入資料夾名稱"
+      header="輸入新資料夾名稱"
       actions={[
         <button
           key="submit-upload-form"
           type="button"
           disabled={isUploading || !dirname}
-          onClick={onDirSubmit}
+          onClick={onRenameDirSubmit}
           className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
         >
-          建立
+          變更
         </button>,
       ]}
       onCloseModal={onCloseModal}
@@ -58,7 +66,7 @@ export default function DirAddModal({ onCloseModal, dir }: DirAddModalProps) {
           className="mb-2 block text-sm text-slate-700"
           htmlFor="multiple_files"
         >
-          名稱
+          新名稱
         </label>
         <input
           className="block w-full cursor-pointer rounded border border-slate-300 bg-slate-50 text-sm text-slate-900 focus:outline-none"
