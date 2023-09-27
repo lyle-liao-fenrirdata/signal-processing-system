@@ -6,10 +6,10 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const inputDir = searchParams.get('dir') || 'home/'
     try {
-        await fs.access('./public/mount', fs.constants.R_OK)
+        await fs.access(env.MOUNT_DIR, fs.constants.R_OK)
     } catch (e) {
-        console.error('Path: ./public/mount is not accessible (R).')
-        await fs.mkdir('./public/mount')
+        console.error('Path: ', env.MOUNT_DIR, 'is not accessible (R).')
+        await fs.mkdir(env.MOUNT_DIR)
     }
 
     const dir = inputDir.replace('home/', env.MOUNT_DIR);
