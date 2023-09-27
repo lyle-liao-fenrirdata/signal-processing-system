@@ -7,6 +7,7 @@ services:
       context: ../
       dockerfile: nextjs-docker/nextjs/Dockerfile
     image: signal-process-system-frontend
+    user: "${UID}:${GID}"
     container_name: nextjs
     restart: always
     env_file:
