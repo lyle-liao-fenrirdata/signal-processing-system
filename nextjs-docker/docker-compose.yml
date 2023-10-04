@@ -13,7 +13,6 @@ services:
     restart: always
     depends_on:
       - postgres
-      - nextjs-files
     env_file:
       - ../.env.production
     ports:
