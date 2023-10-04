@@ -7,30 +7,29 @@ services:
       context: ../
       dockerfile: nextjs-docker/nextjs/Dockerfile
     image: signal-process-system-frontend
-    user: ${UID}:${GID}
     container_name: nextjs
+    networks:
+      - frontend
     restart: always
     depends_on:
-      - db
+      - postgres
       - nextjs-files
     env_file:
       - ../.env.production
     ports:
       - 3009:3000
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
 
-  db:
+  postgres:
     image: postgres
     container_name: postgres
     restart: always
+    networks:
+      - frontend
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
       POSTGRES_DB: signal_processing_system
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
     volumes:
       - ./nextjs/initdb.d/:/docker-entrypoint-initdb.d/
       - /mnt/iscsi_frontend/postgres/data:/var/lib/postgresql/data
@@ -40,6 +39,9 @@ services:
   #   container_name: adminer
   #   restart: always
   #   depends_on:
-  #     - db
+  #     - postgres
   #   ports:
   #     - 5433:8080
+
+networks:
+  frontend:
