@@ -158,7 +158,9 @@ export default function Settings({
                       onClick={() =>
                         router.push(
                           "/app/files?dir=" +
-                            encodeURIComponent(arr.slice(0, i + 1).join("/"))
+                            encodeURIComponent(
+                              arr.slice(0, i + 1).join("/") + "/"
+                            )
                         )
                       }
                     >
@@ -226,9 +228,9 @@ export default function Settings({
                     className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
                     target="_blank"
                     href={`${env.NEXT_PUBLIC_FILES_API_URL.replace(
-                      "api/files",
-                      dir.replace("home/", "mount/")
-                    )}${file.name}`}
+                      "files",
+                      "download/"
+                    )}${file.name}?dir=${encodeURIComponent(dir)}`}
                   >
                     <i className="fas fa-file"></i>
                     {file.name}
