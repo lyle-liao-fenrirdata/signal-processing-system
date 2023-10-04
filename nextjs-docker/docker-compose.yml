@@ -10,17 +10,15 @@ services:
     user: ${UID}:${GID}
     container_name: nextjs
     restart: always
+    depends_on:
+      - db
+      - nextjs-files
     env_file:
       - ../.env.production
     ports:
       - 3009:3000
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    volumes:
-      - /mnt/iscsi_mongodb/files:/app/public/mount:rw
-      # - type: bind
-      #   source: /mnt/iscsi_mongodb/files/
-      #   target: /app/public/mount/
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
 
   db:
     image: postgres
@@ -35,12 +33,13 @@ services:
       - 5432:5432
     volumes:
       - ./nextjs/initdb.d/:/docker-entrypoint-initdb.d/
+      - /mnt/iscsi_frontend/postgres/data:/var/lib/postgresql/data
 
-  db-viewer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    depends_on:
-      - db
-    ports:
-      - 5433:8080
+  # db-viewer:
+  #   image: adminer
+  #   container_name: adminer
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 5433:8080
