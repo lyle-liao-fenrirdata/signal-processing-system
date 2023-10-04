@@ -13,7 +13,6 @@ export const env = createEnv({
       .regex(
         /^postgresql:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
       ),
-    MOUNT_DIR: z.string().default("./public/mount/"),
   },
 
   /**
@@ -44,7 +43,6 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     DATABASE_URL: process.env.DATABASE_URL,
-    MOUNT_DIR: process.env.MOUNT_DIR,
     NEXT_PUBLIC_MAIN_NODE_URL: process.env.NEXT_PUBLIC_MAIN_NODE_URL,
     NEXT_PUBLIC_SWARM_PORT: process.env.NEXT_PUBLIC_SWARM_PORT,
     NEXT_PUBLIC_HAPROXY_PORT: process.env.NEXT_PUBLIC_HAPROXY_PORT,

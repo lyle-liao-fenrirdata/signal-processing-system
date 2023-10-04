@@ -30,6 +30,8 @@ type DirContent = {
   files: {
     birthtimeMs: number;
     size: number;
+    comment: string | null | undefined;
+    id: string;
     name: string;
   }[];
   dirs: {
@@ -99,6 +101,17 @@ export default function Settings({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState("");
   const [isRenameModalOpen, setIsRenameModalOpen] = useState("");
 
+  async function onCommentSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const url = new URL(form.action);
+    const result = await fetch(url, {
+      method: form.method,
+      body: new FormData(form),
+    });
+    if (result.ok) router.reload();
+  }
+
   return (
     <AdminLayout
       navbarProps={{
@@ -132,8 +145,8 @@ export default function Settings({
           </div>
         }
       >
-        {/* <p className="">當前路徑: {dir}</p> */}
         <div className="text-sm text-slate-700">
+          {/* current directory path  */}
           <p>
             <i className="fa-solid fa-folder-tree pr-2"></i>
             {dir &&
@@ -158,6 +171,7 @@ export default function Settings({
           <hr className="border-b-1 my-4 border-slate-300" />
           {dirContent && (
             <>
+              {/* directory */}
               {dirContent.dirs.map((dirsDir) => (
                 <div
                   key={"dir.path-" + dirsDir.name}
@@ -196,6 +210,7 @@ export default function Settings({
                 </div>
               ))}
               <hr className="border-b-1 my-4 border-slate-300" />
+              {/* file */}
               {dirContent.files.map((file) => (
                 <div
                   key={"dir.path-" + file.name}
@@ -207,13 +222,45 @@ export default function Settings({
                   >
                     <i className="fas fa-file-excel px-1"></i>
                   </button>
-                  <button
+                  <a
                     className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
-                    // onClick={() => setDir(dir.path)}
+                    target="_blank"
+                    href={`${env.NEXT_PUBLIC_FILES_API_URL.replace(
+                      "api/files",
+                      dir.replace("home/", "mount/")
+                    )}${file.name}`}
                   >
                     <i className="fas fa-file"></i>
                     {file.name}
-                  </button>
+                  </a>
+                  <form
+                    action={env.NEXT_PUBLIC_FILES_API_URL.replace(
+                      "files",
+                      "comment"
+                    )}
+                    method="POST"
+                    className="flex grow flex-row gap-2 px-2"
+                    onSubmit={onCommentSubmit}
+                  >
+                    <input
+                      type="hidden"
+                      name="id"
+                      defaultValue={file.id}
+                      className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-700 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      name="comment"
+                      defaultValue={file.comment || "no comment"}
+                      className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-700 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="hidden overflow-hidden rounded bg-slate-700 px-2 py-1 text-xs text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:inline-block focus:outline-none active:inline-block active:bg-slate-600 peer-focus:inline-block peer-active:inline-block"
+                    >
+                      儲存
+                    </button>
+                  </form>
                   <p className="ml-auto text-xs text-slate-700">
                     {formatFileSize(file.size)}
                   </p>

@@ -41,6 +41,3 @@ next-env.d.ts
 
 # vs-code
 .VSCodeCounter
-
-# public mount dir
-/public/mount
