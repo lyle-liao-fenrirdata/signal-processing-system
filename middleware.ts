@@ -10,7 +10,7 @@ interface AuthenticatedNextResponse extends NextResponse {
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
     let token: string | undefined;
-    // console.log('\x1b[33m', request.nextUrl.pathname, '\x1b[0m')
+    console.log('\x1b[33m', request.nextUrl.pathname, '\x1b[0m')
 
     const bearerCookie = request.cookies.get("x-token")?.value;
     const pathname = request.nextUrl.pathname;
@@ -21,16 +21,16 @@ export async function middleware(request: NextRequest) {
     const isAdminPath = ["/app/permission"].some((path) => pathname === path);
 
     if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.split(';')[0].split(" ")[1];
-    // console.log("middleware 2")
-    // console.log({ bearerCookie, isAdminPath, isAuthPath, isUserPath, token })
+    console.log("middleware 2")
+    console.log({ bearerCookie, isAdminPath, isAuthPath, isUserPath, token })
 
     if (!token) return isAuthPath ? NextResponse.next() : NextResponse.redirect(new URL('/auth/login', request.url));
 
     try {
 
         const { error, payload } = await verifyUserJWT(token);
-        // console.log("middleware 3")
-        // console.log({ error, payload })
+        console.log("middleware 3")
+        console.log({ error, payload })
 
         if (!payload) {
             const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: error! })}`, request.url));
@@ -50,8 +50,8 @@ export async function middleware(request: NextRequest) {
             role: Role;
         };
 
-        // console.log("middleware 4")
-        // console.log({ ok, trueUsername, trueRole })
+        console.log("middleware 4")
+        console.log({ ok, trueUsername, trueRole })
 
         if (!ok) {
             const response = NextResponse.redirect(new URL(`/auth/login?${new URLSearchParams({ error: "User does not exist." })}`, request.url));
@@ -76,8 +76,8 @@ export async function middleware(request: NextRequest) {
             }
         });
 
-        // console.log("middleware 5")
-        // console.log({ isRoleOrNameChange, isAboutToExpired, trueUsername })
+        console.log("middleware 5")
+        console.log({ isRoleOrNameChange, isAboutToExpired, trueUsername })
 
         if (isAboutToExpired || isRoleOrNameChange) {
             const token = await signUserJWT({ username: trueUsername, account, role: trueRole });
