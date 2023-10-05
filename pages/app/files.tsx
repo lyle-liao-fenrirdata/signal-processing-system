@@ -89,7 +89,7 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-export default function Settings({
+export default function Files({
   username,
   role,
   dir,

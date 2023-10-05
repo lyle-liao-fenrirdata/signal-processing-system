@@ -410,7 +410,9 @@ export default function Audit({
               <span className="mb-2 block font-semibold text-gray-900">
                 上機概要
               </span>
-              <span className="block text-sm">{activeLog.comment ?? "無"}</span>
+              <span className="block whitespace-pre-line text-sm">
+                {activeLog.comment ?? "無"}
+              </span>
             </span>
             <hr className="col-span-12 border-slate-300" />
             {activeLog.groups.map((group) => (

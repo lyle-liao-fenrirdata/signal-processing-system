@@ -82,7 +82,9 @@ export default function Report({
             <span className="block text-sm font-semibold text-gray-900">
               上機概要
             </span>
-            <span className="block text-xs">{log.audit.comment ?? ""}</span>
+            <span className="block whitespace-pre-line text-xs">
+              {log.audit.comment ?? ""}
+            </span>
           </span>
           {log.auditGroupLogs.map((group) => (
             <Fragment key={`histroy-audit-group-log-${group.id}`}>

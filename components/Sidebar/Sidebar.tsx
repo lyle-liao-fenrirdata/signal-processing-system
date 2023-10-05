@@ -247,14 +247,24 @@ export default function Sidebar({ role, username }: SidebarProps) {
 
           <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
             {role === Role.ADMIN && (
-              <li className="items-center">
-                <NavigationItem
-                  href="/app/permission"
-                  title="權限管理"
-                  FaIconClass="fas fa-user-shield"
-                  currentPath={router.pathname}
-                />
-              </li>
+              <>
+                <li className="items-center">
+                  <NavigationItem
+                    href="/app/permission"
+                    title="權限管理"
+                    FaIconClass="fas fa-user-shield"
+                    currentPath={router.pathname}
+                  />
+                </li>
+                <li className="items-center">
+                  <NavigationItem
+                    href="/app/registry"
+                    title="Register Image"
+                    FaIconClass="fas fa-cubes-stacked"
+                    currentPath={router.pathname}
+                  />
+                </li>
+              </>
             )}
 
             <li className="items-center">

@@ -16,7 +16,6 @@ export default function DeleteModal({ onCloseModal, dir }: DeleteModalProps) {
   const onDirSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsUploading(true);
-    console.log("\x1b[43m", dir, "\x1b[0m");
     if (!dir) return;
     try {
       const res = await fetch(
