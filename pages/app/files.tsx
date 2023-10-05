@@ -176,7 +176,7 @@ export default function Settings({
               {/* directory */}
               {dirContent.dirs.map((dirsDir) => (
                 <div
-                  key={"dir.path-" + dirsDir.name}
+                  key={"dir.path-" + dir + dirsDir.name}
                   className="flex flex-row items-center gap-2 pl-1"
                 >
                   <button
@@ -215,7 +215,7 @@ export default function Settings({
               {/* file */}
               {dirContent.files.map((file) => (
                 <div
-                  key={"dir.path-" + file.name}
+                  key={"dir.path-" + file.id}
                   className="flex flex-row items-center gap-2 pl-1"
                 >
                   <button
