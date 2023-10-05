@@ -230,7 +230,9 @@ export default function Settings({
                     href={`${env.NEXT_PUBLIC_FILES_API_URL.replace(
                       "files",
                       "download/"
-                    )}${file.name}?dir=${encodeURIComponent(dir)}`}
+                    )}?d=${encodeURIComponent(dir)}&n=${encodeURIComponent(
+                      file.name
+                    )}`}
                   >
                     <i className="fas fa-file"></i>
                     {file.name}
@@ -253,8 +255,9 @@ export default function Settings({
                     <input
                       type="text"
                       name="comment"
-                      defaultValue={file.comment || "no comment"}
-                      className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-700 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
+                      defaultValue={file.comment || ""}
+                      placeholder="no comment"
+                      className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-500 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
                     />
                     <button
                       type="submit"
