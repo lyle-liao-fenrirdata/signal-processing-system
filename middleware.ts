@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
             return response
         }
 
-        if (env.IS_PORTABLE_SYSTEM && isNotForPortablePath) return NextResponse.redirect(new URL('/not-found', request.url));
+        if (env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM && isNotForPortablePath) return NextResponse.redirect(new URL('/not-found', request.url));
         if (isUserPath && trueRole !== Role.USER && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
         if (isAdminPath && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
 

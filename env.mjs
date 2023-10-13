@@ -14,7 +14,6 @@ export const env = createEnv({
         /^postgresql:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
       ),
     REGISTRY_V2_URL: z.string().url(),
-    IS_PORTABLE_SYSTEM: z.string().optional(),
   },
 
   /**
@@ -35,6 +34,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FACILITY_RESOURCE_LINK: z.string().min(2),
     NEXT_PUBLIC_FRONTEND_MANAGE_LINK: z.string().min(2),
     NEXT_PUBLIC_FILES_API_URL: z.string().url(),
+    NEXT_PUBLIC_IS_PORTABLE_SYSTEM: z.string().optional(),
   },
 
   /**
@@ -60,7 +60,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FRONTEND_MANAGE_LINK:
       process.env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK,
     NEXT_PUBLIC_FILES_API_URL: process.env.NEXT_PUBLIC_FILES_API_URL,
-    IS_PORTABLE_SYSTEM: process.env.IS_PORTABLE_SYSTEM,
+    NEXT_PUBLIC_IS_PORTABLE_SYSTEM: process.env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM,
   },
 
   /**

@@ -171,7 +171,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                   />
                 </li>
 
-                {!env.IS_PORTABLE_SYSTEM && (
+                {!env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM && (
                   <>
                     <li className="items-center">
                       <NavigationItem
@@ -260,7 +260,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     currentPath={router.pathname}
                   />
                 </li>
-                {!env.IS_PORTABLE_SYSTEM && (
+                {!env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM && (
                   <li className="items-center">
                     <NavigationItem
                       href="/app/registry"
