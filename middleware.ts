@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Role } from '@prisma/client';
 import { getCookie, signUserJWT, verifyUserJWT } from './utils/jwt';
+import { env } from './env.mjs';
 
 interface AuthenticatedNextResponse extends NextResponse {
     user?: { username: string, role: Role }
@@ -18,7 +19,8 @@ export async function middleware(request: NextRequest) {
 
     // const isGuestPath = ["/app", "/app/setting"].some((path) => pathname === path);
     const isUserPath = ["/app/search", "/app/audit", "/app/files"].some((path) => pathname.indexOf(path) !== -1);
-    const isAdminPath = ["/app/permission"].some((path) => pathname === path);
+    const isAdminPath = ["/app/permission"].some((path) => pathname.indexOf(path) !== -1);
+    const isNotForPortablePath = ["/app/audit", "/app/files", "/app/registry"].some((path) => pathname.indexOf(path) !== -1);
 
     if (bearerCookie?.startsWith("Bearer ")) token = bearerCookie.split(';')[0].split(" ")[1];
     console.log("middleware 2")
@@ -59,6 +61,7 @@ export async function middleware(request: NextRequest) {
             return response
         }
 
+        if (env.IS_PORTABLE_SYSTEM && isNotForPortablePath) return NextResponse.redirect(new URL('/not-found', request.url));
         if (isUserPath && trueRole !== Role.USER && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
         if (isAdminPath && trueRole !== Role.ADMIN) return NextResponse.redirect(new URL('/app/setting', request.url));
 

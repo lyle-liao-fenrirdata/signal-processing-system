@@ -171,29 +171,33 @@ export default function Sidebar({ role, username }: SidebarProps) {
                   />
                 </li>
 
-                <li className="items-center">
-                  <NavigationItem
-                    href="/app/audit"
-                    title="稽核勾稽"
-                    FaIconClass="fas fa-table"
-                    currentPath={router.pathname}
-                  />
-                </li>
+                {!env.IS_PORTABLE_SYSTEM && (
+                  <>
+                    <li className="items-center">
+                      <NavigationItem
+                        href="/app/audit"
+                        title="稽核勾稽"
+                        FaIconClass="fas fa-table"
+                        currentPath={router.pathname}
+                      />
+                    </li>
 
-                <li className="items-center">
-                  <NavigationItem
-                    href="/app/files"
-                    title={
-                      <>
-                        MongoDB
-                        <br />
-                        檔案管理
-                      </>
-                    }
-                    FaIconClass="fas fa-leaf"
-                    currentPath={router.pathname}
-                  />
-                </li>
+                    <li className="items-center">
+                      <NavigationItem
+                        href="/app/files"
+                        title={
+                          <>
+                            MongoDB
+                            <br />
+                            檔案管理
+                          </>
+                        }
+                        FaIconClass="fas fa-leaf"
+                        currentPath={router.pathname}
+                      />
+                    </li>
+                  </>
+                )}
 
                 <li className="items-center">
                   <NavigationItem
@@ -256,14 +260,16 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     currentPath={router.pathname}
                   />
                 </li>
-                <li className="items-center">
-                  <NavigationItem
-                    href="/app/registry"
-                    title="Register Image"
-                    FaIconClass="fas fa-cubes-stacked"
-                    currentPath={router.pathname}
-                  />
-                </li>
+                {!env.IS_PORTABLE_SYSTEM && (
+                  <li className="items-center">
+                    <NavigationItem
+                      href="/app/registry"
+                      title="Register Image"
+                      FaIconClass="fas fa-cubes-stacked"
+                      currentPath={router.pathname}
+                    />
+                  </li>
+                )}
               </>
             )}
 

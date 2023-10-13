@@ -30,7 +30,7 @@ type DirContent = {
   files: {
     birthtimeMs: number;
     size: number;
-    comment: string | null | undefined;
+    comment: string;
     id: string;
     name: string;
   }[];
@@ -215,7 +215,7 @@ export default function Files({
               {/* file */}
               {dirContent.files.map((file) => (
                 <div
-                  key={"dir.path-" + file.id}
+                  key={"dir.path-" + (file.id ?? file.name)}
                   className="flex flex-row items-center gap-2 pl-1"
                 >
                   <button
@@ -246,16 +246,17 @@ export default function Files({
                     className="flex grow flex-row gap-2 px-2"
                     onSubmit={onCommentSubmit}
                   >
+                    <input type="hidden" name="id" defaultValue={file.id} />
+                    <input type="hidden" name="path" defaultValue={dir} />
                     <input
                       type="hidden"
-                      name="id"
-                      defaultValue={file.id}
-                      className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-700 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
+                      name="filename"
+                      defaultValue={file.name}
                     />
                     <input
                       type="text"
                       name="comment"
-                      defaultValue={file.comment || ""}
+                      defaultValue={file.comment}
                       placeholder="no comment"
                       className="peer grow rounded border-0 bg-transparent px-2 py-1 text-xs text-slate-700 placeholder-slate-500 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
                     />
