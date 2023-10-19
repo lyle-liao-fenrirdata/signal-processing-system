@@ -10,35 +10,13 @@ services:
     container_name: nextjs
     networks:
       - frontend
+      - mongo
     restart: always
-    depends_on:
-      - postgres
     env_file:
       - ../.env.production
 
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    networks:
-      - frontend
-    environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_USER: root
-      POSTGRES_DB: signal_processing_system
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - ./nextjs/initdb.d/:/docker-entrypoint-initdb.d/
-      - /mnt/iscsi_frontend/postgres/data:/var/lib/postgresql/data
-
-  # db-viewer:
-  #   image: adminer
-  #   container_name: adminer
-  #   restart: always
-  #   depends_on:
-  #     - postgres
-  #   ports:
-  #     - 5433:8080
-
 networks:
   frontend:
+  mongo:
+    exteral:
+      name: mongo-replica-set_mongodb

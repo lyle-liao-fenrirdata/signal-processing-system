@@ -12,6 +12,9 @@ export const env = createEnv({
       .string()
       .regex(
         /^mongodb:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
+      )
+      .default(
+        "mongodb://nextjs:nextjs@mongo-rs1:27041/nextjs?replicaSet=RS&authSource=nextjs&retryWrites=true&w=majority&directConnection=true"
       ),
     REGISTRY_V2_URL: z.string().url(),
   },
@@ -23,13 +26,13 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_MAIN_NODE_URL: z.string().min(12),
-    NEXT_PUBLIC_SWARM_PORT: z.string().min(2),
-    NEXT_PUBLIC_HAPROXY_PORT: z.string().min(2),
-    NEXT_PUBLIC_NETDATA_PORT: z.string().min(2),
-    NEXT_PUBLIC_PORTAINER_PORT: z.string().min(2),
-    NEXT_PUBLIC_KIBANA_PORT: z.string().min(2),
-    NEXT_PUBLIC_ELASTIC_PORT: z.string().min(2),
-    NEXT_PUBLIC_ARKIME_PORT: z.string().min(2),
+    NEXT_PUBLIC_SWARM_PORT: z.string().min(2).default(2376),
+    NEXT_PUBLIC_HAPROXY_PORT: z.string().min(2).default(8888),
+    NEXT_PUBLIC_NETDATA_PORT: z.string().min(2).default(19999),
+    NEXT_PUBLIC_PORTAINER_PORT: z.string().min(2).default(9000),
+    NEXT_PUBLIC_KIBANA_PORT: z.string().min(2).default(5601),
+    NEXT_PUBLIC_ELASTIC_PORT: z.string().min(2).default(9200),
+    NEXT_PUBLIC_ARKIME_PORT: z.string().min(2).default(8000),
     NEXT_PUBLIC_MOSQUITTO_URL_PORT: z.string().min(2),
     NEXT_PUBLIC_FACILITY_RESOURCE_LINK: z.string().min(2),
     NEXT_PUBLIC_FRONTEND_MANAGE_LINK: z.string().min(2),
