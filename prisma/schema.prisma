@@ -5,12 +5,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   account   String     @unique
   username  String
   password  String
@@ -29,10 +29,10 @@ enum Role {
 }
 
 model Audit {
-  id          Int          @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   isActive    Boolean      @default(false)
   comment     String?
-  createdById Int
+  createdById String  @db.ObjectId
   createdBy   User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   deletedAt   DateTime?
@@ -41,12 +41,12 @@ model Audit {
 }
 
 model AuditLog {
-  id             Int             @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   isLocked       Boolean         @default(false)
   description    String?
-  userId         Int
+  userId         String  @db.ObjectId
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  auditId        Int
+  auditId        String  @db.ObjectId
   audit          Audit           @relation(fields: [auditId], references: [id], onDelete: Cascade)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -54,45 +54,45 @@ model AuditLog {
 }
 
 model AuditGroup {
-  id             Int             @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   name           String
-  order          Int             @default(autoincrement())
+  order          Int            
   color          Color           @default(Default)
-  auditId        Int
+  auditId        String  @db.ObjectId
   audit          Audit           @relation(fields: [auditId], references: [id], onDelete: Cascade)
   auditItems     AuditItem[]
   auditGroupLogs AuditGroupLog[]
 }
 
 model AuditGroupLog {
-  id            Int            @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   description   String?
-  auditGroupId  Int
+  auditGroupId  String  @db.ObjectId
   auditGroup    AuditGroup     @relation(fields: [auditGroupId], references: [id], onDelete: Cascade)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  auditLogId    Int
+  auditLogId    String  @db.ObjectId
   auditLog      AuditLog       @relation(fields: [auditLogId], references: [id], onDelete: Cascade)
   auditItemLogs AuditItemLog[]
 }
 
 model AuditItem {
-  id           Int            @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  order        Int            @default(autoincrement())
-  auditGroupId Int
+  order        Int
+  auditGroupId String  @db.ObjectId
   auditGroups  AuditGroup     @relation(fields: [auditGroupId], references: [id], onDelete: Cascade)
   auditLogs    AuditItemLog[]
 }
 
 model AuditItemLog {
-  id              Int           @id @default(autoincrement())
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   isChecked       Boolean       @default(false)
-  auditItemId     Int
+  auditItemId     String  @db.ObjectId
   auditItem       AuditItem     @relation(fields: [auditItemId], references: [id], onDelete: Cascade)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  auditGroupLogId Int
+  auditGroupLogId String  @db.ObjectId
   auditGroupLog   AuditGroupLog @relation(fields: [auditGroupLogId], references: [id], onDelete: Cascade)
 }
 

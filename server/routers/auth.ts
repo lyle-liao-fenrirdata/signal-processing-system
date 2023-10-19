@@ -50,6 +50,7 @@ export const authRouter = router({
                     deletedAt: true,
                 }
             })
+            console.log(user)
 
             if (!user || !(await argon2.verify(user.password, password))) {
                 throw new TRPCError({
@@ -172,28 +173,4 @@ export const authRouter = router({
 
             return { ok: true }
         })
-    // getUserInfoByPayload: loginProcedure
-    //     .query(async ({ ctx: { user } }) => {
-    //         const { username, account, role } = user
-    //         const trueUser = await prisma.user.findUnique({ where: { account }, select: { username: true, role: true, deletedAt: true } })
-    //         if (!trueUser || Boolean(trueUser.deletedAt)) {
-    //             throw new TRPCError({
-    //                 code: "FORBIDDEN",
-    //                 message: "無此使用者，或已為靜止戶",
-    //             })
-    //         }
-    //         return { username, account, role }
-    //     })
-    // verify: authProcedure
-    //     .query(async ({ ctx }) => {
-    //         return { user: ctx.user };
-    //     }),
-    // refresh: authProcedure
-    //     .query(async ({ ctx }) => {
-    //         const { username, account, role } = ctx.user;
-    //         const token = await signUserJWT({ username, account, role });
-    //         const cookie = getCookie(token);
-    //         ctx.res.setHeader('Set-Cookie', cookie);
-    //         return { ok: true };
-    //     }),
 });

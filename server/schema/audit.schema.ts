@@ -2,7 +2,7 @@ import { Color, Role } from '@prisma/client';
 import { z } from 'zod';
 
 export const auditIdSchema = z.object({
-    id: z.number(),
+    id: z.string(),
 })
 
 export const auditLockSchema = auditIdSchema.merge(z.object({

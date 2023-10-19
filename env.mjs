@@ -11,7 +11,7 @@ export const env = createEnv({
     DATABASE_URL: z
       .string()
       .regex(
-        /^postgresql:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
+        /^mongodb:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
       ),
     REGISTRY_V2_URL: z.string().url(),
   },
