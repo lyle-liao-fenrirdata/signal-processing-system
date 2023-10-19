@@ -38,7 +38,7 @@ export default function Report({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [activeIds, setActiveIds] = useState<number[]>([]);
+  const [activeIds, setActiveIds] = useState<string[]>([]);
   const [isUseFilter, setIsUseFilter] = useState(false);
   const [filterProps, setFilterProps] = useState<AuditLogQueryInput>({
     page: 1,

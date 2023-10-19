@@ -36,7 +36,7 @@ export default function History({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [activeIds, setActiveIds] = useState<number[]>([]);
+  const [activeIds, setActiveIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
   const { isError, data, isLoading, error } =

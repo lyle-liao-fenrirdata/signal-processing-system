@@ -22,7 +22,7 @@ import Paginator from "@/components/commons/Paginator";
 export const auditPageSize = 10;
 
 export type ActiveAudit = {
-  id: number;
+  id: string;
   comment: string;
   groups: (AuditGroupInput & {
     items: AuditGroupItemCommonInput[];
@@ -74,7 +74,7 @@ export default function Edit({
       : queryHistoryLog === String(id);
   }
 
-  function onHistoryLogClick(id: number, pathname: string) {
+  function onHistoryLogClick(id: string, pathname: string) {
     if (!window) return;
     if (isCurrentLog(id)) return push(new URL(pathname, window.location.href));
 
@@ -258,7 +258,7 @@ export default function Edit({
     });
   }
 
-  function onGroupInputChange(name: string, groupId: number) {
+  function onGroupInputChange(name: string, groupId: string) {
     setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
@@ -277,7 +277,7 @@ export default function Edit({
     });
   }
 
-  function onGroupSelectChange(color: Color, groupId: number) {
+  function onGroupSelectChange(color: Color, groupId: string) {
     setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
@@ -296,7 +296,7 @@ export default function Edit({
     });
   }
 
-  function onItemInputChange(name: string, itemId: number) {
+  function onItemInputChange(name: string, itemId: string) {
     setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
@@ -321,26 +321,26 @@ export default function Edit({
     });
   }
 
-  function onDeleteAuditGroup(id: number) {
+  function onDeleteAuditGroup(id: string) {
     deleteAuditGroup({ id });
   }
 
-  function onDeleteAudtiItem(id: number) {
+  function onDeleteAudtiItem(id: string) {
     deleteAuditItem({ id });
   }
 
-  function onCreateAuditGroup(id: number) {
+  function onCreateAuditGroup(id: string) {
     createAuditGroup({ id });
   }
 
-  function onCreateAudtiItem(id: number) {
+  function onCreateAudtiItem(id: string) {
     createAuditItem({ id });
   }
 
   function onAuditSwap(
     layer: "group" | "item",
     direction: "prev" | "next",
-    currId: number
+    currId: string
   ) {
     setIsSync(false);
     setActiveLog((prev) => {

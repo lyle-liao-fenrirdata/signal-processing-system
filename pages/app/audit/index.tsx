@@ -191,7 +191,7 @@ export default function Audit({
     setIsAuditSubmitModalOpen(false);
   }
 
-  function onCheckboxChange(isChecked: boolean, itemId: number) {
+  function onCheckboxChange(isChecked: boolean, itemId: string) {
     setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
@@ -224,7 +224,7 @@ export default function Audit({
     });
   }
 
-  function onGroupTextboxChange(description: string, groupId: number) {
+  function onGroupTextboxChange(description: string, groupId: string) {
     setIsSync(false);
     setActiveLog((prev) => {
       if (!prev) return prev;
