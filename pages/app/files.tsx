@@ -66,11 +66,14 @@ export const getServerSideProps: GetServerSideProps<{
   };
   try {
     const dirRes = await fetch(
-      env.NEXT_PUBLIC_FILES_API_URL + `?dir=${encodeURIComponent(dir)}`
+      `${env.NEXT_PUBLIC_MAIN_NODE_URL}/api/files?dir=${encodeURIComponent(
+        dir
+      )}`
     );
     // console.log("\x1b[33m", dirRes.status, "\x1b[0m");
     dirContent = await dirRes.json();
-  } catch {
+  } catch (error) {
+    console.error(error);
     return {
       redirect: {
         destination: "/app/files",
@@ -227,21 +230,15 @@ export default function Files({
                   <a
                     className="flex flex-row items-center gap-2 px-3 py-1 hover:text-slate-900"
                     target="_blank"
-                    href={`${env.NEXT_PUBLIC_FILES_API_URL.replace(
-                      "files",
-                      "download/"
-                    )}?d=${encodeURIComponent(dir)}&n=${encodeURIComponent(
-                      file.name
-                    )}`}
+                    href={`/api/download?d=${encodeURIComponent(
+                      dir
+                    )}&n=${encodeURIComponent(file.name)}`}
                   >
                     <i className="fas fa-file"></i>
                     {file.name}
                   </a>
                   <form
-                    action={env.NEXT_PUBLIC_FILES_API_URL.replace(
-                      "files",
-                      "comment"
-                    )}
+                    action="/api/comment"
                     method="POST"
                     className="flex grow flex-row gap-2 px-2"
                     onSubmit={onCommentSubmit}

@@ -107,3 +107,12 @@ enum Color {
   Pink
   Red
 }
+
+model File {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  path     String
+  filename String
+  comment  String @default("")
+
+  @@unique([path, filename])
+}

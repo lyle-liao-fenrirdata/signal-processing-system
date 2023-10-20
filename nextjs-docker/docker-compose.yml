@@ -9,14 +9,14 @@ services:
     image: signal-process-system-frontend
     container_name: nextjs
     networks:
-      - frontend
       - mongo
     restart: always
     env_file:
       - ../.env.production
+    volumes:
+      - /mnt/iscsi_frontend/files:/app/public/mount:rw
 
 networks:
-  frontend:
   mongo:
     external:
       name: mongo-replica-set_mongodb

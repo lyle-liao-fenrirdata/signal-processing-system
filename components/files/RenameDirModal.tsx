@@ -26,7 +26,7 @@ export default function RenameDirModal({
     setIsUploading(true);
     if (!dirname || dirname.match(notAllowedFilename)) return;
     try {
-      const res = await fetch(env.NEXT_PUBLIC_FILES_API_URL, {
+      const res = await fetch(`${env.NEXT_PUBLIC_MAIN_NODE_URL}/api/files`, {
         method: "PATCH",
         body: JSON.stringify({
           oldPath: dir + currentName,

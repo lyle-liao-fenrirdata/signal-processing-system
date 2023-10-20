@@ -19,7 +19,9 @@ export default function DeleteModal({ onCloseModal, dir }: DeleteModalProps) {
     if (!dir) return;
     try {
       const res = await fetch(
-        env.NEXT_PUBLIC_FILES_API_URL + `?dirToDel=${encodeURIComponent(dir)}`,
+        `${
+          env.NEXT_PUBLIC_MAIN_NODE_URL
+        }/api/files?dirToDel=${encodeURIComponent(dir)}`,
         {
           method: "DELETE",
         }

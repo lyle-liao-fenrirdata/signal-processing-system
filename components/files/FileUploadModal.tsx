@@ -42,10 +42,13 @@ export default function FileUploadModal({
             if (uploadedFile.map((file) => file.name).includes(theFile.name))
               return;
 
-            const res = await fetch(env.NEXT_PUBLIC_FILES_API_URL, {
-              method: "POST",
-              body: data,
-            });
+            const res = await fetch(
+              `${env.NEXT_PUBLIC_MAIN_NODE_URL}/api/files`,
+              {
+                method: "POST",
+                body: data,
+              }
+            );
             const resBody = await res.json();
             if (resBody.ok) {
               setUploadedFile((prev) => [...prev, { name: theFile.name }]);
