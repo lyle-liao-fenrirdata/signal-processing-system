@@ -4,7 +4,6 @@
 import { env } from '@/env.mjs';
 import { z } from 'zod';
 import { userProcedure, router } from '../trpc';
-import { arkimeRouter } from './arkime';
 import { authRouter } from './auth';
 import { permissionRouter } from './permission';
 import { swarmRouter } from './swarm';
@@ -12,7 +11,6 @@ import { auditRouter } from './audit';
 
 export const appRouter = router({
     auth: authRouter,
-    arkime: arkimeRouter,
     sqlTranslate: userProcedure.input(z.object({
         query: z.string(),
         fetch_size: z.number().min(1)
