@@ -9,6 +9,7 @@ services:
     image: signal-process-system-frontend
     container_name: nextjs
     networks:
+      - frontend
       - mongo
     restart: always
     env_file:
@@ -22,6 +23,7 @@ networks:
       name: mongo-replica-set_mongodb
 
 volumes:
+  frontend:
   nfs_nextjs_files:
     driver: local
     driver_opts:
