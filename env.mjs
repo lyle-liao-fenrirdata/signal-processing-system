@@ -14,7 +14,7 @@ export const env = createEnv({
         /^mongodb:\/\/[\w]{1,}:[\w]{1,}@[A-Za-z0-9\-\.\~\(\)\'\!\*\:\@\,\_\;\+\&\=\?\/\#\+\&\=]{1,}$/gm
       ),
     REGISTRY_V2_URL: z.string().url(),
-    MOUNT_DIR: z.string().default("./public/mount/"),
+    MOUNT_DIR: z.string().default("./public/files/"),
   },
 
   /**

@@ -14,9 +14,17 @@ services:
     env_file:
       - ../.env.production
     volumes:
-      - /mnt/iscsi_frontend/files:/app/public/mount:rw
+      - nfs_nextjs_files:/app/public/files:rw
 
 networks:
   mongo:
     external:
       name: mongo-replica-set_mongodb
+
+volumes:
+  nfs_nextjs_files:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=${NAS01_IP},nolock,soft,rw,nfsvers=3
+      device: ":${NAS_NEXTJS_FILES_PATH}"
