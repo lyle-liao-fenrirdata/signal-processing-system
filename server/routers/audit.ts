@@ -278,7 +278,7 @@ export const auditRouter = router({
             const skipPage = page === undefined ? 0 : page > 0 ? page - 1 : 0
 
             const searchParam: Exclude<Exclude<Parameters<typeof prisma.audit.findMany>[number], undefined>['where'], undefined> = {
-                deletedAt: null
+                deletedAt: { equals: undefined }
             }
 
             const [count, audit] = await Promise.all([
@@ -327,7 +327,7 @@ export const auditRouter = router({
 
             const searchParam: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
                 audit: {
-                    deletedAt: null,
+                    deletedAt: { equals: undefined },
                 },
             }
 
@@ -410,7 +410,7 @@ export const auditRouter = router({
                         createdBy: {
                             account
                         },
-                        deletedAt: null,
+                        deletedAt: { equals: undefined },
                     },
                     orderBy: {
                         createdAt: 'desc',
@@ -703,7 +703,7 @@ async function getLiveAudit() {
     const audit = await prisma.audit.findFirst({
         where: {
             isActive: true,
-            deletedAt: null
+            deletedAt: { equals: undefined }
         },
         include: {
             auditGroups: {

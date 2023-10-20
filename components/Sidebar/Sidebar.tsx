@@ -21,7 +21,7 @@ const NavigationItem = ({
   href: string;
   target?: string;
   title: string | JSX.Element;
-  currentPath?: string;
+  currentPath: string;
   FaIconClass: string;
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }) => (
@@ -31,7 +31,7 @@ const NavigationItem = ({
     target={target}
     className={
       "group flex flex-row flex-nowrap items-center gap-1 py-3 text-xs font-bold " +
-      (currentPath === href
+      ((href === "/app" ? currentPath === href : currentPath.includes(href))
         ? "text-sky-600"
         : "text-slate-700 hover:text-sky-500")
     }
@@ -40,7 +40,7 @@ const NavigationItem = ({
     <span>
       <i
         className={`${FaIconClass} w-5 text-sm ${
-          currentPath == href
+          (href === "/app" ? currentPath === href : currentPath.includes(href))
             ? "text-sky-600"
             : "opacity-25 group-hover:text-sky-500 group-hover:opacity-100"
         }`}
@@ -57,6 +57,7 @@ const NavigationItem = ({
 
 export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
+  console.log(router.pathname);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
   const { isSuccess, data, refetch } = trpc.auth.getCookie.useQuery(undefined, {
@@ -204,6 +205,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     href={`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_PORTAINER_PORT}`}
                     target="_blank"
                     title="容器叢集"
+                    currentPath={router.pathname}
                     FaIconClass="fa-brands fa-docker"
                   />
                 </li>
@@ -213,6 +215,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     href={env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK}
                     target="_blank"
                     title="RF設備及資源控制系統"
+                    currentPath={router.pathname}
                     FaIconClass="fas fa-satellite-dish"
                     onClick={(e) => {
                       openOtherSiteLnck(
@@ -234,6 +237,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                         系統(5網)
                       </>
                     }
+                    currentPath={router.pathname}
                     FaIconClass="fas fa-server"
                     onClick={(e) => {
                       openOtherSiteLnck(
