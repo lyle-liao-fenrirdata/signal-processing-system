@@ -15,18 +15,20 @@ services:
     env_file:
       - ../.env.production
     volumes:
-      - nfs_nextjs_files:/app/public/files:rw
+      - nfs_mongo_files:/app/public/files:rw
 
 networks:
+  frontend:
+    name: frontend
   mongo:
     external:
-      name: mongo-replica-set_mongodb
+      name: mongodb
 
 volumes:
-  frontend:
-  nfs_nextjs_files:
+  nfs_mongo_files:
+    name: nfs_mongo_files
     driver: local
     driver_opts:
       type: nfs
       o: addr=${NAS01_IP},nolock,soft,rw,nfsvers=3
-      device: ":${NAS_NEXTJS_FILES_PATH}"
+      device: ":${NAS_MONGO_FILES_PATH}"
