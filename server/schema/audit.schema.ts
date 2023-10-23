@@ -39,6 +39,7 @@ export const auditLogQuerySchema = z.object({
     updatedAtFrom: z.date().optional(),
     updateAtTo: z.date().optional(),
     page: z.number(),
+    isReviewed: z.boolean().optional(),
 })
 
 

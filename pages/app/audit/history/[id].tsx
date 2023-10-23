@@ -13,6 +13,8 @@ import {
 } from "@/server/schema/audit.schema";
 import debounce from "lodash.debounce";
 import Link from "next/link";
+import { getAuditGroupBgColor } from "..";
+import { useRouter } from "next/router";
 
 export type ActiveLog = AuditDescriptionInput & {
   comment: string;
@@ -21,26 +23,6 @@ export type ActiveLog = AuditDescriptionInput & {
     name: string;
     items: (AuditIsCheckedInput & { name: string })[];
   })[];
-};
-
-export const getAuditGroupBgColor = (color: Color) => {
-  return color === Color.Blue
-    ? "bg-sky-200"
-    : color === Color.Gray
-    ? "bg-neutral-200"
-    : color === Color.Green
-    ? "bg-green-200"
-    : color === Color.Orange
-    ? "bg-orange-200"
-    : color === Color.Pink
-    ? "bg-pink-200"
-    : color === Color.Purple
-    ? "bg-purple-200"
-    : color === Color.Red
-    ? "bg-red-200"
-    : color === Color.Yellow
-    ? "bg-yellow-200"
-    : "bg-slate-200";
 };
 
 export const getServerSideProps: GetServerSideProps<{
@@ -68,6 +50,8 @@ export default function Audit({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
+  if (typeof router.query.id !== "string") router.back();
   const [isSync, setIsSync] = React.useState<boolean>(true);
   const [isAuditSubmitModalOpen, setIsAuditSubmitModalOpen] =
     React.useState(false);
@@ -80,15 +64,18 @@ export default function Audit({
     isLoading: isUserAuditLogLoading,
     error: userAuditLogError,
     refetch: refetchUserAuditLog,
-  } = trpc.audit.getUserActiveAuditLog.useQuery(undefined, {
-    retry: false,
-    retryOnMount: false,
-    refetchOnMount: false,
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-  });
+  } = trpc.audit.getUserActiveAuditLog.useQuery(
+    String(router.query.id) ?? undefined,
+    {
+      retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const {
     mutate: createNewAuditLog,
@@ -320,7 +307,11 @@ export default function Audit({
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "稽核勾稽", href: "/app/audit" }],
+        breadcrumbs: [
+          { title: "稽核勾稽", href: "/app/audit" },
+          { title: "歷史紀錄", href: "/app/audit/history" },
+          { title: "修改紀錄", href: `/app/audit/history/${router.query.id}` },
+        ],
         username,
       }}
       sidebarProps={{ role, username }}
@@ -329,28 +320,10 @@ export default function Audit({
         title={
           <div className="flex items-center justify-between">
             <div className="flex flex-row items-center gap-2">
-              <h6 className="font-bold text-slate-700">勾稽表單</h6>
-              {role === Role.ADMIN && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-                  <a
-                    href="/app/audit/edit"
-                    className="text-xs text-slate-400 hover:underline"
-                  >
-                    編輯
-                  </a>
-                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-                  <a
-                    href="/app/audit/report"
-                    className="text-xs text-slate-400 hover:underline"
-                  >
-                    報表
-                  </a>
-                </>
-              )}
+              <h6 className="font-bold text-slate-700">修改紀錄表單</h6>
             </div>
             <div className="flex flex-row items-center gap-4 text-xs">
-              {activeLog ? (
+              {activeLog && (
                 <>
                   {isSync ? (
                     <span className="text-emerald-700">已儲存✅</span>
@@ -373,17 +346,6 @@ export default function Audit({
                     提交紀錄
                   </button>
                 </>
-              ) : (
-                <button
-                  className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
-                  type="button"
-                  onClick={() => {
-                    createNewAuditLog();
-                  }}
-                  disabled={isCreateNewAuditLogLoading}
-                >
-                  新增紀錄
-                </button>
               )}
               <Link
                 href="/app/audit/history"
@@ -403,7 +365,7 @@ export default function Audit({
         ) : isUserAuditLogError ? (
           <Errors errors={[userAuditLogError?.message]} />
         ) : !activeLog ? (
-          <span>無在用紀錄</span>
+          <span>紀錄已提交，不可修改。</span>
         ) : (
           <div className="grid grid-cols-12 gap-4">
             <span className="col-span-12 block w-full rounded p-2.5">

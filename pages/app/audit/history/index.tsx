@@ -6,8 +6,9 @@ import { trpc } from "@/utils/trpc";
 import { Errors } from "@/components/commons/Errors";
 import { formatDateTime } from "@/utils/formats";
 import DropTableContainer from "@/components/commons/DropTableContainer";
-import { getAuditGroupBgColor } from ".";
+import { getAuditGroupBgColor } from "..";
 import Paginator from "@/components/commons/Paginator";
+import Modal from "@/components/commons/Modal";
 
 export const userAuditLogPageSize = 10;
 
@@ -36,10 +37,15 @@ export default function History({
   username,
   role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState("");
   const [activeIds, setActiveIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
-  const { isError, data, isLoading, error } =
+  function closeDeleteModal() {
+    setIsDeleteModalOpen("");
+  }
+
+  const { isError, data, isLoading, error, refetch } =
     trpc.audit.getUserHistoryAuditLog.useQuery(
       { page },
       {
@@ -50,6 +56,15 @@ export default function History({
         refetchIntervalInBackground: false,
       }
     );
+
+  const { mutate: deleteAuditLog, isLoading: isDeleteAuditLogLoading } =
+    trpc.audit.deleteAuditLog.useMutation({
+      retry: false,
+      onSuccess: () => {
+        refetch();
+        setIsDeleteModalOpen("");
+      },
+    });
 
   return (
     <AdminLayout
@@ -72,7 +87,7 @@ export default function History({
         <>
           <DropTableContainer
             title={<>歷史紀錄</>}
-            ths={["Record ID", "建立時間", "提交時間"]}
+            ths={["Record ID", "建立時間", "最後變更時間", "編輯"]}
             tbodyTrs={data.auditLog.map((log) => ({
               key: `history-${log.id}`,
               onClick: () =>
@@ -93,7 +108,7 @@ export default function History({
                     </span>
                   </span>
                   {log.auditGroupLogs.map((group) => (
-                    <Fragment key={`histroy-auditGroupLog-${group.id}`}>
+                    <Fragment key={`history-auditGroupLog-${group.id}`}>
                       <div
                         className={`col-span-3 flex items-center justify-center rounded ${getAuditGroupBgColor(
                           group.auditGroup.color
@@ -164,6 +179,28 @@ export default function History({
                       .map((d) => Number(d))
                   )
                 ),
+                log.isLocked ? (
+                  "已提交，不可編輯。"
+                ) : (
+                  <div className="flex w-full flex-row flex-nowrap items-center gap-3">
+                    <a
+                      href={`/app/audit/history/${log.id}`}
+                      className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
+                    >
+                      編輯
+                    </a>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsDeleteModalOpen(log.id);
+                      }}
+                      className="mr-2 rounded bg-red-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-red-600 disabled:opacity-50"
+                    >
+                      刪除
+                    </button>
+                  </div>
+                ),
               ],
             }))}
           />
@@ -178,6 +215,44 @@ export default function History({
             }))}
           />
         </>
+      )}
+
+      {isDeleteModalOpen && (
+        <Modal
+          header="刪除表單"
+          actions={[
+            <button
+              disabled={isDeleteAuditLogLoading}
+              key={`save audit change`}
+              className="mr-2 rounded bg-red-700 px-4 py-2 text-sm font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-red-600"
+              type="button"
+              onClick={() => {
+                if (!isDeleteModalOpen) return;
+                deleteAuditLog({ id: isDeleteModalOpen });
+              }}
+            >
+              刪除
+            </button>,
+            <button
+              key="closeModal"
+              className="rounded border border-solid border-slate-500 bg-transparent px-4 py-2 text-sm font-bold text-slate-500 outline-none transition-all duration-150 ease-linear hover:bg-slate-500 hover:text-white focus:outline-none active:bg-slate-600"
+              type="button"
+              onClick={closeDeleteModal}
+            >
+              取消
+            </button>,
+          ]}
+          onCloseModal={closeDeleteModal}
+        >
+          <div className="max-h-[60vh] min-w-48 text-lg leading-relaxed">
+            <b>確定刪除?</b>
+            <br />
+            刪除後，無法恢復。
+            <br />
+            <br />
+            請按「刪除」刪除表單。
+          </div>
+        </Modal>
       )}
     </AdminLayout>
   );

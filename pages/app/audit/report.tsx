@@ -43,17 +43,40 @@ export default function Report({
   const [filterProps, setFilterProps] = useState<AuditLogQueryInput>({
     page: 1,
   });
-  const { isError, data, isLoading, error } =
-    trpc.audit.getAllAuditLog.useQuery(
-      isUseFilter ? filterProps : { page: filterProps.page },
-      {
-        retry: false,
-        retryOnMount: false,
-        refetchOnMount: false,
-        refetchInterval: false,
-        refetchIntervalInBackground: false,
-      }
-    );
+  const {
+    isError,
+    data,
+    isLoading,
+    error,
+    refetch: refetchAudit,
+  } = trpc.audit.getAllAuditLog.useQuery(
+    isUseFilter ? filterProps : { page: filterProps.page },
+    {
+      retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
+    }
+  );
+
+  const {
+    mutate: toggleAuditLogReviewed,
+    isLoading: isToggleAuditLogReviewedLoading,
+  } = trpc.audit.toggleAuditLogReviewed.useMutation({
+    retry: false,
+    onSuccess: () => {
+      refetchAudit();
+    },
+  });
+
+  const { mutate: unlockAuditLog, isLoading: isUnlockAuditLogLoading } =
+    trpc.audit.unlockAuditLog.useMutation({
+      retry: false,
+      onSuccess: () => {
+        refetchAudit();
+      },
+    });
 
   const tbodyTrs = (
     d: Exclude<typeof data, undefined>["audit"],
@@ -87,7 +110,7 @@ export default function Report({
             </span>
           </span>
           {log.auditGroupLogs.map((group) => (
-            <Fragment key={`histroy-audit-group-log-${group.id}`}>
+            <Fragment key={`history-audit-group-log-${group.id}`}>
               <div
                 className={`col-span-3 flex items-center justify-center rounded ${getAuditGroupBgColor(
                   group.auditGroup.color
@@ -164,6 +187,49 @@ export default function Report({
                   .map((d) => Number(d))
               )
             ),
+        log.reviewer?.username ? (
+          <div className="flex w-full flex-row flex-nowrap items-center justify-end gap-3">
+            <span className="text-xs font-bold">
+              審閱者: {log.reviewer.username} <br />
+              {formatDateTime.format(log.updatedAt)}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleAuditLogReviewed({ id: log.id });
+              }}
+              className="mr-2 rounded bg-red-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-red-600 disabled:opacity-50"
+            >
+              退審
+            </button>
+          </div>
+        ) : (
+          <div className="flex w-full flex-row flex-nowrap items-center justify-end gap-3">
+            <button
+              type="button"
+              disabled={!log.isLocked || isToggleAuditLogReviewedLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleAuditLogReviewed({ id: log.id });
+              }}
+              className="rounded bg-slate-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-slate-600 disabled:opacity-50"
+            >
+              核可
+            </button>
+            <button
+              type="button"
+              disabled={!log.isLocked || isUnlockAuditLogLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAuditLog({ id: log.id });
+              }}
+              className="mr-2 rounded bg-red-700 px-4 py-2 text-xs font-bold text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-red-600 disabled:opacity-50"
+            >
+              退回
+            </button>
+          </div>
+        ),
       ],
     }));
     if (!isUseFilter) return mainData;
@@ -351,6 +417,32 @@ export default function Report({
               />
             </div>
           </div>,
+          <select
+            key="filter-isReviewed"
+            name="filter-isReviewed"
+            id="filter-isReviewed"
+            className="rounded border border-slate-700 text-xs outline-none focus:outline-none"
+            value={
+              filterProps.isReviewed
+                ? "true"
+                : filterProps.isReviewed === false
+                ? "false"
+                : ""
+            }
+            onChange={(e) =>
+              setFilterProps((prev) => ({
+                ...prev,
+                isReviewed: !e.target.value
+                  ? undefined
+                  : e.target.value === "true",
+                page: 1,
+              }))
+            }
+          >
+            <option value="">無</option>
+            <option value="true">已審閱</option>
+            <option value="false">未審閱</option>
+          </select>,
         ],
       },
       ...(!mainData.length ? empty : mainData),
@@ -404,6 +496,7 @@ export default function Report({
               "建立時間",
               "已提交",
               "最後變更時間",
+              "審閱",
             ]}
             tbodyTrs={tbodyTrs(data.audit, isUseFilter)}
           />

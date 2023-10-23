@@ -57,7 +57,6 @@ const NavigationItem = ({
 
 export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
-  console.log(router.pathname);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
   const { isSuccess, data, refetch } = trpc.auth.getCookie.useQuery(undefined, {
@@ -79,13 +78,16 @@ export default function Sidebar({ role, username }: SidebarProps) {
   });
 
   function openOtherSiteLnck(
-    url: string,
+    path: string,
     e: React.MouseEvent<HTMLAnchorElement>
   ) {
     e.preventDefault();
     e.stopPropagation();
     if (isSuccess && data && data.token) {
-      const tgt = new URL(url);
+      const tgt = new URL(
+        path,
+        window?.location?.origin || "https://172.16.16.31"
+      );
       tgt.searchParams.append("token", data.token);
       window.open(tgt, "_blank");
     } else {
@@ -212,23 +214,20 @@ export default function Sidebar({ role, username }: SidebarProps) {
 
                 <li className="items-center">
                   <NavigationItem
-                    href={env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK}
+                    href="/RFManage"
                     target="_blank"
                     title="RF設備及資源控制系統"
                     currentPath={router.pathname}
                     FaIconClass="fas fa-satellite-dish"
                     onClick={(e) => {
-                      openOtherSiteLnck(
-                        env.NEXT_PUBLIC_FACILITY_RESOURCE_LINK,
-                        e
-                      );
+                      openOtherSiteLnck("/RFManage", e);
                     }}
                   />
                 </li>
 
                 <li className="items-center">
                   <NavigationItem
-                    href={env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK}
+                    href="/SysMonitor"
                     target="_blank"
                     title={
                       <>
@@ -240,10 +239,7 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     currentPath={router.pathname}
                     FaIconClass="fas fa-server"
                     onClick={(e) => {
-                      openOtherSiteLnck(
-                        env.NEXT_PUBLIC_FRONTEND_MANAGE_LINK,
-                        e
-                      );
+                      openOtherSiteLnck("/SysMonitor", e);
                     }}
                   />
                 </li>

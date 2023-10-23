@@ -792,7 +792,7 @@ export default function Edit({
                         </span>
                       </span>
                       {log.auditGroups.map((group) => (
-                        <Fragment key={`histroy-auditGroupLog-${group.id}`}>
+                        <Fragment key={`history-auditGroupLog-${group.id}`}>
                           <div
                             className={`col-span-5 flex items-center justify-center rounded ${getAuditGroupBgColor(
                               group.color

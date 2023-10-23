@@ -4,7 +4,7 @@ import { adminProcedure, router, userProcedure } from '../trpc';
 import { auditCommentSchema, auditDescriptionSchema, auditGroupItemCommonSchema, auditGroupSchema, auditIdSchema, auditIsCheckedSchema, auditLockSchema, auditLogQuerySchema } from '../schema/audit.schema';
 import { z } from 'zod';
 import { adminAuditLogPageSize } from '@/pages/app/audit/report';
-import { userAuditLogPageSize } from '@/pages/app/audit/histroy';
+import { userAuditLogPageSize } from '@/pages/app/audit/history';
 import { auditPageSize } from '@/pages/app/audit/edit';
 
 export type AuditRouter = typeof auditRouter;
@@ -13,13 +13,17 @@ export const auditRouter = router({
     getLiveAudit: userProcedure
         .query(async () => { return await getLiveAudit() }),
     getUserActiveAuditLog: userProcedure
-        .query(async ({ ctx: { user: { account } } }) => {
+        .input(z.string().optional())
+        .query(async ({ ctx: { user: { account } }, input: id }) => {
+            const where: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
+                user: { account },
+                isLocked: false,
+            }
+            if (id) where.id = id;
+
             return await prisma.auditLog.findMany({
-                take: 10,
-                where: {
-                    user: { account },
-                    isLocked: false,
-                },
+                take: 1,
+                where,
                 include: {
                     audit: true,
                     auditGroupLogs: {
@@ -231,7 +235,6 @@ export const auditRouter = router({
 
             const searchParam: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
                 user: { account },
-                isLocked: true,
             }
 
             const [count, auditLog] = await Promise.all([
@@ -321,7 +324,7 @@ export const auditRouter = router({
         }),
     getAllAuditLog: adminProcedure
         .input(auditLogQuerySchema)
-        .query(async ({ input: { account, role, isLock, createAtFrom, createAtTo, updatedAtFrom, updateAtTo, page } }) => {
+        .query(async ({ input: { account, role, isLock, createAtFrom, createAtTo, updatedAtFrom, updateAtTo, page, isReviewed } }) => {
 
             const skipPage = page === undefined ? 0 : page > 0 ? page - 1 : 0
 
@@ -334,6 +337,8 @@ export const auditRouter = router({
             if (account) searchParam.user = { account }
             if (role) searchParam.user ? searchParam.user.role = role : searchParam.user = { role }
             if (isLock !== undefined) searchParam.isLocked = isLock
+            if (isReviewed === true) searchParam.OR = [{ reviewerId: { not: null }, }, { reviewerId: { not: undefined }, }]
+            if (isReviewed === false) searchParam.OR = [{ reviewerId: { equals: null }, }, { reviewerId: { not: undefined }, }, { reviewerId: { isSet: false }, }]
 
             if (createAtFrom && !createAtTo) searchParam.createdAt = { gt: createAtFrom }
             if (!createAtFrom && createAtTo) searchParam.createdAt = { lte: new Date(createAtTo.setHours(23, 59, 59, 999)) }
@@ -386,8 +391,8 @@ export const auditRouter = router({
                                 role: true,
                                 account: true,
                             },
-
-                        }
+                        },
+                        reviewer: true
                     },
                     orderBy: {
                         createdAt: 'desc',
@@ -694,6 +699,84 @@ export const auditRouter = router({
                     order
                 }
             });
+
+            return { ok: true };
+        }),
+    toggleAuditLogReviewed: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ ctx: { user: { account } }, input: { id } }) => {
+            const auditLog = await prisma.auditLog.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    isLocked: true,
+                    reviewerId: true,
+                },
+            });
+            if (!auditLog) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
+            if (!auditLog.isLocked) throw new TRPCError({ code: "CONFLICT", message: "資料未提交，不可變更審閱。" });
+
+            const reviewer = await prisma.user.findUnique({ where: { account, }, select: { id: true } })
+            if (!reviewer) throw new TRPCError({ code: "NOT_FOUND", message: "審閱者帳號不存在。" });
+
+            await prisma.auditLog.update({
+                where: {
+                    id,
+                },
+                data: {
+                    reviewerId: auditLog.reviewerId ? null : reviewer.id,
+                }
+            });
+
+            return { ok: true };
+        }),
+    unlockAuditLog: adminProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ ctx: { user: { account } }, input: { id } }) => {
+            const auditLog = await prisma.auditLog.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    isLocked: true,
+                },
+            })
+            if (!auditLog) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
+            if (!auditLog.isLocked) throw new TRPCError({ code: "BAD_REQUEST", message: "沒有內容變更。" });
+
+            await prisma.auditLog.update({
+                where: {
+                    id,
+                },
+                data: {
+                    isLocked: false,
+                }
+            })
+
+            return { ok: true };
+
+        }),
+
+    deleteAuditLog: userProcedure
+        .input(auditIdSchema)
+        .mutation(async ({ ctx: { user: { account } }, input: { id } }) => {
+            const auditLog = await prisma.auditLog.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    user: true,
+                }
+            })
+            if (!auditLog) throw new TRPCError({ code: "NOT_FOUND", message: "紀錄不存在。" });
+            if (auditLog.user.account !== account) throw new TRPCError({ code: "BAD_REQUEST", message: "不可刪除非本人資料。" });
+
+            await prisma.auditLog.delete({
+                where: {
+                    id,
+                },
+            })
 
             return { ok: true };
         }),
