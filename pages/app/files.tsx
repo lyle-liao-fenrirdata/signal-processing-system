@@ -118,7 +118,7 @@ export default function Files({
   return (
     <AdminLayout
       navbarProps={{
-        breadcrumbs: [{ title: "MongoDB 檔案管理", href: "/app/files" }],
+        breadcrumbs: [{ title: "檔案管理", href: "/app/files" }],
         username,
       }}
       sidebarProps={{ role, username }}

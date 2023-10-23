@@ -17,7 +17,7 @@ export const auditRouter = router({
         .query(async ({ ctx: { user: { account } }, input: id }) => {
             const where: Exclude<Exclude<Parameters<typeof prisma.auditLog.findMany>[number], undefined>['where'], undefined> = {
                 user: { account },
-                isLocked: false,
+                isLocked: { not: true },
             }
             if (id) where.id = id;
 
@@ -336,7 +336,7 @@ export const auditRouter = router({
 
             if (account) searchParam.user = { account }
             if (role) searchParam.user ? searchParam.user.role = role : searchParam.user = { role }
-            if (isLock !== undefined) searchParam.isLocked = isLock
+            if (isLock !== undefined) searchParam.isLocked = { not: !isLock }
             if (isReviewed === true) searchParam.OR = [{ reviewerId: { not: null }, }, { reviewerId: { not: undefined }, }]
             if (isReviewed === false) searchParam.OR = [{ reviewerId: { equals: null }, }, { reviewerId: { not: undefined }, }, { reviewerId: { isSet: false }, }]
 

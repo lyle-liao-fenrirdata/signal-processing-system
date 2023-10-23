@@ -5,7 +5,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { Container } from "@/components/commons/Container";
 import Modal from "@/components/commons/Modal";
 import { trpc } from "@/utils/trpc";
-import { Color, Role } from "@prisma/client";
+import { Color } from "@prisma/client";
 import { Errors } from "@/components/commons/Errors";
 import {
   AuditDescriptionInput,
@@ -77,65 +77,32 @@ export default function Audit({
     }
   );
 
-  const {
-    mutate: createNewAuditLog,
-    isError: isCreateNewAuditLogError,
-    isLoading: isCreateNewAuditLogLoading,
-    isSuccess: isCreateNewAuditLogSuccess,
-    error: createNewAuditLogError,
-  } = trpc.audit.createNewAuditLog.useMutation({
-    retry: false,
-    onSuccess: () => {
-      refetchUserAuditLog();
-    },
-  });
+  const { mutate: lockAuditLog, isLoading: isLockAudutLogLoading } =
+    trpc.audit.lockAuditLog.useMutation({
+      retry: false,
+      onSuccess: () => {
+        refetchUserAuditLog();
+        setIsAuditSubmitModalOpen(false);
+      },
+    });
 
-  const {
-    mutate: lockAuditLog,
-    isError: isLockAudutLogError,
-    isLoading: isLockAudutLogLoading,
-    isSuccess: isLockAudutLogSuccess,
-    error: lockAuditLogError,
-  } = trpc.audit.lockAuditLog.useMutation({
-    retry: false,
-    onSuccess: () => {
-      refetchUserAuditLog();
-      setIsAuditSubmitModalOpen(false);
-    },
-  });
+  const { mutate: saveAuditLog, isLoading: isSaveAuditLogLoading } =
+    trpc.audit.saveAuditLog.useMutation({
+      retry: false,
+      onSuccess: () => debouncedRefetchUserAuditLog(),
+    });
 
-  const {
-    mutate: saveAuditLog,
-    isError: isSaveAuditLogError,
-    isLoading: isSaveAuditLogLoading,
-    isSuccess: isSaveAuditLogSuccess,
-    error: saveAuditLogError,
-  } = trpc.audit.saveAuditLog.useMutation({
-    retry: false,
-    onSuccess: () => debouncedRefetchUserAuditLog(),
-  });
+  const { mutate: saveAuditGroupLog, isLoading: isSaveAuditGroupLogLoading } =
+    trpc.audit.saveAuditGroupLog.useMutation({
+      retry: false,
+      onSuccess: () => debouncedRefetchUserAuditLog(),
+    });
 
-  const {
-    mutate: saveAuditGroupLog,
-    isError: isSaveAuditGroupLogError,
-    isLoading: isSaveAuditGroupLogLoading,
-    isSuccess: isSaveAuditGroupLogSuccess,
-    error: saveAuditGroupLogError,
-  } = trpc.audit.saveAuditGroupLog.useMutation({
-    retry: false,
-    onSuccess: () => debouncedRefetchUserAuditLog(),
-  });
-
-  const {
-    mutate: saveAuditItemLog,
-    isError: isSaveAuditItemLogError,
-    isLoading: isSaveAuditItemLogLoading,
-    isSuccess: isSaveAuditItemLogSuccess,
-    error: saveAuditItemLogError,
-  } = trpc.audit.saveAuditItemLog.useMutation({
-    retry: false,
-    onSuccess: () => debouncedRefetchUserAuditLog(),
-  });
+  const { mutate: saveAuditItemLog, isLoading: isSaveAuditItemLogLoading } =
+    trpc.audit.saveAuditItemLog.useMutation({
+      retry: false,
+      onSuccess: () => debouncedRefetchUserAuditLog(),
+    });
 
   useEffect(() => {
     if (
@@ -144,6 +111,7 @@ export default function Audit({
       isUserAuditLogSuccess &&
       userAuditLog
     ) {
+      console.log(userAuditLog);
       const log = userAuditLog.find((log) => !log.isLocked);
       if (log) {
         setActiveLog({
@@ -353,9 +321,6 @@ export default function Audit({
               >
                 歷史紀錄
               </Link>
-              {isCreateNewAuditLogError && (
-                <Errors errors={[createNewAuditLogError.message]} />
-              )}
             </div>
           </div>
         }

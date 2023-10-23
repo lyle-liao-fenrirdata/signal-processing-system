@@ -57,6 +57,7 @@ const NavigationItem = ({
 
 export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
+  const [checked, setChecked] = React.useState(false);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
   const { isSuccess, data, refetch } = trpc.auth.getCookie.useQuery(undefined, {
@@ -175,31 +176,14 @@ export default function Sidebar({ role, username }: SidebarProps) {
                 </li>
 
                 {!env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM && (
-                  <>
-                    <li className="items-center">
-                      <NavigationItem
-                        href="/app/audit"
-                        title="稽核勾稽"
-                        FaIconClass="fas fa-table"
-                        currentPath={router.pathname}
-                      />
-                    </li>
-
-                    <li className="items-center">
-                      <NavigationItem
-                        href="/app/files"
-                        title={
-                          <>
-                            MongoDB
-                            <br />
-                            檔案管理
-                          </>
-                        }
-                        FaIconClass="fas fa-leaf"
-                        currentPath={router.pathname}
-                      />
-                    </li>
-                  </>
+                  <li className="items-center">
+                    <NavigationItem
+                      href="/app/audit"
+                      title="稽核勾稽"
+                      FaIconClass="fas fa-table"
+                      currentPath={router.pathname}
+                    />
+                  </li>
                 )}
 
                 <li className="items-center">
@@ -250,6 +234,16 @@ export default function Sidebar({ role, username }: SidebarProps) {
           <hr className="my-4 md:min-w-full" />
 
           <ul className="flex list-none flex-col md:mb-4 md:min-w-full md:flex-col">
+            {!env.NEXT_PUBLIC_IS_PORTABLE_SYSTEM && (
+              <li className="items-center">
+                <NavigationItem
+                  href="/app/files"
+                  title="檔案管理"
+                  FaIconClass="fas fa-leaf"
+                  currentPath={router.pathname}
+                />
+              </li>
+            )}
             {role === Role.ADMIN && (
               <>
                 <li className="items-center">
@@ -276,11 +270,27 @@ export default function Sidebar({ role, username }: SidebarProps) {
             <li className="items-center">
               <NavigationItem
                 href="/app/settings"
-                title="設定"
+                title="個人設定"
                 FaIconClass="fas fa-tools"
                 currentPath={router.pathname}
               />
             </li>
+
+            {(role === Role.ADMIN || role === Role.USER) && (
+              <li className="pt-3">
+                <label className="relative inline-flex cursor-pointer items-center font-bold">
+                  <input
+                    type="checkbox"
+                    value=""
+                    className="peer sr-only"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                  />
+                  <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-sky-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-0"></div>
+                  <span className="ml-1 text-sm font-medium">過濾圖檔</span>
+                </label>
+              </li>
+            )}
           </ul>
 
           <hr className="my-4 md:min-w-full" />
