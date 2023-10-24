@@ -57,7 +57,6 @@ const NavigationItem = ({
 
 export default function Sidebar({ role, username }: SidebarProps) {
   const router = useRouter();
-  const [checked, setChecked] = React.useState(false);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
 
   const { isSuccess, data, refetch } = trpc.auth.getCookie.useQuery(undefined, {
@@ -69,6 +68,30 @@ export default function Sidebar({ role, username }: SidebarProps) {
     refetchOnWindowFocus: false,
     refetchIntervalInBackground: false,
   });
+
+  const {
+    isError: isGetIsStoreImageError,
+    data: getIsStoreImageData,
+    isLoading: isGetIsStoreImageLoading,
+    refetch: refetchIsStoreImage,
+  } = trpc.analyzer.getIsStoreImage.useQuery(undefined, {
+    retry: false,
+    retryOnMount: false,
+    refetchOnMount: true,
+    refetchInterval: 5000,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
+  });
+
+  const { mutate: setIsStoreImage, isLoading: setIsStoreImageLoading } =
+    trpc.analyzer.setIsStoreImage.useMutation({
+      retry: false,
+      onSuccess: () => {
+        refetchIsStoreImage();
+      },
+      onError: (error) => console.log(error),
+    });
 
   const { mutate: logout } = trpc.auth.logout.useMutation({
     retry: false,
@@ -283,8 +306,16 @@ export default function Sidebar({ role, username }: SidebarProps) {
                     type="checkbox"
                     value=""
                     className="peer sr-only"
-                    checked={checked}
-                    onChange={(e) => setChecked(e.target.checked)}
+                    disabled={
+                      isGetIsStoreImageError ||
+                      isGetIsStoreImageLoading ||
+                      setIsStoreImageLoading
+                    }
+                    checked={
+                      getIsStoreImageData?.ok &&
+                      getIsStoreImageData.data._source?.store_image
+                    }
+                    onChange={(e) => setIsStoreImage(e.target.checked)}
                   />
                   <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-sky-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-0"></div>
                   <span className="ml-1 text-sm font-medium">過濾圖檔</span>
