@@ -11,9 +11,6 @@ export type SwarmRouter = typeof swarmRouter;
 export const swarmRouter = router({
     getNodes: loginProcedure
         .query(async () => {
-
-            // console.log("MAIN_NODE_URL + NEXT_PUBLIC_SWARM_PORT", mainNodeUrlAndPort);
-
             try {
                 const nodesResponse = await fetch(`${mainNodeUrlAndPort}/nodes`);
 

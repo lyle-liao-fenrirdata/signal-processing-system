@@ -103,7 +103,6 @@ export const permissionRouter = router({
             const res = await prisma.user.delete({
                 where: { account },
             })
-            console.log(res)
 
             return { ok: true }
         }),

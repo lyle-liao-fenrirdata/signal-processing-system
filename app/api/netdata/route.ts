@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
         const result = await fetch(`https://${url}${path}&${searchParams.toString()}`);
         if (!result.ok) {
-            console.log("\u001b[33m", result.statusText, "\u001b[0m")
+            console.log("\u001b[33m", String(result), "\u001b[0m")
             return NextResponse.json({ ok: false, error: result.statusText }, { status: result.status });
         }
 

@@ -23,7 +23,7 @@ export default function DeleteModal({
     setIsUploading(true);
     const form = e.target as HTMLFormElement;
     const url = new URL(form.action);
-    console.log(url);
+    // console.log(url);
     const result = await fetch(url, {
       method: "DELETE",
       body: new FormData(form),

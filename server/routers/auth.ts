@@ -50,7 +50,6 @@ export const authRouter = router({
                     deletedAt: true,
                 }
             })
-            console.log(user)
 
             if (!user || !(await argon2.verify(user.password, password))) {
                 throw new TRPCError({
@@ -81,7 +80,6 @@ export const authRouter = router({
 
             try {
                 const token = await signUserJWT({ username, account, role })
-                console.log(token)
                 return { ok: true, token };
             } catch (error) {
                 return { ok: false, error: String(error) }

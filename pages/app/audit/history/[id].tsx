@@ -111,7 +111,6 @@ export default function Audit({
       isUserAuditLogSuccess &&
       userAuditLog
     ) {
-      console.log(userAuditLog);
       const log = userAuditLog.find((log) => !log.isLocked);
       if (log) {
         setActiveLog({

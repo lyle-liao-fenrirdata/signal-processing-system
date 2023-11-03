@@ -54,6 +54,22 @@ export default function ModalExtResetPassword({
         passwordConfirm: errors.passwordConfirm?._errors ?? [],
       }));
     } else {
+      if (!registerInfo.password || !registerInfo.passwordConfirm) {
+        setError({
+          account: [],
+          password: ["密碼不可空白"],
+          passwordConfirm: [],
+        });
+        return;
+      }
+      if (registerInfo.password !== registerInfo.passwordConfirm) {
+        setError({
+          account: [],
+          password: ["兩次密碼輸入不同"],
+          passwordConfirm: [],
+        });
+        return;
+      }
       resetUser(registerInfo);
     }
   }

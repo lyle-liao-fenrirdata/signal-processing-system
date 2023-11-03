@@ -1,0 +1,25 @@
+version: "3"
+
+# name: frontend
+services:
+  nextjs:
+    build:
+      context: ../
+      dockerfile: nextjs-docker/nextjs/Dockerfile
+    image: signal-process-system-frontend
+    container_name: nextjs
+    networks:
+      - frontend
+      - mongo
+    restart: always
+    env_file:
+      - ../.env.production
+    volumes:
+      - /mnt/data/frontend/files:/app/public/files:rw
+
+networks:
+  frontend:
+    name: frontend
+  mongo:
+    external:
+      name: mongodb
