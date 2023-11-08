@@ -30,5 +30,5 @@ volumes:
     driver: local
     driver_opts:
       type: nfs
-      o: addr=${NAS01_IP},nolock,soft,rw,nfsvers=3
-      device: ":${NAS_MONGO_FILES_PATH}"
+      o: addr=192.168.16.61,nolock,soft,rw,nfsvers=3
+      device: ":/mnt/remote_storage/frontend/files"

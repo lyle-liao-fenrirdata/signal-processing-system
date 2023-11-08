@@ -16,16 +16,25 @@ export const appRouter = router({
         query: z.string(),
         fetch_size: z.number().min(1)
     })).mutation(async ({ input }) => {
-        const res = await fetch(`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ELASTIC_PORT}/_sql/translate`, {
-            method: "POST",
-            headers: {
-                ApiKey: "i0laJU21RnioiVnl_WTakw",
-                "Content-Type": "application/json; charset=UTF-8",
-                'Authorization': `Basic ${btoa("reader:1qaz2wsx")}`
-            },
-            body: JSON.stringify(input),
-        });
-        return await res.json()
+        try {
+            const res = await fetch(`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ELASTIC_PORT}/_sql/translate`, {
+                method: "POST",
+                headers: {
+                    ApiKey: env.ES_READER_API_KEY,
+                    "Content-Type": "application/json; charset=UTF-8",
+                    'Authorization': `Basic ${btoa("reader:1qaz2wsx")}`
+                },
+                body: JSON.stringify(input),
+            });
+            return await res.json()
+        } catch (error) {
+            console.error("===================================")
+            console.error(`${env.NEXT_PUBLIC_MAIN_NODE_URL}:${env.NEXT_PUBLIC_ELASTIC_PORT}/_sql/translate`)
+            console.error({ body: JSON.stringify(input) })
+            console.error(error)
+            console.error("===================================")
+            return "can not translate"
+        }
     }),
     permission: permissionRouter,
     swarm: swarmRouter,

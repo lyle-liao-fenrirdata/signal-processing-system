@@ -11,6 +11,7 @@ import ModalExt from "@/components/permission/ModalExt";
 import Modal from "@/components/commons/Modal";
 import ModalExtResetPassword from "@/components/permission/ModalExtResetPassword";
 import { formatDateTime } from "@/utils/formats";
+import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSideProps<{
   username: string;
@@ -55,6 +56,18 @@ export default function Permission({
     retryOnMount: false,
     retry: false,
   });
+  const { data: lpdaData, refetch: refetchLpda } = trpc.auth.getLpda.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: true,
+      refetchOnMount: false,
+      refetchOnReconnect: true,
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
+      retryOnMount: false,
+      retry: false,
+    }
+  );
 
   const {
     mutate: updateUser,
@@ -131,6 +144,18 @@ export default function Permission({
       });
     }
   }
+  const router = useRouter();
+
+  async function onCommentSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const url = new URL(form.action);
+    const result = await fetch(url, {
+      method: form.method,
+      body: new FormData(form),
+    });
+    if (result.ok) router.reload();
+  }
 
   return (
     <AdminLayout
@@ -194,6 +219,39 @@ export default function Permission({
         </>
       </ChartContainer>
 
+      <ChartContainer title={<>外部 AD URL</>}>
+        <>
+          <span className="block py-2 text-sm">
+            LDAP Setting <span className="text-red-600">(disabled)</span>
+          </span>
+
+          <form
+            action="/api/ldap"
+            method="POST"
+            className="flex grow flex-row gap-2 px-2"
+            onSubmit={onCommentSubmit}
+          >
+            <input
+              type="hidden"
+              name="id"
+              defaultValue={lpdaData?.id ? lpdaData.id : ""}
+            />
+            <input
+              type="text"
+              name="ldap_url"
+              defaultValue={lpdaData?.url ? lpdaData.url : ""}
+              placeholder="ldap://localhost:1389"
+              className="peer grow rounded border-0 bg-transparent px-4 py-2 text-slate-700 placeholder-slate-500 shadow-none transition-all duration-150 ease-linear focus:border-none focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="hidden overflow-hidden rounded bg-slate-700 px-4 py-2 text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:inline-block focus:outline-none active:inline-block active:bg-slate-600 peer-focus:inline-block peer-active:inline-block"
+            >
+              儲存
+            </button>
+          </form>
+        </>
+      </ChartContainer>
       {/* user information model */}
       {userInfo && (
         <ModalExt

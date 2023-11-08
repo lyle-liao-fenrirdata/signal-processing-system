@@ -1,4 +1,4 @@
-import { router, publicProcedure, userProcedure, loginProcedure } from '../trpc';
+import { router, publicProcedure, userProcedure, loginProcedure, adminProcedure } from '../trpc';
 // import { Prisma } from '@prisma/client';
 import * as argon2 from "argon2";
 import { prisma } from '@/server/prisma';
@@ -170,5 +170,11 @@ export const authRouter = router({
             })
 
             return { ok: true }
-        })
+        }),
+    getLpda: adminProcedure.query(async () => {
+        const lpad = await prisma.lpad.findFirst({
+            where: { isActive: true }
+        });
+        return lpad;
+    })
 });

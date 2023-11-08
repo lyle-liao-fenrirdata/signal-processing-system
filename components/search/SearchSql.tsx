@@ -23,7 +23,7 @@ export default function SearchSql() {
     4
   );
   const [sqlSearch, setSqlSearch] = useState({
-    query: "select * from parase_test_parse_gse",
+    query: "select * from es_data",
     fetch_size: 10,
   });
   const [result, setResult] = useState(null);

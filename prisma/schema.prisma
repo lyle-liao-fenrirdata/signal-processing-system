@@ -119,3 +119,9 @@ model File {
 
   @@unique([path, filename])
 }
+
+model Lpad {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  url      String  @default("")
+  isActive Boolean @default(true)
+}

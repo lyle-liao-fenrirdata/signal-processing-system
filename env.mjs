@@ -15,6 +15,7 @@ export const env = createEnv({
       ),
     REGISTRY_V2_URL: z.string().url(),
     MOUNT_DIR: z.string().default("./public/files/"),
+    ES_READER_API_KEY: z.string().default("i0laJU21RnioiVnl_WTakw"),
   },
 
   /**
@@ -44,6 +45,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     DATABASE_URL: process.env.DATABASE_URL,
     REGISTRY_V2_URL: process.env.REGISTRY_V2_URL,
+    ES_READER_API_KEY: process.env.ES_READER_API_KEY,
     NEXT_PUBLIC_MAIN_NODE_URL: process.env.NEXT_PUBLIC_MAIN_NODE_URL,
     NEXT_PUBLIC_SWARM_PORT: process.env.NEXT_PUBLIC_SWARM_PORT,
     NEXT_PUBLIC_HAPROXY_PORT: process.env.NEXT_PUBLIC_HAPROXY_PORT,
